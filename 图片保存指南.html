@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labubu奖品图片保存指南</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #8B5CF6;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 8px;
+            border-left: 4px solid #8B5CF6;
+        }
+
+        .filename {
+            background: #e5e7eb;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #374151;
+        }
+
+        .preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .preview-item {
+            text-align: center;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+        }
+
+        .note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🧸 Labubu奖品图片保存指南</h1>
+
+        <div class="note">
+            <strong>📌 重要提示：</strong> 请将您上传的三张Labubu图片保存到正确的位置，这样网站就能显示您的可爱Labubu奖品了！
+        </div>
+
+        <div class="step">
+            <h3>步骤1：找到images/prizes文件夹</h3>
+            <p>在您的项目根目录中，已经创建了 <span class="filename">images/prizes/</span> 文件夹</p>
+        </div>
+
+        <div class="step">
+            <h3>步骤2：按分类保存角色图片</h3>
+            <p>现在支持三大角色系列，请按照分类文件夹保存相应图片：</p>
+
+            <h4 style="color: #8B5CF6; margin-top: 25px;">🧸 Labubu系列 (labubu文件夹)</h4>
+            <div class="preview">
+                <div class="preview-item">
+                    <h5>经典款</h5>
+                    <p>保存为：<span class="filename">labubu/classic.jpg</span></p>
+                </div>
+                <div class="preview-item">
+                    <h5>彩虹限定</h5>
+                    <p>保存为：<span class="filename">labubu/rainbow.jpg</span></p>
+                </div>
+                <div class="preview-item">
+                    <h5>万圣节版</h5>
+                    <p>保存为：<span class="filename">labubu/halloween.jpg</span></p>
+                </div>
+                <div class="preview-item">
+                    <h5>黄金收藏版</h5>
+                    <p>保存为：<span class="filename">labubu/gold.jpg</span></p>
+                </div>
+                <div class="preview-item">
+                    <h5>万圣节限定挂件</h5>
+                    <p>保存为：<span class="filename">labubu/halloween-special.jpg</span></p>
+                </div>
+                <div class="preview-item">
+                    <h5>白金至尊版</h5>
+                    <p>保存为：<span class="filename">labubu/platinum.jpg</span></p>
+                </div>
+            </div>
+
+            <h4 style="color: #f59e0b; margin-top: 25px;">🍪 Cookie Ann系列 (cookie-ann文件夹)</h4>
+            <div class="preview">
+                <div class="preview-item">
+                    <h5>甜心款</h5>
+                    <p>保存为：<span class="filename">cookie-ann/sweet.jpg</span></p>
+                </div>
+                <div class="preview-item">
+                    <h5>公主限定</h5>
+                    <p>保存为：<span class="filename">cookie-ann/princess.jpg</span></p>
+                </div>
+                <div class="preview-item">
+                    <h5>圣诞特别版</h5>
+                    <p>保存为：<span class="filename">cookie-ann/christmas.jpg</span></p>
+                </div>
+                <div class="preview-item">
+                    <h5>烘焙大师</h5>
+                    <p>保存为：<span class="filename">cookie-ann/baker.jpg</span></p>
+                </div>
+                <div class="preview-item">
+                    <h5>圣诞限定挂件</h5>
+                    <p>保存为：<span class="filename">cookie-ann/christmas-special.jpg</span></p>
+                </div>
+                <div class="preview-item">
+                    <h5>公主礼盒</h5>
+                    <p>保存为：<span class="filename">cookie-ann/royal-set.jpg</span></p>
+                </div>
+            </div>
+
+            <h4 style="color: #ef4444; margin-top: 25px;">🎭 Pop Mart系列 (popmart文件夹)</h4>
+            <div class="preview">
+                <div class="preview-item">
+                    <h5>Molly经典款</h5>
+                    <p>保存为：<span class="filename">popmart/molly-classic.jpg</span></p>
+                </div>
+                <div class="preview-item">
+                    <h5>Dimoo云朵系列</h5>
+                    <p>保存为：<span class="filename">popmart/dimoo-cloud.jpg</span></p>
+                </div>
+                <div class="preview-item">
+                    <h5>Skullpanda</h5>
+                    <p>保存为：<span class="filename">popmart/skullpanda.jpg</span></p>
+                </div>
+                <div class="preview-item">
+                    <h5>Molly海洋挂件</h5>
+                    <p>保存为：<span class="filename">popmart/molly-ocean-special.jpg</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <h3>步骤3：验证文件结构</h3>
+            <p>完成后，您的文件结构应该是这样的：</p>
+            <pre style="background: #f1f5f9; padding: 15px; border-radius: 6px; overflow-x: auto;">
+LotteryLabubu/
+├── images/
+│   └── prizes/
+│       ├── labubu/
+│       │   ├── classic.jpg
+│       │   ├── rainbow.jpg
+│       │   ├── halloween.jpg
+│       │   ├── gold.jpg
+│       │   ├── halloween-special.jpg
+│       │   └── platinum.jpg
+│       ├── cookie-ann/
+│       │   ├── sweet.jpg
+│       │   ├── princess.jpg
+│       │   ├── christmas.jpg
+│       │   ├── baker.jpg
+│       │   ├── christmas-special.jpg
+│       │   └── royal-set.jpg
+│       └── popmart/
+│           ├── molly-classic.jpg
+│           ├── dimoo-cloud.jpg
+│           ├── skullpanda.jpg
+│           └── molly-ocean-special.jpg
+├── index.html
+├── admin.html
+└── ... (其他文件)
+            </pre>
+        </div>
+
+        <div class="step">
+            <h3>步骤4：测试效果</h3>
+            <p>保存图片后，打开 <span class="filename">index.html</span> 进行抽奖测试，您应该能看到：</p>
+            <ul>
+                <li>🧸 Labubu系列奖品显示您选择的Labubu图片</li>
+                <li>🍪 Cookie Ann系列显示迪士尼Cookie Ann图片</li>
+                <li>🎭 Pop Mart系列显示Molly、Dimoo等角色图片</li>
+                <li>📱 所有图片会自动调整为80x80像素的圆角显示</li>
+                <li>✨ 没有图片的奖品继续显示emoji图标</li>
+                <li>🎁 积分兑换页面也会显示相应的角色图片</li>
+            </ul>
+        </div>
+
+        <div class="note">
+            <strong>💡 提示：</strong>
+            <ul style="margin: 10px 0 0 0;">
+                <li>建议图片尺寸为正方形，推荐400x400像素以上</li>
+                <li>支持JPG、PNG格式</li>
+                <li>如果图片不显示，请检查文件名是否完全匹配（区分大小写）</li>
+            </ul>
+        </div>
+
+        <p style="text-align: center; margin-top: 30px; color: #666;">
+            🎉 完成后就可以享受您的专属Labubu抽奖体验了！
+        </p>
+    </div>
+</body>
+
+</html>

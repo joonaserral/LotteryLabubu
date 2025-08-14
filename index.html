@@ -1092,25 +1092,36 @@
         // —— VIP专享奖池 (含超稀有上迪挂件) ——
         const DEFAULT_POOL = [
             // 普通奖品
-            { name: "再接再厉", type: '折扣券', weight: 30, quantity: 50, rarity: 'common', points: 10 },
-            { name: "奶茶一杯", type: '实体', weight: 25, quantity: 30, rarity: 'common', points: 20 },
-            { name: "烤肉券（清真记录）", type: '实体', weight: 20, quantity: 25, rarity: 'common', points: 30 },
-            { name: "烤肉券", type: '实体', weight: 20, quantity: 20, rarity: 'common', points: 30 },
-            { name: "精品奶茶券", type: '实体', weight: 15, quantity: 15, rarity: 'rare', points: 50 },
-            { name: "1U币", type: '实体', weight: 25, quantity: 100, rarity: 'common', points: 1 },
-            { name: "3U币", type: '实体', weight: 15, quantity: 60, rarity: 'common', points: 3 },
-            { name: "5U币", type: '实体', weight: 10, quantity: 40, rarity: 'rare', points: 5 },
+            { name: "再接再厉", type: '折扣券', weight: 30, quantity: 50, rarity: 'common', points: 10, emoji: "💪" },
+            { name: "奶茶一杯", type: '实体', weight: 25, quantity: 30, rarity: 'common', points: 20, emoji: "🧋" },
+            { name: "烤肉券（清真记录）", type: '实体', weight: 20, quantity: 25, rarity: 'common', points: 30, emoji: "🥩" },
+            { name: "烤肉券", type: '实体', weight: 20, quantity: 20, rarity: 'common', points: 30, emoji: "🍖" },
+            { name: "精品奶茶券", type: '实体', weight: 15, quantity: 15, rarity: 'rare', points: 50, emoji: "🧃" },
+            { name: "1U币", type: '实体', weight: 25, quantity: 100, rarity: 'common', points: 1, emoji: "💰" },
+            { name: "3U币", type: '实体', weight: 15, quantity: 60, rarity: 'common', points: 3, emoji: "💵" },
+            { name: "5U币", type: '实体', weight: 10, quantity: 40, rarity: 'rare', points: 5, emoji: "💸" },
 
-            // 普通Labubu收藏
-            { name: "经典Labubu公仔", type: '实体', weight: 8, quantity: 10, rarity: 'rare', points: 100 },
-            { name: "彩虹Labubu限定", type: '实体', weight: 6, quantity: 8, rarity: 'epic', points: 150 },
-            { name: "圣诞Labubu特别版", type: '实体', weight: 4, quantity: 5, rarity: 'epic', points: 200 },
-            { name: "黄金Labubu收藏版", type: '实体', weight: 2, quantity: 3, rarity: 'legendary', points: 500 },
+            // Labubu系列收藏
+            { name: "经典Labubu公仔", type: '实体', weight: 8, quantity: 10, rarity: 'rare', points: 100, image: "images/prizes/labubu/classic.jpg", emoji: "🧸" },
+            { name: "彩虹Labubu限定", type: '实体', weight: 6, quantity: 8, rarity: 'epic', points: 150, image: "images/prizes/labubu/rainbow.jpg", emoji: "🌈" },
+            { name: "万圣节Labubu特别版", type: '实体', weight: 4, quantity: 5, rarity: 'epic', points: 200, image: "images/prizes/labubu/halloween.jpg", emoji: "🎃" },
+            { name: "黄金Labubu收藏版", type: '实体', weight: 2, quantity: 3, rarity: 'legendary', points: 500, image: "images/prizes/labubu/gold.jpg", emoji: "👑" },
 
-            // 超稀有上迪挂件 - 中奖率极低 (几乎为0)
-            { name: "24上迪万圣节饼饼挂件", type: '实体', weight: 0.1, quantity: 1, rarity: 'mythic', points: 2000 },
-            { name: "24上迪万圣节露露挂件", type: '实体', weight: 0.1, quantity: 1, rarity: 'mythic', points: 2000 },
-            { name: "25上迪夏日海洋饼饼挂件", type: '实体', weight: 0.05, quantity: 1, rarity: 'mythic', points: 3000 }
+            // Cookie Ann迪士尼系列
+            { name: "甜心Cookie Ann公仔", type: '实体', weight: 7, quantity: 8, rarity: 'rare', points: 120, image: "images/prizes/cookie-ann/sweet.jpg", emoji: "🍪" },
+            { name: "公主Cookie Ann限定", type: '实体', weight: 5, quantity: 6, rarity: 'epic', points: 180, image: "images/prizes/cookie-ann/princess.jpg", emoji: "👸" },
+            { name: "圣诞Cookie Ann特别版", type: '实体', weight: 3, quantity: 4, rarity: 'epic', points: 220, image: "images/prizes/cookie-ann/christmas.jpg", emoji: "🎄" },
+            { name: "烘焙大师Cookie Ann", type: '实体', weight: 1.5, quantity: 2, rarity: 'legendary', points: 600, image: "images/prizes/cookie-ann/baker.jpg", emoji: "👩‍🍳" },
+
+            // Pop Mart潮玩系列
+            { name: "Molly经典款", type: '实体', weight: 6, quantity: 7, rarity: 'rare', points: 110, image: "images/prizes/popmart/molly-classic.jpg", emoji: "👧" },
+            { name: "Dimoo云朵系列", type: '实体', weight: 4, quantity: 5, rarity: 'epic', points: 160, image: "images/prizes/popmart/dimoo-cloud.jpg", emoji: "☁️" },
+            { name: "Skullpanda骷髅熊猫", type: '实体', weight: 2.5, quantity: 3, rarity: 'legendary', points: 450, image: "images/prizes/popmart/skullpanda.jpg", emoji: "🐼" },
+
+            // 超稀有特别版挂件 - 中奖率极低 (几乎为0)
+            { name: "限定Labubu万圣节挂件", type: '实体', weight: 0.1, quantity: 1, rarity: 'mythic', points: 2000, image: "images/prizes/labubu/halloween-special.jpg", emoji: "🎃" },
+            { name: "限定Cookie Ann圣诞挂件", type: '实体', weight: 0.1, quantity: 1, rarity: 'mythic', points: 2000, image: "images/prizes/cookie-ann/christmas-special.jpg", emoji: "🎄" },
+            { name: "限定Molly夏日海洋挂件", type: '实体', weight: 0.05, quantity: 1, rarity: 'mythic', points: 3000, image: "images/prizes/popmart/molly-ocean-special.jpg", emoji: "🌊" }
         ];
 
         // —— 工具函数 ——
@@ -1497,7 +1508,19 @@
                 renderHistory();
             }
 
-            display.textContent = picked.name;
+            // 显示奖品 - 优先显示图片，否则显示emoji
+            if (picked.image) {
+                display.innerHTML = `<div class="flex flex-col items-center gap-2">
+                    <img src="${picked.image}" alt="${picked.name}" class="w-20 h-20 object-cover rounded-lg shadow-md">
+                    <span class="text-lg font-bold">${picked.name}</span>
+                </div>`;
+            } else {
+                display.innerHTML = `<div class="flex flex-col items-center gap-2">
+                    <span class="text-4xl">${picked.emoji || '🧸'}</span>
+                    <span class="text-lg font-bold">${picked.name}</span>
+                </div>`;
+            }
+
             let metaText = `${record.type}${record.code ? ' · 券码：' + record.code : ''}`;
             if (isTrial && code) {
                 metaText += ' (模拟券码)';
@@ -2553,53 +2576,68 @@
         const EXCHANGE_ITEMS = [
             {
                 id: 1,
-                name: "24上迪万圣节饼饼挂件",
+                name: "限定Labubu万圣节挂件",
                 emoji: "🎃",
+                image: "images/prizes/labubu/halloween-special.jpg",
                 description: "超稀有万圣节限定挂件",
                 cost: 6000,
                 rarity: 'mythic',
                 available: 1,
-                requirements: "需要3只传说级Labubu + 1000积分"
+                requirements: "需要3只传说级角色 + 1000积分"
             },
             {
                 id: 2,
-                name: "24上迪万圣节露露挂件",
-                emoji: "👻",
-                description: "万圣节限定露露挂件",
+                name: "限定Cookie Ann圣诞挂件",
+                emoji: "🎄",
+                image: "images/prizes/cookie-ann/christmas-special.jpg",
+                description: "迪士尼圣诞限定挂件",
                 cost: 6000,
                 rarity: 'mythic',
                 available: 1,
-                requirements: "需要3只传说级Labubu + 1000积分"
+                requirements: "需要3只传说级角色 + 1000积分"
             },
             {
                 id: 3,
-                name: "25上迪夏日海洋饼饼挂件",
+                name: "限定Molly夏日海洋挂件",
                 emoji: "🌊",
+                image: "images/prizes/popmart/molly-ocean-special.jpg",
                 description: "2025夏日海洋限定挂件",
                 cost: 8000,
                 rarity: 'mythic',
                 available: 1,
-                requirements: "需要4只传说级Labubu + 2000积分"
+                requirements: "需要4只传说级角色 + 2000积分"
             },
             {
                 id: 4,
                 name: "白金Labubu至尊版",
                 emoji: "💎",
+                image: "images/prizes/labubu/platinum.jpg",
                 description: "终极收藏版Labubu",
                 cost: 4000,
                 rarity: 'legendary',
                 available: 3,
-                requirements: "需要4只史诗级Labubu"
+                requirements: "需要4只史诗级角色"
             },
             {
                 id: 5,
-                name: "VIP股东专属礼包",
+                name: "Cookie Ann公主礼盒",
+                emoji: "👸",
+                image: "images/prizes/cookie-ann/royal-set.jpg",
+                description: "迪士尼公主主题限定套装",
+                cost: 3500,
+                rarity: 'legendary',
+                available: 2,
+                requirements: "需要3只史诗级角色"
+            },
+            {
+                id: 6,
+                name: "Pop Mart联名礼包",
                 emoji: "🎁",
-                description: "包含限定周边+现金券",
+                description: "包含Molly+Dimoo限定周边",
                 cost: 2000,
                 rarity: 'epic',
                 available: 5,
-                requirements: "需要3只稀有级Labubu"
+                requirements: "需要3只稀有级角色"
             }
         ];
 
