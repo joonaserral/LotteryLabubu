@@ -252,8 +252,11 @@
                     <a href="index.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🎯 抽奖</a>
                     <a href="achievements.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🏆
                         个人成就</a>
+                    <button id="addPrizeBtn" class="text-slate-600 hover:text-[var(--labu)] transition-colors">
+                        ➕ 添加奖品
+                    </button>
                     <div class="relative">
-                        <button class="text-slate-600 hover:text-[var(--labu)] transition-colors">
+                        <button id="cartBtn" class="text-slate-600 hover:text-[var(--labu)] transition-colors">
                             🛒 购物车 <span id="cartCount"
                                 class="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 ml-1">0</span>
                         </button>
@@ -298,12 +301,18 @@
     <!-- 分类导航 -->
     <section class="py-6 bg-white border-b">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="flex justify-center gap-8 overflow-x-auto">
+            <div class="flex justify-center gap-6 overflow-x-auto">
                 <button
                     class="category-btn flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-slate-50 transition-colors"
                     data-category="all">
                     <div class="text-3xl">🧸</div>
                     <span class="text-sm font-medium">全部商品</span>
+                </button>
+                <button
+                    class="category-btn flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-slate-50 transition-colors"
+                    data-category="custom">
+                    <div class="text-3xl">💝</div>
+                    <span class="text-sm font-medium">我的奖品</span>
                 </button>
                 <button
                     class="category-btn flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-slate-50 transition-colors"
@@ -404,6 +413,126 @@
 
     <!-- 背景遮罩 -->
     <div id="cartOverlay" class="fixed inset-0 bg-black/50 hidden z-30"></div>
+
+    <!-- 添加奖品模态框 -->
+    <div id="addPrizeModal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-slate-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-slate-800">✨ 添加自定义奖品</h3>
+                    <button id="closePrizeModal" class="text-slate-400 hover:text-slate-600 text-2xl">×</button>
+                </div>
+                <p class="text-sm text-slate-600 mt-2">创建你的专属奖品，让商城更加丰富！</p>
+            </div>
+
+            <form id="addPrizeForm" class="p-6 space-y-6">
+                <!-- 奖品图片上传 -->
+                <div class="space-y-3">
+                    <label class="block text-sm font-medium text-slate-700">🖼️ 奖品图片</label>
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <div id="imagePreview"
+                                class="w-full h-32 border-2 border-dashed border-slate-300 rounded-xl flex items-center justify-center text-slate-400 bg-slate-50">
+                                <div class="text-center">
+                                    <div class="text-3xl mb-2">📷</div>
+                                    <p class="text-sm">点击上传图片</p>
+                                </div>
+                            </div>
+                            <input type="file" id="imageUpload" accept="image/*" class="hidden">
+                        </div>
+                    </div>
+                    <div class="text-xs text-slate-500">
+                        💡 也可以选择下方的emoji图标作为奖品图片
+                    </div>
+
+                    <!-- Emoji选择器 -->
+                    <div class="grid grid-cols-8 gap-2 p-3 bg-slate-50 rounded-xl">
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="🧸">🧸</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="🎁">🎁</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="💎">💎</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="🌟">🌟</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="🎨">🎨</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="🎪">🎪</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="🎭">🎭</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="🎯">🎯</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="🎲">🎲</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="🍭">🍭</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="🍰">🍰</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="🎂">🎂</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="⭐">⭐</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="💫">💫</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="✨">✨</button>
+                        <button type="button" class="emoji-btn text-2xl p-2 rounded-lg hover:bg-white transition-colors"
+                            data-emoji="🌈">🌈</button>
+                    </div>
+                </div>
+
+                <!-- 奖品名称 -->
+                <div class="space-y-2">
+                    <label for="prizeName" class="block text-sm font-medium text-slate-700">🏷️ 奖品名称</label>
+                    <input type="text" id="prizeName" name="prizeName" placeholder="输入奖品名称..."
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
+                </div>
+
+                <!-- 奖品描述 -->
+                <div class="space-y-2">
+                    <label for="prizeDescription" class="block text-sm font-medium text-slate-700">📝 奖品描述</label>
+                    <textarea id="prizeDescription" name="prizeDescription" placeholder="描述一下这个奖品..." rows="3"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors resize-none"></textarea>
+                </div>
+
+                <!-- 奖品价格 -->
+                <div class="space-y-2">
+                    <label for="prizePrice" class="block text-sm font-medium text-slate-700">💰 奖品价格</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-500">￥</span>
+                        <input type="number" id="prizePrice" name="prizePrice" placeholder="0" min="0" step="0.01"
+                            class="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
+                    </div>
+                </div>
+
+                <!-- 奖品分类 -->
+                <div class="space-y-2">
+                    <label for="prizeCategory" class="block text-sm font-medium text-slate-700">📂 奖品分类</label>
+                    <select id="prizeCategory" name="prizeCategory"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
+                        <option value="custom">💝 自定义</option>
+                        <option value="classic">⭐ 经典系列</option>
+                        <option value="limited">💎 限定款</option>
+                        <option value="blind">🎁 盲盒系列</option>
+                        <option value="accessories">👜 周边配件</option>
+                    </select>
+                </div>
+
+                <!-- 按钮组 -->
+                <div class="flex gap-3 pt-4">
+                    <button type="button" id="cancelPrize"
+                        class="flex-1 py-3 px-4 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors">
+                        取消
+                    </button>
+                    <button type="submit"
+                        class="flex-1 py-3 px-4 bg-[var(--labu)] text-white rounded-xl hover:bg-opacity-90 transition-colors font-medium">
+                        ✨ 添加奖品
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         // 工具函数
@@ -561,6 +690,9 @@
         let cart = [];
         let currentCategory = 'all';
         let currentSlide = 0;
+        let userPrizes = JSON.parse(localStorage.getItem('userPrizes') || '[]');
+        let currentImageData = null; // 存储当前选择的图片数据
+        let selectedEmoji = null; // 存储当前选择的emoji
 
         // 初始化
         function init() {
@@ -568,13 +700,25 @@
             initCarousel();
             initEventListeners();
             initCustomCursor();
+            initPrizeModal();
             updateCartUI();
         }
 
         // 渲染商品
-        function renderProducts(productsToShow = products) {
+        function renderProducts(productsToShow = null) {
             const grid = $('#productGrid');
             grid.innerHTML = '';
+
+            // 合并默认商品和用户奖品
+            let allProducts = [...products];
+            if (userPrizes.length > 0) {
+                allProducts = [...products, ...userPrizes];
+            }
+
+            // 如果没有指定要显示的商品，则显示所有商品
+            if (!productsToShow) {
+                productsToShow = allProducts;
+            }
 
             productsToShow.forEach(product => {
                 const productCard = createProductCard(product);
@@ -589,18 +733,39 @@
             const card = document.createElement('div');
             card.className = 'product-card bg-white rounded-2xl p-4 shadow-sm border border-slate-200';
 
-            const discount = Math.round((1 - product.price / product.originalPrice) * 100);
-            const stars = '⭐'.repeat(Math.floor(product.rating));
+            const isUserPrize = product.isUserPrize || false;
+            const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : 0;
+            const stars = '⭐'.repeat(Math.floor(product.rating || 5));
+            const sales = product.sales || 0;
+
+            // 处理图片显示
+            let imageDisplay;
+            if (isUserPrize && product.imageData) {
+                // 用户上传的图片（Base64）
+                imageDisplay = `<img src="${product.imageData}" alt="${product.name}" class="w-full h-20 object-cover rounded-lg">`;
+            } else if (product.image) {
+                // 检查是否是emoji或图片URL
+                if (product.image.length <= 4) {
+                    // 可能是emoji
+                    imageDisplay = `<div class="text-6xl">${product.image}</div>`;
+                } else {
+                    // 可能是图片URL
+                    imageDisplay = `<img src="${product.image}" alt="${product.name}" class="w-full h-20 object-cover rounded-lg">`;
+                }
+            } else {
+                imageDisplay = `<div class="text-6xl">🎁</div>`;
+            }
 
             card.innerHTML = `
                 <div class="relative mb-3">
-                    <div class="product-image text-6xl text-center py-6 bg-slate-50 rounded-xl">
-                        ${product.image}
+                    <div class="product-image text-center py-6 bg-slate-50 rounded-xl flex items-center justify-center">
+                        ${imageDisplay}
                     </div>
                     ${discount > 0 ? `<div class="absolute top-2 left-2 price-tag text-white text-xs px-2 py-1 rounded-full">
                         -${discount}%
                     </div>` : ''}
                     ${!product.inStock ? '<div class="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center text-white font-medium">暂时缺货</div>' : ''}
+                    ${isUserPrize ? '<div class="absolute top-2 right-2 bg-purple-500 text-white text-xs px-2 py-1 rounded-full">自定义</div>' : ''}
                 </div>
                 
                 <div class="space-y-2">
@@ -610,20 +775,33 @@
                     
                     <div class="flex items-center gap-1 text-xs">
                         <span class="stars">${stars}</span>
-                        <span class="text-slate-500">(${product.sales})</span>
+                        <span class="text-slate-500">(${sales})</span>
                     </div>
                     
                     <div class="flex items-center justify-between">
                         <div>
                             <span class="text-lg font-bold text-[var(--labu)]">￥${product.price}</span>
-                            ${product.originalPrice > product.price ? `<span class="text-xs text-slate-400 line-through ml-1">￥${product.originalPrice}</span>` : ''}
+                            ${product.originalPrice && product.originalPrice > product.price ? `<span class="text-xs text-slate-400 line-through ml-1">￥${product.originalPrice}</span>` : ''}
                         </div>
                     </div>
                     
-                    <button class="enhanced-btn w-full py-2 bg-[var(--labu)] text-white rounded-xl text-sm font-medium ${!product.inStock ? 'opacity-50 cursor-not-allowed' : ''}" 
-                            onclick="addToCart(${product.id})" ${!product.inStock ? 'disabled' : ''}>
-                        ${product.inStock ? '🛒 加入购物车' : '暂时缺货'}
-                    </button>
+                    ${isUserPrize ? `
+                        <div class="flex gap-2">
+                            <button class="enhanced-btn flex-1 py-2 bg-blue-500 text-white rounded-xl text-sm font-medium" 
+                                    onclick="editUserPrize('${product.id}')">
+                                ✏️ 编辑
+                            </button>
+                            <button class="enhanced-btn flex-1 py-2 bg-red-500 text-white rounded-xl text-sm font-medium" 
+                                    onclick="deleteUserPrize('${product.id}')">
+                                🗑️ 删除
+                            </button>
+                        </div>
+                    ` : `
+                        <button class="enhanced-btn w-full py-2 bg-[var(--labu)] text-white rounded-xl text-sm font-medium ${!product.inStock ? 'opacity-50 cursor-not-allowed' : ''}" 
+                                onclick="addToCart(${product.id})" ${!product.inStock ? 'disabled' : ''}>
+                            ${product.inStock ? '🛒 加入购物车' : '暂时缺货'}
+                        </button>
+                    `}
                 </div>
             `;
 
@@ -633,6 +811,7 @@
         // 获取分类名称
         function getCategoryName(category) {
             const names = {
+                'custom': '自定义',
                 'classic': '经典',
                 'limited': '限定',
                 'blind': '盲盒',
@@ -777,7 +956,7 @@
             });
 
             // 购物车侧边栏
-            $('.text-slate-600').addEventListener('click', () => {
+            $('#cartBtn').addEventListener('click', () => {
                 $('#cartSidebar').style.transform = 'translateX(0)';
                 $('#cartOverlay').classList.remove('hidden');
             });
@@ -800,7 +979,9 @@
 
         // 筛选商品
         function filterProducts() {
-            let filtered = products;
+            // 合并所有商品
+            let allProducts = [...products, ...userPrizes];
+            let filtered = allProducts;
 
             // 分类筛选
             if (currentCategory !== 'all') {
@@ -833,10 +1014,10 @@
                     filtered.sort((a, b) => b.price - a.price);
                     break;
                 case 'rating':
-                    filtered.sort((a, b) => b.rating - a.rating);
+                    filtered.sort((a, b) => (b.rating || 5) - (a.rating || 5));
                     break;
                 case 'sales':
-                    filtered.sort((a, b) => b.sales - a.sales);
+                    filtered.sort((a, b) => (b.sales || 0) - (a.sales || 0));
                     break;
             }
 
@@ -897,6 +1078,257 @@
                     }, 2000);
                 }, i * 50);
             }
+        }
+
+        // 用户奖品管理功能
+        function initPrizeModal() {
+            const modal = $('#addPrizeModal');
+            const addBtn = $('#addPrizeBtn');
+            const closeBtn = $('#closePrizeModal');
+            const cancelBtn = $('#cancelPrize');
+            const form = $('#addPrizeForm');
+            const imagePreview = $('#imagePreview');
+            const imageUpload = $('#imageUpload');
+
+            // 显示模态框
+            addBtn.addEventListener('click', () => {
+                modal.classList.remove('hidden');
+                resetForm();
+            });
+
+            // 隐藏模态框
+            closeBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+
+            cancelBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+
+            // 点击遮罩关闭
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+
+            // 图片上传
+            imagePreview.addEventListener('click', () => {
+                imageUpload.click();
+            });
+
+            imageUpload.addEventListener('change', handleImageUpload);
+
+            // Emoji选择
+            $$('.emoji-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    selectEmoji(btn.dataset.emoji);
+                });
+            });
+
+            // 表单提交
+            form.addEventListener('submit', handleFormSubmit);
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    currentImageData = e.target.result;
+                    selectedEmoji = null;
+                    updateImagePreview();
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('请选择有效的图片文件！');
+            }
+        }
+
+        function selectEmoji(emoji) {
+            selectedEmoji = emoji;
+            currentImageData = null;
+            updateImagePreview();
+
+            // 更新选中状态
+            $$('.emoji-btn').forEach(btn => {
+                btn.classList.remove('bg-[var(--labu)]', 'text-white');
+            });
+
+            const selectedBtn = $(`.emoji-btn[data-emoji="${emoji}"]`);
+            if (selectedBtn) {
+                selectedBtn.classList.add('bg-[var(--labu)]', 'text-white');
+            }
+        }
+
+        function updateImagePreview() {
+            const preview = $('#imagePreview');
+
+            if (currentImageData) {
+                preview.innerHTML = `<img src="${currentImageData}" alt="预览" class="w-full h-full object-cover rounded-xl">`;
+            } else if (selectedEmoji) {
+                preview.innerHTML = `<div class="text-6xl">${selectedEmoji}</div>`;
+            } else {
+                preview.innerHTML = `
+                    <div class="text-center">
+                        <div class="text-3xl mb-2">📷</div>
+                        <p class="text-sm">点击上传图片</p>
+                    </div>
+                `;
+            }
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const name = formData.get('prizeName').trim();
+            const description = formData.get('prizeDescription').trim();
+            const price = parseFloat(formData.get('prizePrice')) || 0;
+            const category = formData.get('prizeCategory');
+
+            // 验证表单
+            if (!name) {
+                alert('请输入奖品名称！');
+                return;
+            }
+
+            if (!currentImageData && !selectedEmoji) {
+                alert('请选择奖品图片或emoji！');
+                return;
+            }
+
+            // 创建新奖品
+            const newPrize = {
+                id: 'user_' + Date.now(),
+                name: name,
+                description: description || '用户自定义奖品',
+                price: price,
+                originalPrice: null,
+                image: selectedEmoji || null,
+                imageData: currentImageData || null,
+                category: category,
+                rating: 5,
+                sales: 0,
+                inStock: true,
+                isUserPrize: true
+            };
+
+            // 保存到用户奖品列表
+            userPrizes.push(newPrize);
+            saveUserPrizes();
+
+            // 关闭模态框并刷新显示
+            $('#addPrizeModal').classList.add('hidden');
+            renderProducts();
+
+            // 显示成功消息
+            showSuccessMessage('✅ 奖品添加成功！');
+        }
+
+        function editUserPrize(prizeId) {
+            const prize = userPrizes.find(p => p.id === prizeId);
+            if (!prize) return;
+
+            // 填充表单
+            $('#prizeName').value = prize.name;
+            $('#prizeDescription').value = prize.description;
+            $('#prizePrice').value = prize.price;
+            $('#prizeCategory').value = prize.category;
+
+            // 设置图片
+            if (prize.imageData) {
+                currentImageData = prize.imageData;
+                selectedEmoji = null;
+            } else if (prize.image) {
+                selectedEmoji = prize.image;
+                currentImageData = null;
+            }
+            updateImagePreview();
+
+            // 显示模态框
+            $('#addPrizeModal').classList.remove('hidden');
+
+            // 修改表单提交处理
+            const form = $('#addPrizeForm');
+            form.onsubmit = (e) => {
+                e.preventDefault();
+
+                const formData = new FormData(e.target);
+                const name = formData.get('prizeName').trim();
+                const description = formData.get('prizeDescription').trim();
+                const price = parseFloat(formData.get('prizePrice')) || 0;
+                const category = formData.get('prizeCategory');
+
+                if (!name) {
+                    alert('请输入奖品名称！');
+                    return;
+                }
+
+                // 更新奖品信息
+                prize.name = name;
+                prize.description = description || '用户自定义奖品';
+                prize.price = price;
+                prize.category = category;
+                prize.image = selectedEmoji || prize.image;
+                prize.imageData = currentImageData || prize.imageData;
+
+                saveUserPrizes();
+                $('#addPrizeModal').classList.add('hidden');
+                renderProducts();
+                showSuccessMessage('✅ 奖品更新成功！');
+
+                // 恢复原始提交处理
+                form.onsubmit = handleFormSubmit;
+            };
+        }
+
+        function deleteUserPrize(prizeId) {
+            if (confirm('确定要删除这个奖品吗？此操作不可恢复。')) {
+                userPrizes = userPrizes.filter(p => p.id !== prizeId);
+                saveUserPrizes();
+                renderProducts();
+                showSuccessMessage('🗑️ 奖品已删除！');
+            }
+        }
+
+        function saveUserPrizes() {
+            localStorage.setItem('userPrizes', JSON.stringify(userPrizes));
+        }
+
+        function resetForm() {
+            $('#addPrizeForm').reset();
+            currentImageData = null;
+            selectedEmoji = null;
+            updateImagePreview();
+
+            // 清除emoji选中状态
+            $$('.emoji-btn').forEach(btn => {
+                btn.classList.remove('bg-[var(--labu)]', 'text-white');
+            });
+        }
+
+        function showSuccessMessage(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg z-50 transform translate-x-full transition-transform duration-300';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
         }
 
         // 页面加载完成后初始化

@@ -1406,10 +1406,12 @@
         }
 
         function onDraw() {
+            uiSounds.playClickSound();
             performDraw(false); // 正式抽奖
         }
 
         function onTrialDraw() {
+            uiSounds.playClickSound();
             performDraw(true); // 试抽体验
         }
 
@@ -1417,6 +1419,9 @@
             const btn = isTrial ? $('#trialDrawBtn') : $('#drawBtn');
             const drawModeIndicator = $('#drawModeIndicator');
             const trialNotice = $('#trialNotice');
+
+            // 播放抽奖音效
+            uiSounds.playDrawSound();
 
             btn.disabled = true; btn.classList.add('opacity-60');
 
@@ -1507,6 +1512,11 @@
                 updateDrawLimitDisplay();
                 renderHistory();
             }
+
+            // 播放中奖音效
+            setTimeout(() => {
+                uiSounds.playWinSound();
+            }, 1000);
 
             // 显示奖品 - 优先显示图片，否则显示emoji
             if (picked.image) {
@@ -1855,6 +1865,70 @@
         let isPlaying = false;
         let currentAudio = null;
         let isPlayerMinimized = true; // 默认最小化
+
+        // 简单的UI音效系统
+        class UISoundManager {
+            constructor() {
+                this.enabled = localStorage.getItem('ui_sound_enabled') !== 'false';
+                this.audioContext = null;
+                this.initAudioContext();
+            }
+
+            initAudioContext() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('音效不支持');
+                }
+            }
+
+            createBeep(frequency, duration, type = 'sine') {
+                if (!this.audioContext || !this.enabled) return;
+
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+
+                gainNode.gain.setValueAtTime(0.05, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + duration);
+            }
+
+            playDrawSound() {
+                this.createBeep(440, 0.1);
+                setTimeout(() => this.createBeep(554.37, 0.1), 100);
+                setTimeout(() => this.createBeep(659.25, 0.2), 200);
+            }
+
+            playWinSound() {
+                this.createBeep(523.25, 0.15);
+                setTimeout(() => this.createBeep(659.25, 0.15), 150);
+                setTimeout(() => this.createBeep(783.99, 0.3), 300);
+            }
+
+            playClickSound() {
+                this.createBeep(800, 0.1, 'square');
+            }
+
+            playNotificationSound() {
+                this.createBeep(880, 0.15);
+            }
+
+            toggle() {
+                this.enabled = !this.enabled;
+                localStorage.setItem('ui_sound_enabled', this.enabled.toString());
+                return this.enabled;
+            }
+        }
+
+        const uiSounds = new UISoundManager();
 
         async function initMusicPlayer() {
             try {

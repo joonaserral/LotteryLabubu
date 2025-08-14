@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自定义奖品功能使用指南 🎁</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .feature-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- 头部 -->
+    <header class="gradient-bg text-white py-16">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">🎁 自定义奖品功能</h1>
+            <p class="text-xl opacity-90">让您的商城更加个性化，创建专属奖品！</p>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="max-w-4xl mx-auto px-6 py-12">
+
+        <!-- 功能概述 -->
+        <section class="mb-16">
+            <div class="bg-white rounded-2xl p-8 shadow-lg">
+                <h2 class="text-3xl font-bold text-gray-800 mb-6 text-center">✨ 功能概述</h2>
+                <div class="text-gray-600 text-lg leading-relaxed">
+                    <p class="mb-4">
+                        现在您可以在Labubu商城中添加自己的自定义奖品！这个功能让您能够：
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 ml-4">
+                        <li>上传自己的奖品图片或选择可爱的emoji</li>
+                        <li>设置奖品的名称、描述和价格</li>
+                        <li>选择奖品分类</li>
+                        <li>在商城中展示您的创作</li>
+                        <li>随时编辑或删除您添加的奖品</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 使用步骤 -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">📝 使用步骤</h2>
+
+            <div class="grid gap-6">
+                <!-- 步骤1 -->
+                <div class="feature-card bg-white rounded-xl p-6 shadow-md border-l-4 border-blue-500">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="bg-blue-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                            1</div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">🛍️ 进入商城页面</h3>
+                            <p class="text-gray-600">打开 <code class="bg-gray-100 px-2 py-1 rounded">shop.html</code>
+                                页面，在顶部导航栏找到"➕ 添加奖品"按钮。</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步骤2 -->
+                <div class="feature-card bg-white rounded-xl p-6 shadow-md border-l-4 border-green-500">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                            2</div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">🖼️ 选择奖品图片</h3>
+                            <p class="text-gray-600 mb-3">有两种方式设置奖品图片：</p>
+                            <ul class="text-gray-600 space-y-1 ml-4">
+                                <li>• <strong>上传图片：</strong> 点击上传区域，选择您的图片文件</li>
+                                <li>• <strong>选择emoji：</strong> 从提供的emoji列表中选择一个可爱的图标</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步骤3 -->
+                <div class="feature-card bg-white rounded-xl p-6 shadow-md border-l-4 border-purple-500">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="bg-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                            3</div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">📝 填写奖品信息</h3>
+                            <div class="text-gray-600 space-y-2">
+                                <p><strong>奖品名称：</strong> 给您的奖品起一个吸引人的名字</p>
+                                <p><strong>奖品描述：</strong> 简单描述这个奖品的特色</p>
+                                <p><strong>奖品价格：</strong> 设置一个合理的价格</p>
+                                <p><strong>奖品分类：</strong> 选择合适的分类或使用"自定义"</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 步骤4 -->
+                <div class="feature-card bg-white rounded-xl p-6 shadow-md border-l-4 border-orange-500">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="bg-orange-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">
+                            4</div>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800 mb-2">✅ 保存并查看</h3>
+                            <p class="text-gray-600">点击"✨ 添加奖品"按钮保存您的创作。奖品将立即出现在商城中，您可以在"💝 我的奖品"分类中查看所有自定义奖品。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 管理功能 -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">🔧 管理您的奖品</h2>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="feature-card bg-white rounded-xl p-6 shadow-md">
+                    <div class="text-center mb-4">
+                        <div class="text-4xl mb-2">✏️</div>
+                        <h3 class="text-xl font-semibold text-gray-800">编辑奖品</h3>
+                    </div>
+                    <p class="text-gray-600 text-center">
+                        在您添加的奖品卡片上点击"✏️ 编辑"按钮，可以修改奖品的所有信息，包括图片、名称、描述和价格。
+                    </p>
+                </div>
+
+                <div class="feature-card bg-white rounded-xl p-6 shadow-md">
+                    <div class="text-center mb-4">
+                        <div class="text-4xl mb-2">🗑️</div>
+                        <h3 class="text-xl font-semibold text-gray-800">删除奖品</h3>
+                    </div>
+                    <p class="text-gray-600 text-center">
+                        如果不再需要某个奖品，点击"🗑️ 删除"按钮可以永久移除它。请注意此操作不可恢复。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 特色功能 -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">🌟 特色功能</h2>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="feature-card bg-white rounded-xl p-6 shadow-md text-center">
+                    <div class="text-4xl mb-3">💾</div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">本地存储</h3>
+                    <p class="text-gray-600 text-sm">您的自定义奖品会保存在浏览器本地，下次访问时依然存在。</p>
+                </div>
+
+                <div class="feature-card bg-white rounded-xl p-6 shadow-md text-center">
+                    <div class="text-4xl mb-3">🔍</div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">搜索筛选</h3>
+                    <p class="text-gray-600 text-sm">您的奖品支持所有商城功能，包括搜索、分类筛选和价格排序。</p>
+                </div>
+
+                <div class="feature-card bg-white rounded-xl p-6 shadow-md text-center">
+                    <div class="text-4xl mb-3">🎨</div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">个性标识</h3>
+                    <p class="text-gray-600 text-sm">自定义奖品会显示特殊的"自定义"标签，让它们更加显眼。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 技术说明 -->
+        <section class="mb-16">
+            <div class="bg-blue-50 rounded-2xl p-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">💡 技术说明</h2>
+                <div class="text-gray-700 space-y-4">
+                    <p><strong>图片存储：</strong> 上传的图片会转换为Base64格式存储在本地，确保快速加载和离线可用。</p>
+                    <p><strong>数据安全：</strong> 所有数据存储在您的浏览器本地，不会上传到服务器，保护您的隐私。</p>
+                    <p><strong>兼容性：</strong> 支持所有现代浏览器，与商城的现有功能完美兼容。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 注意事项 -->
+        <section class="mb-16">
+            <div class="bg-yellow-50 border-l-4 border-yellow-400 rounded-r-xl p-6">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">⚠️ 注意事项</h3>
+                <ul class="text-gray-700 space-y-2">
+                    <li>• 清除浏览器数据会导致自定义奖品丢失</li>
+                    <li>• 建议图片文件大小控制在2MB以内，确保最佳性能</li>
+                    <li>• 删除奖品的操作不可恢复，请谨慎操作</li>
+                    <li>• 自定义奖品仅在当前浏览器中可见</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 返回按钮 -->
+        <div class="text-center">
+            <a href="shop.html"
+                class="inline-flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-full font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+                🛍️ 返回商城页面
+            </a>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <p class="text-gray-300">© 2024 Labubu基金会 - 自定义奖品功能</p>
+            <p class="text-gray-400 text-sm mt-2">让您的创意在商城中闪闪发光！✨</p>
+        </div>
+    </footer>
+</body>
+
+</html>

@@ -308,56 +308,206 @@
             .star-particle {
                 font-size: 1rem;
             }
-        }
 
-        /* 小屏幕设备优化 */
-        @media (max-width: 480px) {
-            .disney-character {
-                font-size: 2rem;
+            /* 移动端滚动指引优化 */
+            .scroll-indicator {
+                bottom: 20px;
+                font-size: 12px;
+                padding: 8px 16px;
             }
 
-            .center-labubu {
-                font-size: 4rem;
-            }
-
-            .terms-content {
-                padding: 10px;
-            }
-
-            .terms-header h1 {
+            .quick-jump {
+                bottom: 80px;
+                right: 15px;
+                width: 50px;
+                height: 50px;
                 font-size: 18px;
             }
 
-            .terms-body {
-                font-size: 13px;
-            }
-
-            .terms-body h2 {
+            .sound-toggle {
+                top: 15px;
+                right: 15px;
+                width: 40px;
+                height: 40px;
                 font-size: 16px;
             }
 
-            .agree-button {
+            /* 小屏幕设备优化 */
+            @media (max-width: 480px) {
+                .disney-character {
+                    font-size: 2rem;
+                }
+
+                .center-labubu {
+                    font-size: 4rem;
+                }
+
+                .terms-content {
+                    padding: 10px;
+                }
+
+                .terms-header h1 {
+                    font-size: 18px;
+                }
+
+                .terms-body {
+                    font-size: 13px;
+                }
+
+                .terms-body h2 {
+                    font-size: 16px;
+                }
+
+                .agree-button {
+                    font-size: 14px;
+                }
+            }
+
+            /* 触摸设备优化 */
+            @media (hover: none) {
+                .agree-button.enabled:hover {
+                    transform: none;
+                    box-shadow: 0 4px 15px rgba(107, 91, 149, 0.3);
+                }
+            }
+
+            /* 过渡动画 */
+            .fade-transition {
+                opacity: 1;
+                transition: opacity 1s ease-in-out;
+            }
+
+            .fade-transition.fade-out {
+                opacity: 0;
+            }
+
+            /* 滚动指引 */
+            .scroll-indicator {
+                position: fixed;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 10001;
+                background: rgba(107, 91, 149, 0.9);
+                color: white;
+                padding: 12px 24px;
+                border-radius: 25px;
                 font-size: 14px;
+                backdrop-filter: blur(10px);
+                animation: bounce 2s infinite;
+                transition: all 0.3s ease;
+                display: flex;
+                items-center;
+                gap: 8px;
+                box-shadow: 0 8px 25px rgba(107, 91, 149, 0.3);
             }
-        }
 
-        /* 触摸设备优化 */
-        @media (hover: none) {
-            .agree-button.enabled:hover {
-                transform: none;
+            .scroll-indicator.hidden {
+                opacity: 0;
+                pointer-events: none;
+                transform: translateX(-50%) translateY(20px);
+            }
+
+            @keyframes bounce {
+
+                0%,
+                20%,
+                50%,
+                80%,
+                100% {
+                    transform: translateX(-50%) translateY(0);
+                }
+
+                40% {
+                    transform: translateX(-50%) translateY(-10px);
+                }
+
+                60% {
+                    transform: translateX(-50%) translateY(-5px);
+                }
+            }
+
+            /* 快速跳转按钮 */
+            .quick-jump {
+                position: fixed;
+                bottom: 100px;
+                right: 20px;
+                z-index: 10001;
+                width: 60px;
+                height: 60px;
+                background: linear-gradient(135deg, var(--labu), var(--labu2));
+                color: white;
+                border: none;
+                border-radius: 50%;
+                font-size: 20px;
+                cursor: pointer;
                 box-shadow: 0 4px 15px rgba(107, 91, 149, 0.3);
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
             }
-        }
 
-        /* 过渡动画 */
-        .fade-transition {
-            opacity: 1;
-            transition: opacity 1s ease-in-out;
-        }
+            .quick-jump:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(107, 91, 149, 0.4);
+            }
 
-        .fade-transition.fade-out {
-            opacity: 0;
-        }
+            .quick-jump.hidden {
+                opacity: 0;
+                pointer-events: none;
+                transform: translateY(20px);
+            }
+
+            /* 音效控制按钮 */
+            .sound-toggle {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10001;
+                width: 50px;
+                height: 50px;
+                background: rgba(255, 255, 255, 0.9);
+                border: 2px solid var(--labu);
+                border-radius: 50%;
+                font-size: 20px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(10px);
+            }
+
+            .sound-toggle:hover {
+                background: var(--labu);
+                color: white;
+                transform: scale(1.1);
+            }
+
+            .sound-toggle.muted {
+                opacity: 0.5;
+            }
+
+            /* 进度提示 */
+            .progress-hint {
+                position: absolute;
+                right: 20px;
+                top: 50%;
+                transform: translateY(-50%);
+                background: rgba(107, 91, 149, 0.9);
+                color: white;
+                padding: 8px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                opacity: 0;
+                transition: all 0.3s ease;
+                pointer-events: none;
+            }
+
+            .progress-hint.show {
+                opacity: 1;
+            }
     </style>
 </head>
 
@@ -370,6 +520,23 @@
         </div>
     </div>
 
+    <!-- 音效控制按钮 -->
+    <button id="soundToggle" class="sound-toggle">
+        🔊
+    </button>
+
+    <!-- 滚动指引 -->
+    <div id="scrollIndicator" class="scroll-indicator">
+        <span>📜</span>
+        <span>向下滑动阅读条款</span>
+        <span>👇</span>
+    </div>
+
+    <!-- 快速跳转按钮 -->
+    <button id="quickJump" class="quick-jump hidden" title="跳转到底部">
+        ⬇️
+    </button>
+
     <!-- 法律条款界面 -->
     <div id="termsContainer" class="terms-container">
         <div class="terms-content">
@@ -381,10 +548,13 @@
                         <p class="text-sm text-slate-600">VIP股东专享服务条款</p>
                     </div>
                 </div>
-                <div class="w-full bg-slate-200 rounded-full h-1">
+                <div class="w-full bg-slate-200 rounded-full h-1 relative">
                     <div id="scrollProgress"
                         class="bg-gradient-to-r from-purple-500 to-yellow-500 h-1 rounded-full transition-all duration-300"
                         style="width: 0%"></div>
+                    <div id="progressHint" class="progress-hint">
+                        滚动阅读条款
+                    </div>
                 </div>
             </div>
 
@@ -530,6 +700,80 @@
             console.log('🎵 欢迎页面');
         }
 
+        // 音效系统
+        class SoundManager {
+            constructor() {
+                this.enabled = localStorage.getItem('sound_enabled') !== 'false';
+                this.sounds = {};
+                this.audioContext = null;
+                this.initAudioContext();
+                this.initSounds();
+            }
+
+            initAudioContext() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                } catch (e) {
+                    console.log('音效不支持');
+                }
+            }
+
+            createBeep(frequency, duration, type = 'sine') {
+                if (!this.audioContext || !this.enabled) return;
+
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+
+                oscillator.frequency.value = frequency;
+                oscillator.type = type;
+
+                gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + duration);
+            }
+
+            initSounds() {
+                this.sounds = {
+                    pageLoad: () => this.createBeep(523.25, 0.3, 'sine'), // C5
+                    scroll: () => this.createBeep(329.63, 0.1, 'sine'), // E4
+                    buttonClick: () => this.createBeep(659.25, 0.2, 'square'), // E5
+                    success: () => {
+                        this.createBeep(523.25, 0.15); // C5
+                        setTimeout(() => this.createBeep(659.25, 0.15), 150); // E5
+                        setTimeout(() => this.createBeep(783.99, 0.3), 300); // G5
+                    },
+                    transition: () => this.createBeep(440, 0.5, 'triangle'), // A4
+                    notification: () => this.createBeep(880, 0.2, 'sine') // A5
+                };
+            }
+
+            play(soundName) {
+                if (this.enabled && this.sounds[soundName]) {
+                    // 解决浏览器音频策略限制
+                    if (this.audioContext && this.audioContext.state === 'suspended') {
+                        this.audioContext.resume().then(() => {
+                            this.sounds[soundName]();
+                        });
+                    } else {
+                        this.sounds[soundName]();
+                    }
+                }
+            }
+
+            toggle() {
+                this.enabled = !this.enabled;
+                localStorage.setItem('sound_enabled', this.enabled.toString());
+                return this.enabled;
+            }
+        }
+
+        const soundManager = new SoundManager();
+
         // 迪士尼角色数组
         const disneyCharacters = [
             '🐭', '🐰', '🦆', '🐶', '🐱', '🐻', '🦊', '🐷',
@@ -592,12 +836,36 @@
             const termsContainer = document.getElementById('termsContainer');
 
             setTimeout(() => {
+                soundManager.play('transition');
                 openingAnimation.classList.add('hidden');
                 setTimeout(() => {
                     termsContainer.classList.add('show');
                     document.body.style.overflow = 'hidden';
+                    // 显示导航提示
+                    setTimeout(() => {
+                        showScrollIndicator();
+                        soundManager.play('notification');
+                    }, 1000);
                 }, 500);
             }, 4500); // 动画播放4.5秒后显示条款
+        }
+
+        // 显示滚动指引
+        function showScrollIndicator() {
+            const scrollIndicator = document.getElementById('scrollIndicator');
+            const progressHint = document.getElementById('progressHint');
+
+            if (scrollIndicator) {
+                scrollIndicator.classList.remove('hidden');
+                setTimeout(() => {
+                    progressHint.classList.add('show');
+                }, 500);
+
+                // 3秒后自动隐藏提示
+                setTimeout(() => {
+                    progressHint.classList.remove('show');
+                }, 3000);
+            }
         }
 
         // 监听滚动进度
@@ -605,25 +873,65 @@
             const termsBody = document.getElementById('termsBody');
             const scrollProgress = document.getElementById('scrollProgress');
             const agreeButton = document.getElementById('agreeButton');
+            const scrollIndicator = document.getElementById('scrollIndicator');
+            const quickJump = document.getElementById('quickJump');
+
+            let lastScrollTime = 0;
+            let scrollSoundThrottle = false;
 
             termsBody.addEventListener('scroll', () => {
                 const scrollTop = termsBody.scrollTop;
                 const scrollHeight = termsBody.scrollHeight - termsBody.clientHeight;
-                const scrollPercentage = (scrollTop / scrollHeight) * 100;
+                const scrollPercentage = Math.min((scrollTop / scrollHeight) * 100, 100);
 
                 scrollProgress.style.width = scrollPercentage + '%';
 
-                // 滚动到90%以上才能点击同意
-                if (scrollPercentage >= 90) {
-                    agreeButton.disabled = false;
-                    agreeButton.classList.add('enabled');
-                    agreeButton.textContent = '我已阅读并同意以上条款，进入VIP股东专享系统';
+                // 播放滚动音效（节流）
+                if (!scrollSoundThrottle) {
+                    soundManager.play('scroll');
+                    scrollSoundThrottle = true;
+                    setTimeout(() => {
+                        scrollSoundThrottle = false;
+                    }, 200);
                 }
+
+                // 控制UI元素显示
+                if (scrollPercentage > 10) {
+                    scrollIndicator.classList.add('hidden');
+                    quickJump.classList.remove('hidden');
+                } else {
+                    scrollIndicator.classList.remove('hidden');
+                    quickJump.classList.add('hidden');
+                }
+
+                // 滚动到80%以上才能点击同意（降低门槛）
+                if (scrollPercentage >= 80) {
+                    if (agreeButton.disabled) {
+                        agreeButton.disabled = false;
+                        agreeButton.classList.add('enabled');
+                        agreeButton.textContent = '我已阅读并同意以上条款，进入VIP股东专享系统';
+                        soundManager.play('success');
+
+                        // 隐藏快速跳转按钮
+                        quickJump.classList.add('hidden');
+                    }
+                }
+            });
+
+            // 快速跳转到底部
+            quickJump.addEventListener('click', () => {
+                soundManager.play('buttonClick');
+                termsBody.scrollTo({
+                    top: termsBody.scrollHeight,
+                    behavior: 'smooth'
+                });
             });
 
             // 同意按钮点击事件
             agreeButton.addEventListener('click', () => {
                 if (!agreeButton.disabled) {
+                    soundManager.play('success');
+
                     // 保存同意状态
                     localStorage.setItem('terms_agreed', Date.now().toString());
 
@@ -631,6 +939,7 @@
                     document.body.classList.add('fade-transition');
                     setTimeout(() => {
                         document.body.classList.add('fade-out');
+                        soundManager.play('transition');
                         setTimeout(() => {
                             window.location.href = 'index.html';
                         }, 1000);
@@ -655,6 +964,31 @@
             }
         }
 
+        // 音效控制
+        function initSoundControl() {
+            const soundToggle = document.getElementById('soundToggle');
+
+            // 更新音效按钮显示
+            function updateSoundButton() {
+                soundToggle.textContent = soundManager.enabled ? '🔊' : '🔇';
+                soundToggle.classList.toggle('muted', !soundManager.enabled);
+            }
+
+            // 初始化按钮状态
+            updateSoundButton();
+
+            // 点击事件
+            soundToggle.addEventListener('click', () => {
+                const enabled = soundManager.toggle();
+                updateSoundButton();
+
+                // 播放测试音效
+                if (enabled) {
+                    soundManager.play('buttonClick');
+                }
+            });
+        }
+
         // 优化性能
         function optimizePerformance() {
             // 预加载主页面资源
@@ -672,13 +1006,34 @@
             });
         }
 
+        // 初始化音频上下文（解决浏览器音频策略）
+        function initAudioInteraction() {
+            const initAudio = () => {
+                if (soundManager.audioContext && soundManager.audioContext.state === 'suspended') {
+                    soundManager.audioContext.resume();
+                }
+                document.removeEventListener('click', initAudio);
+                document.removeEventListener('touchstart', initAudio);
+            };
+
+            document.addEventListener('click', initAudio);
+            document.addEventListener('touchstart', initAudio);
+        }
+
         // 初始化
         document.addEventListener('DOMContentLoaded', () => {
             checkTermsAgreement();
             createOpeningAnimation();
             showTerms();
             initScrollTracking();
+            initSoundControl();
+            initAudioInteraction();
             optimizePerformance();
+
+            // 播放页面加载音效
+            setTimeout(() => {
+                soundManager.play('pageLoad');
+            }, 1000);
         });
 
         // 禁用右键和选择
