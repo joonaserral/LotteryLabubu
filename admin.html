@@ -27,114 +27,152 @@
 </head>
 
 <body class="bg-slate-50 text-slate-900">
-    <!-- 顶部栏 -->
-    <header class="sticky top-0 z-10 backdrop-blur bg-white/60 border-b border-slate-200">
-        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-[var(--labu)] grid place-content-center text-white text-xl">🦊</div>
-                <h1 class="font-bold text-lg">奖池管理系统</h1>
+    <!-- 登录界面 -->
+    <div id="loginOverlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div class="bg-white rounded-3xl shadow-2xl p-8 mx-4 w-full max-w-md">
+            <div class="text-center mb-6">
+                <div
+                    class="w-16 h-16 rounded-2xl bg-[var(--labu)] grid place-content-center text-white text-2xl mx-auto mb-4">
+                    🔒</div>
+                <h2 class="text-2xl font-bold text-slate-900">管理员验证</h2>
+                <p class="text-slate-600 mt-2">请输入管理员密码以访问系统</p>
             </div>
-            <nav class="text-sm flex items-center gap-3">
-                <a href="index.html" class="hover:underline">返回抽奖</a>
-            </nav>
-        </div>
-    </header>
-
-    <!-- Hero -->
-    <section class="labu-gradient">
-        <div class="max-w-5xl mx-auto px-4 py-10">
-            <div class="text-center">
-                <h2 class="text-3xl md:text-4xl font-extrabold leading-tight">奖池配置管理</h2>
-                <p class="mt-3 text-slate-700">管理员专用界面，用于配置和管理抽奖奖池设置</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="adminPassword" class="block text-sm font-medium text-slate-700 mb-2">管理员密码</label>
+                    <input type="password" id="adminPassword"
+                        class="w-full px-4 py-3 rounded-xl border border-slate-300 focus:border-[var(--labu)] focus:ring-2 focus:ring-[var(--labu)]/20 focus:outline-none transition-colors"
+                        placeholder="请输入密码">
+                </div>
+                <button id="loginBtn"
+                    class="w-full px-4 py-3 rounded-xl bg-[var(--labu)] text-white font-medium hover:opacity-90 transition-opacity">
+                    进入管理系统
+                </button>
+                <div class="text-center">
+                    <a href="index.html" class="text-sm text-slate-500 hover:text-slate-700">返回抽奖页面</a>
+                </div>
             </div>
+            <div id="loginError" class="mt-4 text-sm text-red-600 text-center hidden"></div>
         </div>
-    </section>
+    </div>
 
-    <!-- 主要内容 -->
-    <main class="max-w-5xl mx-auto px-4 py-10">
-        <div class="grid lg:grid-cols-2 gap-8">
-            <!-- 奖池设置 -->
-            <section>
-                <div class="rounded-3xl bg-white border border-slate-200 shadow overflow-hidden">
-                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-                        <h3 class="font-semibold">奖池配置编辑</h3>
-                        <div class="text-xs text-slate-500">配置将保存到本地浏览器</div>
+    <!-- 主界面内容 -->
+    <div id="mainContent" class="hidden">
+        <!-- 顶部栏 -->
+        <header class="sticky top-0 z-10 backdrop-blur bg-white/60 border-b border-slate-200">
+            <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-[var(--labu)] grid place-content-center text-white text-xl">🦊
                     </div>
-                    <div class="p-5 grid gap-4">
-                        <div class="text-sm text-slate-600">
-                            <div class="mb-2">每行一个奖品，字段使用逗号分隔：<code>name,type,weight,quantity</code></div>
-                            <ul class="text-xs space-y-1 text-slate-500">
-                                <li>• <b>name</b>: 奖品名称</li>
-                                <li>• <b>type</b>: 奖品类型，仅支持：<b>抵扣券</b>｜<b>实体</b>｜<b>折扣券</b></li>
-                                <li>• <b>weight</b>: 权重数值，数值越大越容易抽中</li>
-                                <li>• <b>quantity</b>: 库存数量，留空或 -1 表示不限量</li>
-                            </ul>
-                        </div>
-                        <textarea id="poolEditor" rows="12"
-                            class="w-full rounded-xl border border-slate-300 p-3 font-mono text-xs"></textarea>
-                        <div class="flex gap-3 flex-wrap">
-                            <button id="savePoolBtn"
-                                class="px-4 py-2 rounded-xl bg-[var(--labu)] text-white font-medium hover:opacity-90">保存奖池</button>
-                            <button id="reloadBtn"
-                                class="px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200">重新载入</button>
-                            <button id="restoreDefaultBtn"
-                                class="px-4 py-2 rounded-xl bg-orange-100 text-orange-700 border border-orange-200 hover:bg-orange-200">恢复默认</button>
-                        </div>
-                    </div>
+                    <h1 class="font-bold text-lg">奖池管理系统</h1>
                 </div>
-            </section>
+                <nav class="text-sm flex items-center gap-3">
+                    <a href="index.html" class="hover:underline">返回抽奖</a>
+                    <button id="logoutBtn" class="text-red-600 hover:underline">登出</button>
+                </nav>
+            </div>
+        </header>
 
-            <!-- 当前奖池预览 -->
-            <section>
-                <div class="rounded-3xl bg-white border border-slate-200 shadow overflow-hidden">
-                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
-                        <h3 class="font-semibold">当前奖池预览</h3>
-                        <button id="refreshPreviewBtn"
-                            class="text-xs px-2 py-1 rounded-lg bg-slate-100 border border-slate-200">刷新预览</button>
-                    </div>
-                    <div class="p-5">
-                        <ul id="poolList" class="text-sm grid gap-2"></ul>
-                        <div id="poolStats" class="mt-4 p-3 rounded-lg bg-slate-50 text-xs text-slate-600"></div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- 数据管理 -->
-        <section class="mt-10">
-            <div class="rounded-3xl bg-white border border-slate-200 shadow overflow-hidden">
-                <div class="p-5 border-b border-slate-100">
-                    <h3 class="font-semibold">数据管理</h3>
-                </div>
-                <div class="p-5 grid md:grid-cols-2 gap-6">
-                    <div>
-                        <h4 class="font-medium mb-3">抽奖记录管理</h4>
-                        <div class="flex gap-3 flex-wrap">
-                            <button id="exportHistoryBtn"
-                                class="px-4 py-2 rounded-xl bg-green-100 text-green-700 border border-green-200 hover:bg-green-200">导出抽奖记录</button>
-                            <button id="clearHistoryBtn"
-                                class="px-4 py-2 rounded-xl bg-red-100 text-red-700 border border-red-200 hover:bg-red-200">清空抽奖记录</button>
-                        </div>
-                        <div class="mt-2 text-xs text-slate-500">当前记录数：<span id="historyCount">0</span></div>
-                    </div>
-                    <div>
-                        <h4 class="font-medium mb-3">系统重置</h4>
-                        <div class="flex gap-3 flex-wrap">
-                            <button id="resetAllBtn"
-                                class="px-4 py-2 rounded-xl bg-red-100 text-red-700 border border-red-200 hover:bg-red-200">完全重置</button>
-                        </div>
-                        <div class="mt-2 text-xs text-slate-500">将清空所有数据并恢复默认奖池</div>
-                    </div>
+        <!-- Hero -->
+        <section class="labu-gradient">
+            <div class="max-w-5xl mx-auto px-4 py-10">
+                <div class="text-center">
+                    <h2 class="text-3xl md:text-4xl font-extrabold leading-tight">奖池配置管理</h2>
+                    <p class="mt-3 text-slate-700">管理员专用界面，用于配置和管理抽奖奖池设置</p>
                 </div>
             </div>
         </section>
-    </main>
 
-    <footer class="max-w-5xl mx-auto px-4 py-10 text-center text-xs text-slate-500">
-        <div>© <span id="year"></span> Labubu 抽奖管理系统</div>
-    </footer>
+        <!-- 主要内容 -->
+        <main class="max-w-5xl mx-auto px-4 py-10">
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- 奖池设置 -->
+                <section>
+                    <div class="rounded-3xl bg-white border border-slate-200 shadow overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                            <h3 class="font-semibold">奖池配置编辑</h3>
+                            <div class="text-xs text-slate-500">配置将保存到本地浏览器</div>
+                        </div>
+                        <div class="p-5 grid gap-4">
+                            <div class="text-sm text-slate-600">
+                                <div class="mb-2">每行一个奖品，字段使用逗号分隔：<code>name,type,weight,quantity</code></div>
+                                <ul class="text-xs space-y-1 text-slate-500">
+                                    <li>• <b>name</b>: 奖品名称</li>
+                                    <li>• <b>type</b>: 奖品类型，仅支持：<b>抵扣券</b>｜<b>实体</b>｜<b>折扣券</b></li>
+                                    <li>• <b>weight</b>: 权重数值，数值越大越容易抽中</li>
+                                    <li>• <b>quantity</b>: 库存数量，留空或 -1 表示不限量</li>
+                                </ul>
+                            </div>
+                            <textarea id="poolEditor" rows="12"
+                                class="w-full rounded-xl border border-slate-300 p-3 font-mono text-xs"></textarea>
+                            <div class="flex gap-3 flex-wrap">
+                                <button id="savePoolBtn"
+                                    class="px-4 py-2 rounded-xl bg-[var(--labu)] text-white font-medium hover:opacity-90">保存奖池</button>
+                                <button id="reloadBtn"
+                                    class="px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200">重新载入</button>
+                                <button id="restoreDefaultBtn"
+                                    class="px-4 py-2 rounded-xl bg-orange-100 text-orange-700 border border-orange-200 hover:bg-orange-200">恢复默认</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 当前奖池预览 -->
+                <section>
+                    <div class="rounded-3xl bg-white border border-slate-200 shadow overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                            <h3 class="font-semibold">当前奖池预览</h3>
+                            <button id="refreshPreviewBtn"
+                                class="text-xs px-2 py-1 rounded-lg bg-slate-100 border border-slate-200">刷新预览</button>
+                        </div>
+                        <div class="p-5">
+                            <ul id="poolList" class="text-sm grid gap-2"></ul>
+                            <div id="poolStats" class="mt-4 p-3 rounded-lg bg-slate-50 text-xs text-slate-600"></div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- 数据管理 -->
+            <section class="mt-10">
+                <div class="rounded-3xl bg-white border border-slate-200 shadow overflow-hidden">
+                    <div class="p-5 border-b border-slate-100">
+                        <h3 class="font-semibold">数据管理</h3>
+                    </div>
+                    <div class="p-5 grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-medium mb-3">抽奖记录管理</h4>
+                            <div class="flex gap-3 flex-wrap">
+                                <button id="exportHistoryBtn"
+                                    class="px-4 py-2 rounded-xl bg-green-100 text-green-700 border border-green-200 hover:bg-green-200">导出抽奖记录</button>
+                                <button id="clearHistoryBtn"
+                                    class="px-4 py-2 rounded-xl bg-red-100 text-red-700 border border-red-200 hover:bg-red-200">清空抽奖记录</button>
+                            </div>
+                            <div class="mt-2 text-xs text-slate-500">当前记录数：<span id="historyCount">0</span></div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium mb-3">系统重置</h4>
+                            <div class="flex gap-3 flex-wrap">
+                                <button id="resetAllBtn"
+                                    class="px-4 py-2 rounded-xl bg-red-100 text-red-700 border border-red-200 hover:bg-red-200">完全重置</button>
+                            </div>
+                            <div class="mt-2 text-xs text-slate-500">将清空所有数据并恢复默认奖池</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="max-w-5xl mx-auto px-4 py-10 text-center text-xs text-slate-500">
+            <div>© <span id="year"></span> Labubu 抽奖管理系统</div>
+        </footer>
+    </div> <!-- 主界面内容结束 -->
 
     <script>
+        // —— 配置常量 ——
+        const ADMIN_PASSWORD = '123';
+        const SESSION_KEY = 'labubu_admin_session';
+
         // —— 本地存储键 ——
         const LS_KEYS = {
             HISTORY: 'labubu_lottery_history',
@@ -256,8 +294,74 @@
             $('#historyCount').textContent = count;
         }
 
+        // —— 登录验证相关 ——
+        function isLoggedIn() {
+            return sessionStorage.getItem(SESSION_KEY) === 'authenticated';
+        }
+
+        function login(password) {
+            if (password === ADMIN_PASSWORD) {
+                sessionStorage.setItem(SESSION_KEY, 'authenticated');
+                showMainContent();
+                return true;
+            }
+            return false;
+        }
+
+        function logout() {
+            sessionStorage.removeItem(SESSION_KEY);
+            showLoginOverlay();
+        }
+
+        function showLoginOverlay() {
+            $('#loginOverlay').classList.remove('hidden');
+            $('#mainContent').classList.add('hidden');
+            $('#adminPassword').value = '';
+            $('#loginError').classList.add('hidden');
+            $('#adminPassword').focus();
+        }
+
+        function showMainContent() {
+            $('#loginOverlay').classList.add('hidden');
+            $('#mainContent').classList.remove('hidden');
+        }
+
+        function handleLogin() {
+            const password = $('#adminPassword').value;
+            const errorDiv = $('#loginError');
+
+            if (!password) {
+                errorDiv.textContent = '请输入密码';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            if (login(password)) {
+                errorDiv.classList.add('hidden');
+            } else {
+                errorDiv.textContent = '密码错误，请重试';
+                errorDiv.classList.remove('hidden');
+                $('#adminPassword').value = '';
+                $('#adminPassword').focus();
+            }
+        }
+
         // —— 事件绑定 ——
         function bind() {
+            // 登录相关事件
+            $('#loginBtn').addEventListener('click', handleLogin);
+            $('#logoutBtn').addEventListener('click', () => {
+                if (confirm('确认退出管理系统？')) {
+                    logout();
+                }
+            });
+            $('#adminPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleLogin();
+                }
+            });
+
+            // 原有功能事件
             $('#savePoolBtn').addEventListener('click', () => {
                 try {
                     const text = $('#poolEditor').value;
@@ -296,9 +400,17 @@
 
         function init() {
             $('#year').textContent = new Date().getFullYear();
-            refreshPoolEditor();
-            renderPoolList(loadPool());
-            updateHistoryCount();
+
+            // 检查登录状态
+            if (isLoggedIn()) {
+                showMainContent();
+                // 初始化主界面内容
+                refreshPoolEditor();
+                renderPoolList(loadPool());
+                updateHistoryCount();
+            } else {
+                showLoginOverlay();
+            }
         }
 
         bind();
