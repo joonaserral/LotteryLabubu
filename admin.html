@@ -14,7 +14,9 @@
     <!-- 移除Google Fonts以避免微信环境下的加载问题 -->
     <style>
         /* 使用系统字体代替Google Fonts，确保微信兼容性 */
-        body, html, * {
+        body,
+        html,
+        * {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
         }
     </style>
@@ -497,7 +499,7 @@
     <script>
         // —— 安全检查 ——
         if (!window._secureConfig || !window._secureConfig.validate()) {
-                            console.log('🎵 管理员系统');
+            console.log('🎵 管理员系统');
         }
 
         // 检查条款同意状态
@@ -1509,85 +1511,85 @@
             const JAMENDO_CLIENT_ID = '709fa152'; // 官方测试ID
             const JAMENDO_API_BASE = 'https://api.jamendo.com/v3.0';
 
-        // 检测微信环境
-        function isWeChatBrowser() {
-            return /micromessenger/i.test(navigator.userAgent);
-        }
-
-        async function loadMusicFromAPI() {
-            // 微信环境直接使用备用音乐库
-            if (isWeChatBrowser()) {
-                console.log('🎵 管理员界面检测到微信环境，使用内置音乐库');
-                musicLibrary = getBackupMusicLibrary();
-                return true;
+            // 检测微信环境
+            function isWeChatBrowser() {
+                return /micromessenger/i.test(navigator.userAgent);
             }
 
-            try {
-                // 添加超时控制
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒超时
-
-                // 获取流行音乐和电子音乐
-                const [popResponse, electroResponse, rockResponse] = await Promise.all([
-                    fetch(`${JAMENDO_API_BASE}/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=5&tags=pop&include=musicinfo&audioformat=mp32`, {
-                        signal: controller.signal,
-                        mode: 'cors'
-                    }),
-                    fetch(`${JAMENDO_API_BASE}/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=3&tags=electronic&include=musicinfo&audioformat=mp32`, {
-                        signal: controller.signal,
-                        mode: 'cors'
-                    }),
-                    fetch(`${JAMENDO_API_BASE}/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=2&tags=rock&include=musicinfo&audioformat=mp32`, {
-                        signal: controller.signal,
-                        mode: 'cors'
-                    })
-                ]);
-
-                clearTimeout(timeoutId);
-
-                if (!popResponse.ok || !electroResponse.ok || !rockResponse.ok) {
-                    throw new Error('API请求失败');
+            async function loadMusicFromAPI() {
+                // 微信环境直接使用备用音乐库
+                if (isWeChatBrowser()) {
+                    console.log('🎵 管理员界面检测到微信环境，使用内置音乐库');
+                    musicLibrary = getBackupMusicLibrary();
+                    return true;
                 }
 
-                const popData = await popResponse.json();
-                const electroData = await electroResponse.json();
-                const rockData = await rockResponse.json();
+                try {
+                    // 添加超时控制
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒超时
 
-                // 合并所有音乐
-                const allTracks = [
-                    ...(popData.results || []),
-                    ...(electroData.results || []),
-                    ...(rockData.results || [])
-                ];
+                    // 获取流行音乐和电子音乐
+                    const [popResponse, electroResponse, rockResponse] = await Promise.all([
+                        fetch(`${JAMENDO_API_BASE}/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=5&tags=pop&include=musicinfo&audioformat=mp32`, {
+                            signal: controller.signal,
+                            mode: 'cors'
+                        }),
+                        fetch(`${JAMENDO_API_BASE}/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=3&tags=electronic&include=musicinfo&audioformat=mp32`, {
+                            signal: controller.signal,
+                            mode: 'cors'
+                        }),
+                        fetch(`${JAMENDO_API_BASE}/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=2&tags=rock&include=musicinfo&audioformat=mp32`, {
+                            signal: controller.signal,
+                            mode: 'cors'
+                        })
+                    ]);
 
-                if (allTracks.length === 0) {
-                    throw new Error('未获取到音乐数据');
+                    clearTimeout(timeoutId);
+
+                    if (!popResponse.ok || !electroResponse.ok || !rockResponse.ok) {
+                        throw new Error('API请求失败');
+                    }
+
+                    const popData = await popResponse.json();
+                    const electroData = await electroResponse.json();
+                    const rockData = await rockResponse.json();
+
+                    // 合并所有音乐
+                    const allTracks = [
+                        ...(popData.results || []),
+                        ...(electroData.results || []),
+                        ...(rockData.results || [])
+                    ];
+
+                    if (allTracks.length === 0) {
+                        throw new Error('未获取到音乐数据');
+                    }
+
+                    // 转换为我们的音乐库格式
+                    musicLibrary = allTracks.map(track => ({
+                        id: track.id,
+                        title: track.name || 'Unknown Title',
+                        artist: track.artist_name || 'Unknown Artist',
+                        album: track.album_name || 'Unknown Album',
+                        url: track.audio || track.audiodownload,
+                        duration: formatDuration(track.duration),
+                        image: track.album_image || track.image,
+                        jamendoUrl: `https://www.jamendo.com/track/${track.id}`
+                    }));
+
+                    console.log('🎵 管理员界面已加载', musicLibrary.length, '首免费音乐');
+                    return true;
+                } catch (error) {
+                    console.error('❌ 管理员界面加载音乐失败:', error);
+                    // 使用备用音乐库
+                    musicLibrary = getBackupMusicLibrary();
+                    return false;
                 }
-
-                // 转换为我们的音乐库格式
-                musicLibrary = allTracks.map(track => ({
-                    id: track.id,
-                    title: track.name || 'Unknown Title',
-                    artist: track.artist_name || 'Unknown Artist',
-                    album: track.album_name || 'Unknown Album',
-                    url: track.audio || track.audiodownload,
-                    duration: formatDuration(track.duration),
-                    image: track.album_image || track.image,
-                    jamendoUrl: `https://www.jamendo.com/track/${track.id}`
-                }));
-
-                console.log('🎵 管理员界面已加载', musicLibrary.length, '首免费音乐');
-                return true;
-            } catch (error) {
-                console.error('❌ 管理员界面加载音乐失败:', error);
-                // 使用备用音乐库
-                musicLibrary = getBackupMusicLibrary();
-                return false;
             }
-        }
 
-        // 备用音乐库（如果API失败）
-        function getBackupMusicLibrary() {
+            // 备用音乐库（如果API失败）
+            function getBackupMusicLibrary() {
                 return [
                     {
                         title: "Admin Music 1",

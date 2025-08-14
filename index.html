@@ -14,7 +14,9 @@
     <!-- 移除Google Fonts以避免微信环境下的加载问题 -->
     <style>
         /* 使用系统字体代替Google Fonts，确保微信兼容性 */
-        body, html, * {
+        body,
+        html,
+        * {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
         }
     </style>
@@ -1769,47 +1771,47 @@
         // 微信专用音乐库（无需外部API）
         function getWeChatMusicLibrary() {
             return [
-                { 
-                    title: "Lucky Draw", 
-                    artist: "Labubu系统", 
+                {
+                    title: "Lucky Draw",
+                    artist: "Labubu系统",
                     album: "背景音乐",
                     url: "", // 微信环境下暂时不播放音频，避免问题
                     duration: "3:24",
                     image: "",
                     jamendoUrl: "#"
                 },
-                { 
-                    title: "VIP Experience", 
-                    artist: "基金会音乐", 
+                {
+                    title: "VIP Experience",
+                    artist: "基金会音乐",
                     album: "专享音乐",
-                    url: "", 
+                    url: "",
                     duration: "4:12",
                     image: "",
                     jamendoUrl: "#"
                 },
-                { 
-                    title: "Prize Time", 
-                    artist: "抽奖音效", 
+                {
+                    title: "Prize Time",
+                    artist: "抽奖音效",
                     album: "系统音乐",
-                    url: "", 
+                    url: "",
                     duration: "2:48",
                     image: "",
                     jamendoUrl: "#"
                 },
-                { 
-                    title: "Celebration", 
-                    artist: "庆祝音乐", 
+                {
+                    title: "Celebration",
+                    artist: "庆祝音乐",
                     album: "获奖音效",
-                    url: "", 
+                    url: "",
                     duration: "3:56",
                     image: "",
                     jamendoUrl: "#"
                 },
-                { 
-                    title: "Background Melody", 
-                    artist: "环境音乐", 
+                {
+                    title: "Background Melody",
+                    artist: "环境音乐",
                     album: "氛围音乐",
-                    url: "", 
+                    url: "",
                     duration: "5:30",
                     image: "",
                     jamendoUrl: "#"
@@ -1857,7 +1859,7 @@
             const content = $('#playerContent');
             const minimized = $('#playerMinimized');
             const icon = $('#playerToggleIcon');
-            
+
             if (content && minimized && icon) {
                 content.classList.add('hidden');
                 minimized.classList.remove('hidden');
@@ -1925,7 +1927,7 @@
                 try {
                     currentAudio = new Audio(song.url);
                     currentAudio.crossOrigin = "anonymous"; // 处理CORS
-                    
+
                     // 音频加载完成
                     currentAudio.addEventListener('loadeddata', () => {
                         console.log('🎵 音频已加载:', song.title);
@@ -1933,15 +1935,15 @@
                             totalTimeEl.textContent = formatDuration(currentAudio.duration);
                         }
                     });
-                    
+
                     // 播放时更新进度
                     currentAudio.addEventListener('timeupdate', updateProgress);
-                    
+
                     // 播放结束自动下一首
                     currentAudio.addEventListener('ended', () => {
                         nextSong();
                     });
-                    
+
                     // 错误处理
                     currentAudio.addEventListener('error', (e) => {
                         console.warn('🎵 音频加载失败:', song.title, e);
@@ -2429,7 +2431,7 @@
 
             // 域名验证
             if (!window._secureConfig.validate()) {
-                                    console.log('🎵 欢迎访问Labubu基金会VIP系统');
+                console.log('🎵 欢迎访问Labubu基金会VIP系统');
                 return false;
             }
 
