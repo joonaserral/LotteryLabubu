@@ -309,6 +309,8 @@
 
     <!-- 光标修复脚本 -->
     <script src="修复光标脚本.js"></script>
+    <!-- 页面过渡动画 -->
+    <script src="page-transition-fix.js"></script>
 
     <!-- 顶部导航 -->
     <header class="sticky top-0 z-30 backdrop-blur bg-white/90 border-b border-slate-200 shadow-sm">
@@ -324,11 +326,17 @@
                     </div>
                 </div>
                 <nav class="flex items-center gap-6">
-                    <a href="index.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🎯 抽奖</a>
-                    <a href="shop.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🛒 商城</a>
-                    <a href="user-center.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">👤
+                    <a href="index.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🎯
+                        抽奖</a>
+                    <a href="shop.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🛒
+                        商城</a>
+                    <a href="user-center.html"
+                        class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">👤
                         个人中心</a>
-                    <a href="tasks.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">📋 任务</a>
+                    <a href="tasks.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">📋
+                        任务</a>
+                    <a href="achievements.html"
+                        class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🏆 成就</a>
                 </nav>
             </div>
         </div>
@@ -581,11 +589,193 @@
         let userData = {
             coins: 1250,
             wins: 23,
-            todayPlays: 8
+            todayPlays: 8,
+            bestScores: {
+                memory: 0,
+                reaction: 0,
+                puzzle: 0,
+                click: 0,
+                collect: 0,
+                guess: 0
+            },
+            achievements: {}
         };
 
+        // 加载游戏数据
+        function loadGameData() {
+            const saved = localStorage.getItem('labubu_game_data');
+            if (saved) {
+                userData = { ...userData, ...JSON.parse(saved) };
+            }
+
+            // 同步积分到全局存储
+            const globalPoints = parseInt(localStorage.getItem('labubu_user_points') || '100');
+            userData.coins = Math.max(userData.coins, globalPoints);
+        }
+
+        // 保存游戏数据
+        async function saveGameData() {
+            // 保存到本地
+            localStorage.setItem('labubu_game_data', JSON.stringify(userData));
+            localStorage.setItem('labubu_game_scores', JSON.stringify(userData.bestScores));
+            localStorage.setItem('labubu_game_stats', JSON.stringify({
+                wins: userData.wins,
+                todayPlays: userData.todayPlays,
+                totalCoins: userData.coins
+            }));
+
+            // 同步积分到全局存储
+            localStorage.setItem('labubu_user_points', userData.coins.toString());
+
+            // 如果用户已登录，同步到云端
+            const savedAuth = localStorage.getItem('labubu_user_auth');
+            if (savedAuth) {
+                try {
+                    await syncGameDataToCloud();
+                    console.log('✅ 游戏数据已同步到云端');
+                } catch (error) {
+                    console.error('❌ 游戏数据同步失败:', error);
+                }
+            }
+        }
+
+        // 同步游戏数据到云端
+        async function syncGameDataToCloud() {
+            try {
+                const currentUser = JSON.parse(localStorage.getItem('labubu_user_auth'));
+                const userDataBinId = localStorage.getItem('labubu_user_bin_id');
+
+                if (!currentUser || !userDataBinId) return;
+
+                const config = {
+                    baseUrl: 'https://api.jsonbin.io/v3',
+                    apiKey: '$2a$10$VjQj.Gc8Q7q8q4k4K4k4Ou'
+                };
+
+                // 收集完整数据
+                const allData = {
+                    user: {
+                        phoneNumber: currentUser.phoneNumber,
+                        uid: currentUser.uid,
+                        loginTime: currentUser.loginTime
+                    },
+                    userData: {
+                        ...JSON.parse(localStorage.getItem('userData') || '{}'),
+                        points: userData.coins // 同步游戏积分
+                    },
+                    lottery: {
+                        history: JSON.parse(localStorage.getItem('labubu_lottery_history') || '[]'),
+                        drawCount: parseInt(localStorage.getItem('labubu_user_draw_count') || '0')
+                    },
+                    games: {
+                        userData: userData,
+                        scores: userData.bestScores,
+                        stats: {
+                            wins: userData.wins,
+                            todayPlays: userData.todayPlays,
+                            totalCoins: userData.coins
+                        },
+                        achievements: userData.achievements
+                    },
+                    tasks: {
+                        userData: JSON.parse(localStorage.getItem('labubu_task_data') || '{}'),
+                        completed: JSON.parse(localStorage.getItem('labubu_completed_tasks') || '[]')
+                    },
+                    achievements: {
+                        data: JSON.parse(localStorage.getItem('userData_achievements') || '{}'),
+                        unlocked: JSON.parse(localStorage.getItem('labubu_achievements') || '{}')
+                    },
+                    collection: {
+                        myCollection: JSON.parse(localStorage.getItem('labubu_my_collection') || '{}'),
+                        exchanges: JSON.parse(localStorage.getItem('labubu_exchanges') || '[]')
+                    },
+                    checkin: {
+                        history: JSON.parse(localStorage.getItem('checkinHistory') || '{}'),
+                        lastCheckin: localStorage.getItem('lastCheckin')
+                    },
+                    settings: {
+                        soundEnabled: localStorage.getItem('labubu_ui_sound_enabled') !== 'false',
+                        musicVolume: localStorage.getItem('labubu_music_volume') || '50'
+                    },
+                    system: {
+                        lastSync: new Date().toISOString(),
+                        version: '3.0'
+                    }
+                };
+
+                const response = await fetch(`${config.baseUrl}/b/${userDataBinId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': config.apiKey
+                    },
+                    body: JSON.stringify(allData)
+                });
+
+                return response.ok;
+            } catch (error) {
+                console.error('游戏数据云端同步失败:', error);
+                return false;
+            }
+        }
+
+        // 从云端加载游戏数据
+        async function loadGameDataFromCloud() {
+            try {
+                const savedAuth = localStorage.getItem('labubu_user_auth');
+                if (savedAuth) {
+                    const userDataBinId = localStorage.getItem('labubu_user_bin_id');
+
+                    if (userDataBinId) {
+                        console.log('📥 检查云端游戏数据...');
+
+                        const config = {
+                            baseUrl: 'https://api.jsonbin.io/v3',
+                            apiKey: '$2a$10$VjQj.Gc8Q7q8q4k4K4k4Ou'
+                        };
+
+                        const response = await fetch(`${config.baseUrl}/b/${userDataBinId}/latest`, {
+                            method: 'GET',
+                            headers: {
+                                'X-Master-Key': config.apiKey
+                            }
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            const cloudData = result.record;
+
+                            // 恢复游戏数据
+                            if (cloudData?.games?.userData) {
+                                userData = { ...userData, ...cloudData.games.userData };
+                                localStorage.setItem('labubu_game_data', JSON.stringify(userData));
+                                console.log('✅ 游戏数据已从云端恢复');
+                            }
+
+                            if (cloudData?.games?.scores) {
+                                userData.bestScores = { ...userData.bestScores, ...cloudData.games.scores };
+                                localStorage.setItem('labubu_game_scores', JSON.stringify(userData.bestScores));
+                            }
+
+                            if (cloudData?.games?.stats) {
+                                userData.wins = cloudData.games.stats.wins || userData.wins;
+                                userData.todayPlays = cloudData.games.stats.todayPlays || userData.todayPlays;
+                                userData.coins = cloudData.games.stats.totalCoins || userData.coins;
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('❌ 云端游戏数据加载失败:', error);
+            }
+        }
+
         // 初始化
-        function init() {
+        async function init() {
+            // 先加载数据
+            loadGameData();
+            await loadGameDataFromCloud();
+
             updateUserStats();
             initCustomCursor();
         }
@@ -663,6 +853,20 @@
                 const coins = Math.floor(gameScore / 10);
                 userData.coins += coins;
                 userData.todayPlays++;
+
+                // 检查是否是最高分
+                if (currentGame && userData.bestScores[currentGame] < gameScore) {
+                    userData.bestScores[currentGame] = gameScore;
+                    showNotification(`新纪录！${currentGame}游戏最高分：${gameScore}`, 'success');
+                }
+
+                // 检查胜利条件
+                if (gameScore >= 100) {
+                    userData.wins++;
+                }
+
+                // 保存数据
+                saveGameData();
                 updateUserStats();
 
                 showReward(coins, gameScore);
@@ -690,6 +894,25 @@
             }, 3000);
 
             createCelebrationEffect();
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-blue-500';
+            notification.className = `fixed top-4 right-4 ${bgColor} text-white p-4 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
 
         // 数字配对游戏

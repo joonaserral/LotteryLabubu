@@ -513,7 +513,11 @@
             </div>
             <nav class="flex items-center gap-6">
                 <a href="index.html" class="hover:underline flex items-center gap-1 smooth-link page-link">🎯 返回抽奖</a>
+                <a href="user-center.html" class="hover:underline flex items-center gap-1 smooth-link page-link">👤
+                    用户中心</a>
                 <a href="shop.html" class="hover:underline flex items-center gap-1 smooth-link page-link">🛒 商城</a>
+                <a href="tasks.html" class="hover:underline flex items-center gap-1 smooth-link page-link">📋 任务</a>
+                <a href="games.html" class="hover:underline flex items-center gap-1 smooth-link page-link">🎮 游戏</a>
                 <a href="admin.html" class="hover:underline flex items-center gap-1 smooth-link page-link"
                     style="display: none;">⚙️ 管理</a>
             </nav>
@@ -928,9 +932,100 @@
                     return saved ? { ...defaultData, ...JSON.parse(saved) } : defaultData;
                 }
 
-                saveUserData() {
+                async saveUserData() {
+                    // 保存到本地
                     localStorage.setItem('userData_achievements', JSON.stringify(this.userData));
+
+                    // 同步积分到全局存储
+                    if (this.userData.stats && this.userData.stats.points) {
+                        localStorage.setItem('labubu_user_points', this.userData.stats.points.toString());
+                    }
+
                     this.broadcastUpdate();
+
+                    // 如果用户已登录，同步到云端
+                    const savedAuth = localStorage.getItem('labubu_user_auth');
+                    if (savedAuth) {
+                        try {
+                            // 调用云端同步（如果在主页面）
+                            if (window.parent && window.parent.syncUserData) {
+                                await window.parent.syncUserData();
+                            } else if (typeof syncUserData === 'function') {
+                                await syncUserData();
+                            } else {
+                                // 直接调用JSONBin.io API
+                                await this.syncToCloud();
+                            }
+
+                            console.log('✅ 成就数据已同步到云端');
+                        } catch (error) {
+                            console.error('❌ 成就数据同步失败:', error);
+                        }
+                    }
+                }
+
+                // 直接同步到云端
+                async syncToCloud() {
+                    try {
+                        const currentUser = JSON.parse(localStorage.getItem('labubu_user_auth'));
+                        const userDataBinId = localStorage.getItem('labubu_user_bin_id');
+
+                        if (!currentUser || !userDataBinId) return;
+
+                        const config = {
+                            baseUrl: 'https://api.jsonbin.io/v3',
+                            apiKey: '$2a$10$VjQj.Gc8Q7q8q4k4K4k4Ou'
+                        };
+
+                        // 收集完整数据
+                        const allData = {
+                            user: {
+                                phoneNumber: currentUser.phoneNumber,
+                                uid: currentUser.uid,
+                                loginTime: currentUser.loginTime
+                            },
+                            userData: JSON.parse(localStorage.getItem('userData') || '{}'),
+                            lottery: {
+                                history: JSON.parse(localStorage.getItem('labubu_lottery_history') || '[]'),
+                                drawCount: parseInt(localStorage.getItem('labubu_user_draw_count') || '0')
+                            },
+                            achievements: {
+                                data: this.userData,
+                                unlocked: JSON.parse(localStorage.getItem('labubu_achievements') || '{}'),
+                                progress: JSON.parse(localStorage.getItem('labubu_achievement_progress') || '{}')
+                            },
+                            collection: {
+                                myCollection: JSON.parse(localStorage.getItem('labubu_my_collection') || '{}'),
+                                exchanges: JSON.parse(localStorage.getItem('labubu_exchanges') || '[]')
+                            },
+                            checkin: {
+                                history: JSON.parse(localStorage.getItem('checkinHistory') || '{}'),
+                                lastCheckin: localStorage.getItem('lastCheckin')
+                            },
+                            settings: {
+                                soundEnabled: localStorage.getItem('labubu_ui_sound_enabled') !== 'false',
+                                musicVolume: localStorage.getItem('labubu_music_volume') || '50'
+                            },
+                            system: {
+                                lastSync: new Date().toISOString(),
+                                version: '3.0'
+                            }
+                        };
+
+                        const response = await fetch(`${config.baseUrl}/b/${userDataBinId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-Master-Key': config.apiKey
+                            },
+                            body: JSON.stringify(allData)
+                        });
+
+                        return response.ok;
+                    } catch (error) {
+                        console.error('云端同步失败:', error);
+                        return false;
+                    }
                 }
 
                 broadcastUpdate() {
@@ -965,7 +1060,7 @@
 
                     // 检查成就
                     this.checkAchievements();
-                    this.saveUserData();
+                    await this.saveUserData();
                 }
 
                 calculatePoints() {
@@ -1317,9 +1412,58 @@
                 }
             }
 
+            // 检查并加载云端数据
+            async function checkAndLoadCloudData() {
+                try {
+                    const savedAuth = localStorage.getItem('labubu_user_auth');
+                    if (savedAuth) {
+                        const currentUser = JSON.parse(savedAuth);
+                        const userDataBinId = localStorage.getItem('labubu_user_bin_id');
+
+                        if (userDataBinId) {
+                            console.log('📥 检查云端成就数据...');
+
+                            const config = {
+                                baseUrl: 'https://api.jsonbin.io/v3',
+                                apiKey: '$2a$10$VjQj.Gc8Q7q8q4k4K4k4Ou'
+                            };
+
+                            const response = await fetch(`${config.baseUrl}/b/${userDataBinId}/latest`, {
+                                method: 'GET',
+                                headers: {
+                                    'X-Master-Key': config.apiKey
+                                }
+                            });
+
+                            if (response.ok) {
+                                const result = await response.json();
+                                const cloudData = result.record;
+
+                                // 恢复成就数据
+                                if (cloudData?.achievements?.data) {
+                                    localStorage.setItem('userData_achievements', JSON.stringify(cloudData.achievements.data));
+                                    console.log('✅ 成就数据已从云端恢复');
+                                }
+
+                                // 恢复其他相关数据
+                                if (cloudData?.userData?.points) {
+                                    localStorage.setItem('labubu_user_points', cloudData.userData.points.toString());
+                                }
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ 云端数据加载失败:', error);
+                }
+            }
+
             // 初始化应用
-            document.addEventListener('DOMContentLoaded', () => {
+            document.addEventListener('DOMContentLoaded', async () => {
                 if (checkTermsAgreement()) {
+                    // 先检查云端数据
+                    await checkAndLoadCloudData();
+
+                    // 然后初始化用户管理器
                     const userManager = new UserManager();
                     const achievementUI = new AchievementUI(userManager);
                 }

@@ -252,6 +252,8 @@
 
     <!-- 光标修复脚本 -->
     <script src="修复光标脚本.js"></script>
+    <!-- 页面过渡动画 -->
+    <script src="page-transition-fix.js"></script>
 
     <!-- 顶部导航 -->
     <header class="sticky top-0 z-30 backdrop-blur bg-white/90 border-b border-slate-200 shadow-sm">
@@ -267,10 +269,17 @@
                     </div>
                 </div>
                 <nav class="flex items-center gap-6">
-                    <a href="index.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🎯 抽奖</a>
-                    <a href="shop.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🛒 商城</a>
-                    <a href="user-center.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">👤
+                    <a href="index.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🎯
+                        抽奖</a>
+                    <a href="shop.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🛒
+                        商城</a>
+                    <a href="user-center.html"
+                        class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">👤
                         个人中心</a>
+                    <a href="games.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🎮
+                        游戏</a>
+                    <a href="achievements.html"
+                        class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🏆 成就</a>
                 </nav>
             </div>
         </div>
@@ -486,8 +495,175 @@
             checkedInToday: false
         };
 
+        // 加载用户数据
+        function loadUserData() {
+            const saved = localStorage.getItem('labubu_task_data');
+            if (saved) {
+                userData = { ...userData, ...JSON.parse(saved) };
+            }
+        }
+
+        // 保存用户数据
+        async function saveUserData() {
+            // 保存到本地
+            localStorage.setItem('labubu_task_data', JSON.stringify(userData));
+
+            // 同步积分到全局
+            if (userData.totalCoins) {
+                const currentPoints = parseInt(localStorage.getItem('labubu_user_points') || '100');
+                localStorage.setItem('labubu_user_points', (currentPoints + userData.totalCoins).toString());
+            }
+
+            // 如果用户已登录，同步到云端
+            const savedAuth = localStorage.getItem('labubu_user_auth');
+            if (savedAuth) {
+                try {
+                    await syncTasksToCloud();
+                    console.log('✅ 任务数据已同步到云端');
+                } catch (error) {
+                    console.error('❌ 任务数据同步失败:', error);
+                }
+            }
+        }
+
+        // 同步任务数据到云端
+        async function syncTasksToCloud() {
+            try {
+                const currentUser = JSON.parse(localStorage.getItem('labubu_user_auth'));
+                const userDataBinId = localStorage.getItem('labubu_user_bin_id');
+
+                if (!currentUser || !userDataBinId) return;
+
+                const config = {
+                    baseUrl: 'https://api.jsonbin.io/v3',
+                    apiKey: '$2a$10$VjQj.Gc8Q7q8q4k4K4k4Ou'
+                };
+
+                // 收集完整数据
+                const allData = {
+                    user: {
+                        phoneNumber: currentUser.phoneNumber,
+                        uid: currentUser.uid,
+                        loginTime: currentUser.loginTime
+                    },
+                    userData: JSON.parse(localStorage.getItem('userData') || '{}'),
+                    lottery: {
+                        history: JSON.parse(localStorage.getItem('labubu_lottery_history') || '[]'),
+                        drawCount: parseInt(localStorage.getItem('labubu_user_draw_count') || '0')
+                    },
+                    tasks: {
+                        userData: userData,
+                        daily: dailyTasks,
+                        weekly: weeklyTasks,
+                        achievement: achievementTasks,
+                        completed: JSON.parse(localStorage.getItem('labubu_completed_tasks') || '[]')
+                    },
+                    achievements: {
+                        data: JSON.parse(localStorage.getItem('userData_achievements') || '{}'),
+                        unlocked: JSON.parse(localStorage.getItem('labubu_achievements') || '{}')
+                    },
+                    collection: {
+                        myCollection: JSON.parse(localStorage.getItem('labubu_my_collection') || '{}'),
+                        exchanges: JSON.parse(localStorage.getItem('labubu_exchanges') || '[]')
+                    },
+                    checkin: {
+                        history: JSON.parse(localStorage.getItem('checkinHistory') || '{}'),
+                        lastCheckin: localStorage.getItem('lastCheckin')
+                    },
+                    settings: {
+                        soundEnabled: localStorage.getItem('labubu_ui_sound_enabled') !== 'false',
+                        musicVolume: localStorage.getItem('labubu_music_volume') || '50'
+                    },
+                    system: {
+                        lastSync: new Date().toISOString(),
+                        version: '3.0'
+                    }
+                };
+
+                const response = await fetch(`${config.baseUrl}/b/${userDataBinId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': config.apiKey
+                    },
+                    body: JSON.stringify(allData)
+                });
+
+                return response.ok;
+            } catch (error) {
+                console.error('任务云端同步失败:', error);
+                return false;
+            }
+        }
+
+        // 从云端加载任务数据
+        async function loadTasksFromCloud() {
+            try {
+                const savedAuth = localStorage.getItem('labubu_user_auth');
+                if (savedAuth) {
+                    const userDataBinId = localStorage.getItem('labubu_user_bin_id');
+
+                    if (userDataBinId) {
+                        console.log('📥 检查云端任务数据...');
+
+                        const config = {
+                            baseUrl: 'https://api.jsonbin.io/v3',
+                            apiKey: '$2a$10$VjQj.Gc8Q7q8q4k4K4k4Ou'
+                        };
+
+                        const response = await fetch(`${config.baseUrl}/b/${userDataBinId}/latest`, {
+                            method: 'GET',
+                            headers: {
+                                'X-Master-Key': config.apiKey
+                            }
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            const cloudData = result.record;
+
+                            // 恢复任务数据
+                            if (cloudData?.tasks?.userData) {
+                                userData = { ...userData, ...cloudData.tasks.userData };
+                                localStorage.setItem('labubu_task_data', JSON.stringify(userData));
+                                console.log('✅ 任务数据已从云端恢复');
+                            }
+
+                            // 更新任务状态
+                            if (cloudData?.tasks?.daily) {
+                                // 合并任务状态
+                                cloudData.tasks.daily.forEach(cloudTask => {
+                                    const localTask = dailyTasks.find(t => t.id === cloudTask.id);
+                                    if (localTask) {
+                                        localTask.progress = cloudTask.progress;
+                                        localTask.completed = cloudTask.completed;
+                                    }
+                                });
+                            }
+
+                            if (cloudData?.tasks?.weekly) {
+                                cloudData.tasks.weekly.forEach(cloudTask => {
+                                    const localTask = weeklyTasks.find(t => t.id === cloudTask.id);
+                                    if (localTask) {
+                                        localTask.progress = cloudTask.progress;
+                                        localTask.completed = cloudTask.completed;
+                                    }
+                                });
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('❌ 云端任务数据加载失败:', error);
+            }
+        }
+
         // 初始化
-        function init() {
+        async function init() {
+            // 先加载数据
+            loadUserData();
+            await loadTasksFromCloud();
+
             renderStatistics();
             renderTasks();
             updateSigninStatus();

@@ -276,9 +276,17 @@
 
                 <!-- 导航链接 -->
                 <nav class="flex items-center gap-6">
-                    <a href="index.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🎯 抽奖</a>
-                    <a href="achievements.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🏆
+                    <a href="index.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🎯
+                        抽奖</a>
+                    <a href="user-center.html"
+                        class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">👤 用户中心</a>
+                    <a href="achievements.html"
+                        class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🏆
                         个人成就</a>
+                    <a href="tasks.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">📋
+                        任务</a>
+                    <a href="games.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🎮
+                        游戏</a>
                     <button id="addPrizeBtn" class="text-slate-600 hover:text-[var(--labu)] transition-colors">
                         ➕ 添加奖品
                     </button>
@@ -432,7 +440,7 @@
                 <span class="font-semibold">总计:</span>
                 <span id="cartTotal" class="text-xl font-bold text-[var(--labu)]">￥0</span>
             </div>
-            <button class="cart-btn w-full py-3 text-white rounded-xl font-medium">
+            <button class="cart-btn w-full py-3 text-white rounded-xl font-medium" onclick="createOrder()">
                 立即结算 💳
             </button>
         </div>
@@ -720,9 +728,195 @@
         let userPrizes = JSON.parse(localStorage.getItem('userPrizes') || '[]');
         let currentImageData = null; // 存储当前选择的图片数据
         let selectedEmoji = null; // 存储当前选择的emoji
+        let userShopData = {
+            cart: [],
+            orders: [],
+            favorites: [],
+            totalSpent: 0
+        };
+
+        // 加载商城数据
+        function loadShopData() {
+            const savedCart = localStorage.getItem('labubu_shopping_cart');
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+            }
+
+            const savedShopData = localStorage.getItem('labubu_shop_data');
+            if (savedShopData) {
+                userShopData = { ...userShopData, ...JSON.parse(savedShopData) };
+            }
+
+            const savedOrders = localStorage.getItem('labubu_orders');
+            if (savedOrders) {
+                userShopData.orders = JSON.parse(savedOrders);
+            }
+
+            const savedFavorites = localStorage.getItem('labubu_shop_favorites');
+            if (savedFavorites) {
+                userShopData.favorites = JSON.parse(savedFavorites);
+            }
+        }
+
+        // 保存商城数据
+        async function saveShopData() {
+            // 保存到本地
+            localStorage.setItem('labubu_shopping_cart', JSON.stringify(cart));
+            localStorage.setItem('labubu_orders', JSON.stringify(userShopData.orders));
+            localStorage.setItem('labubu_shop_favorites', JSON.stringify(userShopData.favorites));
+            localStorage.setItem('labubu_shop_data', JSON.stringify(userShopData));
+
+            // 如果用户已登录，同步到云端
+            const savedAuth = localStorage.getItem('labubu_user_auth');
+            if (savedAuth) {
+                try {
+                    await syncShopDataToCloud();
+                    console.log('✅ 商城数据已同步到云端');
+                } catch (error) {
+                    console.error('❌ 商城数据同步失败:', error);
+                }
+            }
+        }
+
+        // 同步商城数据到云端
+        async function syncShopDataToCloud() {
+            try {
+                const currentUser = JSON.parse(localStorage.getItem('labubu_user_auth'));
+                const userDataBinId = localStorage.getItem('labubu_user_bin_id');
+
+                if (!currentUser || !userDataBinId) return;
+
+                const config = {
+                    baseUrl: 'https://api.jsonbin.io/v3',
+                    apiKey: '$2a$10$VjQj.Gc8Q7q8q4k4K4k4Ou'
+                };
+
+                // 收集完整数据
+                const allData = {
+                    user: {
+                        phoneNumber: currentUser.phoneNumber,
+                        uid: currentUser.uid,
+                        loginTime: currentUser.loginTime
+                    },
+                    userData: JSON.parse(localStorage.getItem('userData') || '{}'),
+                    lottery: {
+                        history: JSON.parse(localStorage.getItem('labubu_lottery_history') || '[]'),
+                        drawCount: parseInt(localStorage.getItem('labubu_user_draw_count') || '0')
+                    },
+                    shop: {
+                        cart: cart,
+                        orders: userShopData.orders,
+                        favorites: userShopData.favorites,
+                        userData: userShopData
+                    },
+                    games: {
+                        userData: JSON.parse(localStorage.getItem('labubu_game_data') || '{}'),
+                        scores: JSON.parse(localStorage.getItem('labubu_game_scores') || '{}'),
+                        stats: JSON.parse(localStorage.getItem('labubu_game_stats') || '{}')
+                    },
+                    tasks: {
+                        userData: JSON.parse(localStorage.getItem('labubu_task_data') || '{}'),
+                        completed: JSON.parse(localStorage.getItem('labubu_completed_tasks') || '[]')
+                    },
+                    achievements: {
+                        data: JSON.parse(localStorage.getItem('userData_achievements') || '{}'),
+                        unlocked: JSON.parse(localStorage.getItem('labubu_achievements') || '{}')
+                    },
+                    collection: {
+                        myCollection: JSON.parse(localStorage.getItem('labubu_my_collection') || '{}'),
+                        exchanges: JSON.parse(localStorage.getItem('labubu_exchanges') || '[]')
+                    },
+                    checkin: {
+                        history: JSON.parse(localStorage.getItem('checkinHistory') || '{}'),
+                        lastCheckin: localStorage.getItem('lastCheckin')
+                    },
+                    settings: {
+                        soundEnabled: localStorage.getItem('labubu_ui_sound_enabled') !== 'false',
+                        musicVolume: localStorage.getItem('labubu_music_volume') || '50'
+                    },
+                    system: {
+                        lastSync: new Date().toISOString(),
+                        version: '3.0'
+                    }
+                };
+
+                const response = await fetch(`${config.baseUrl}/b/${userDataBinId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': config.apiKey
+                    },
+                    body: JSON.stringify(allData)
+                });
+
+                return response.ok;
+            } catch (error) {
+                console.error('商城数据云端同步失败:', error);
+                return false;
+            }
+        }
+
+        // 从云端加载商城数据
+        async function loadShopDataFromCloud() {
+            try {
+                const savedAuth = localStorage.getItem('labubu_user_auth');
+                if (savedAuth) {
+                    const userDataBinId = localStorage.getItem('labubu_user_bin_id');
+
+                    if (userDataBinId) {
+                        console.log('📥 检查云端商城数据...');
+
+                        const config = {
+                            baseUrl: 'https://api.jsonbin.io/v3',
+                            apiKey: '$2a$10$VjQj.Gc8Q7q8q4k4K4k4Ou'
+                        };
+
+                        const response = await fetch(`${config.baseUrl}/b/${userDataBinId}/latest`, {
+                            method: 'GET',
+                            headers: {
+                                'X-Master-Key': config.apiKey
+                            }
+                        });
+
+                        if (response.ok) {
+                            const result = await response.json();
+                            const cloudData = result.record;
+
+                            // 恢复商城数据
+                            if (cloudData?.shop?.cart) {
+                                cart = cloudData.shop.cart;
+                                localStorage.setItem('labubu_shopping_cart', JSON.stringify(cart));
+                                console.log('✅ 购物车数据已从云端恢复');
+                            }
+
+                            if (cloudData?.shop?.orders) {
+                                userShopData.orders = cloudData.shop.orders;
+                                localStorage.setItem('labubu_orders', JSON.stringify(userShopData.orders));
+                            }
+
+                            if (cloudData?.shop?.favorites) {
+                                userShopData.favorites = cloudData.shop.favorites;
+                                localStorage.setItem('labubu_shop_favorites', JSON.stringify(userShopData.favorites));
+                            }
+
+                            if (cloudData?.shop?.userData) {
+                                userShopData = { ...userShopData, ...cloudData.shop.userData };
+                                localStorage.setItem('labubu_shop_data', JSON.stringify(userShopData));
+                            }
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('❌ 云端商城数据加载失败:', error);
+            }
+        }
 
         // 初始化
-        function init() {
+        async function init() {
+            // 先加载数据
+            loadShopData();
+            await loadShopDataFromCloud();
+
             renderProducts();
             initCarousel();
             initEventListeners();
@@ -872,6 +1066,76 @@
             $('#cartTotal').textContent = `￥${totalPrice}`;
 
             renderCartItems();
+        }
+
+        // 添加到收藏
+        async function addToFavorites(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            if (!userShopData.favorites.some(f => f.id === productId)) {
+                userShopData.favorites.push({
+                    id: productId,
+                    name: product.name,
+                    price: product.price,
+                    image: product.image,
+                    addedAt: new Date().toISOString()
+                });
+
+                await saveShopData();
+                showNotification('已添加到收藏夹', 'success');
+            } else {
+                showNotification('已在收藏夹中', 'info');
+            }
+        }
+
+        // 创建订单
+        async function createOrder() {
+            if (cart.length === 0) {
+                showNotification('购物车为空', 'error');
+                return;
+            }
+
+            const order = {
+                id: Date.now().toString(),
+                items: [...cart],
+                totalAmount: cart.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                totalItems: cart.reduce((sum, item) => sum + item.quantity, 0),
+                status: 'pending',
+                createdAt: new Date().toISOString(),
+                paymentMethod: 'mock'
+            };
+
+            userShopData.orders.push(order);
+            userShopData.totalSpent += order.totalAmount;
+
+            // 清空购物车
+            cart = [];
+
+            await saveShopData();
+            updateCartUI();
+            closeCart();
+
+            showNotification(`订单创建成功！订单号: ${order.id}`, 'success');
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+            notification.className = `fixed top-4 right-4 ${bgColor} text-white p-4 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full`;
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
 
         // 渲染购物车商品
@@ -1361,6 +1625,9 @@
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', init);
     </script>
+
+    <!-- 页面过渡动画 -->
+    <script src="page-transition-fix.js"></script>
 </body>
 
 </html>

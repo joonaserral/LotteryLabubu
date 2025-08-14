@@ -220,6 +220,59 @@
             filter: grayscale(100%);
         }
 
+        /* 页面过渡动画 */
+        .page-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(107, 91, 149, 0.9), rgba(255, 204, 0, 0.9));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .page-transition-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .page-transition-content {
+            text-align: center;
+            color: white;
+            transform: translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .page-transition-overlay.active .page-transition-content {
+            transform: translateY(0);
+        }
+
+        .transition-loader {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
         /* 粒子效果 */
         .magic-particle {
             position: fixed;
@@ -252,6 +305,15 @@
 </head>
 
 <body class="bg-slate-50 text-slate-900">
+    <!-- 页面过渡动画覆盖层 -->
+    <div id="pageTransitionOverlay" class="page-transition-overlay">
+        <div class="page-transition-content">
+            <div class="transition-loader"></div>
+            <h3 class="text-2xl font-bold mb-2">🧸 正在跳转...</h3>
+            <p class="text-lg opacity-90">请稍候，即将为您加载精彩内容</p>
+        </div>
+    </div>
+
     <!-- 自定义鼠标光标 -->
     <div class="custom-cursor"></div>
 
@@ -276,9 +338,16 @@
                     </div>
                 </div>
                 <nav class="flex items-center gap-6">
-                    <a href="index.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🎯 抽奖</a>
-                    <a href="shop.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🛒 商城</a>
-                    <a href="tasks.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">📋 任务</a>
+                    <a href="index.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🎯
+                        抽奖</a>
+                    <a href="shop.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🛒
+                        商城</a>
+                    <a href="tasks.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">📋
+                        任务</a>
+                    <a href="games.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🎮
+                        游戏</a>
+                    <a href="achievements.html"
+                        class="text-slate-600 hover:text-[var(--labu)] transition-colors page-link">🏆 成就</a>
                 </nav>
             </div>
         </div>
@@ -491,63 +560,79 @@
         </div>
     </div>
 
-    <!-- 登录/注册模态框 -->
-    <div id="authModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-2xl max-w-md w-full mx-4 overflow-hidden">
-            <div class="p-6 border-b border-slate-200">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-xl font-bold text-slate-800" id="authModalTitle">登录账户</h3>
-                    <button id="closeAuthModal" class="text-slate-400 hover:text-slate-600 text-2xl">×</button>
-                </div>
+    <!-- 手机号登录模态框 -->
+    <div id="authModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-3xl p-8 mx-4 max-w-md w-full shadow-2xl">
+            <!-- 标题 -->
+            <div class="text-center mb-6">
+                <div class="text-4xl mb-2">📱</div>
+                <h2 class="text-xl font-bold text-slate-800">手机验证码登录</h2>
+                <p class="text-sm text-slate-500 mt-2">验证身份，同步您的抽奖数据到云端</p>
+                <button id="closeAuthModal"
+                    class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-2xl">×</button>
             </div>
 
-            <div class="p-6">
-                <!-- 登录表单 -->
-                <form id="loginForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">邮箱地址</label>
-                        <input type="email" id="loginEmail" required
-                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
+            <!-- 手机号输入 -->
+            <div id="phoneInputStep" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">手机号码</label>
+                    <div class="flex">
+                        <select id="countryCode"
+                            class="px-3 py-2 border border-slate-300 rounded-l-lg text-sm focus:border-[var(--labu)] focus:outline-none">
+                            <option value="+86">🇨🇳 +86</option>
+                            <option value="+1">🇺🇸 +1</option>
+                            <option value="+44">🇬🇧 +44</option>
+                            <option value="+81">🇯🇵 +81</option>
+                            <option value="+82">🇰🇷 +82</option>
+                        </select>
+                        <input type="tel" id="phoneNumber" placeholder="请输入手机号"
+                            class="flex-1 px-3 py-2 border border-l-0 border-slate-300 rounded-r-lg text-sm focus:border-[var(--labu)] focus:outline-none">
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">密码</label>
-                        <input type="password" id="loginPassword" required
-                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
-                    </div>
-                    <button type="submit"
-                        class="w-full py-3 bg-[var(--labu)] text-white rounded-xl font-medium hover:bg-opacity-90 transition-colors">
-                        登录
-                    </button>
-                </form>
+                    <div id="phoneError" class="text-red-500 text-xs mt-1 hidden"></div>
+                </div>
 
-                <!-- 注册表单 -->
-                <form id="registerForm" class="space-y-4 hidden">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">用户名</label>
-                        <input type="text" id="registerName" required
-                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">邮箱地址</label>
-                        <input type="email" id="registerEmail" required
-                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">密码</label>
-                        <input type="password" id="registerPassword" required minlength="6"
-                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
-                    </div>
-                    <button type="submit"
-                        class="w-full py-3 bg-[var(--labu)] text-white rounded-xl font-medium hover:bg-opacity-90 transition-colors">
-                        注册
-                    </button>
-                </form>
+                <!-- 简单验证 -->
+                <div class="text-xs text-slate-500 bg-blue-50 p-2 rounded">
+                    💡 为了简化流程，我们使用演示验证码：<strong>123456</strong>
+                </div>
 
-                <div class="mt-4 text-center">
-                    <button id="switchAuthMode" class="text-[var(--labu)] hover:underline">
-                        还没有账户？立即注册
+                <button id="sendCodeBtn"
+                    class="w-full bg-[var(--labu)] text-white py-3 rounded-lg font-medium hover:bg-[var(--labu)]/90 transition-colors">
+                    📤 发送验证码
+                </button>
+            </div>
+
+            <!-- 验证码输入 -->
+            <div id="codeInputStep" class="space-y-4 hidden">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-2">验证码</label>
+                    <input type="text" id="verificationCode" placeholder="请输入6位验证码" maxlength="6"
+                        class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm text-center font-mono text-lg tracking-wider focus:border-[var(--labu)] focus:outline-none">
+                    <div id="codeError" class="text-red-500 text-xs mt-1 hidden"></div>
+                </div>
+
+                <div class="flex justify-between items-center text-sm">
+                    <span class="text-slate-500">验证码已发送至 <span id="sentPhoneNumber"></span></span>
+                    <button id="resendCodeBtn" class="text-[var(--labu)] hover:underline" disabled>
+                        重新发送 (<span id="countdown">60</span>s)
                     </button>
                 </div>
+
+                <button id="verifyCodeBtn"
+                    class="w-full bg-[var(--labu)] text-white py-3 rounded-lg font-medium hover:bg-[var(--labu)]/90 transition-colors">
+                    ✅ 验证登录
+                </button>
+
+                <button id="backToPhoneBtn"
+                    class="w-full bg-slate-200 text-slate-700 py-2 rounded-lg font-medium hover:bg-slate-300 transition-colors">
+                    ← 返回修改手机号
+                </button>
+            </div>
+
+            <!-- 登录加载状态 -->
+            <div id="loginLoading" class="text-center text-slate-500 hidden">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--labu)] mx-auto mb-2"></div>
+                <p class="text-sm">正在验证...</p>
             </div>
         </div>
     </div>
@@ -650,6 +735,8 @@
         // 当前用户
         let currentUser = null;
         let isLoggedIn = false;
+        let isAuthenticated = false;
+        let pendingPhoneNumber = null;
 
         // 默认用户数据
         let userData = {
@@ -659,18 +746,29 @@
             bio: '',
             signature: 'Labubu收集家 🧸',
             birthday: null,
-            level: 5,
-            exp: 350,
-            maxExp: 1000,
-            joinDays: 127,
-            totalDraws: 156,
-            totalPrizes: 89,
-            rarityScore: 2345,
-            streakDays: 23,
-            luckyRate: 87,
+            level: 1,
+            exp: 0,
+            maxExp: 100,
+            joinDays: 1,
+            totalDraws: 0,
+            totalPrizes: 0,
+            rarityScore: 0,
+            streakDays: 0,
+            luckyRate: 50,
+            points: 100, // 积分
             createdAt: new Date(),
             updatedAt: new Date()
         };
+
+        // JSONBin.io数据存储配置
+        const DATA_STORAGE_CONFIG = {
+            jsonbin: {
+                baseUrl: 'https://api.jsonbin.io/v3',
+                apiKey: '$2a$10$VjQj.Gc8Q7q8q4k4K4k4Ou' // 这里使用你的实际API密钥
+            }
+        };
+
+        let userDataBinId = null; // 用户数据存储的bin ID
 
         // 成就数据
         const achievements = [
@@ -741,22 +839,19 @@
 
             // 设置认证状态监听
             setupAuthStateListener() {
+                // 检查本地登录状态
+                this.checkLoginStatus();
+
                 if (auth) {
                     auth.onAuthStateChanged((user) => {
-                        currentUser = user;
-                        isLoggedIn = !!user;
-                        this.updateUIForAuthState(user);
-
                         if (user) {
+                            // Firebase用户登录（如果之前有Firebase账户）
+                            currentUser = user;
+                            isLoggedIn = true;
+                            this.updateUIForAuthState(user);
                             this.loadUserData(user.uid);
-                        } else {
-                            this.loadLocalData();
                         }
                     });
-                } else {
-                    // 如果Firebase不可用，使用本地数据
-                    this.loadLocalData();
-                    this.showAuthModal();
                 }
             }
 
@@ -769,21 +864,29 @@
 
                 if (user) {
                     statusIndicator.className = 'w-3 h-3 bg-green-400 rounded-full';
-                    statusText.textContent = '已登录';
+
+                    if (user.phoneNumber) {
+                        // 显示掩码手机号
+                        const maskedPhone = user.phoneNumber.replace(/(\+\d{1,3})(\d{3})(\d{4})(\d{4})/, '$1 $2****$4');
+                        statusText.textContent = `已登录 · ${maskedPhone}`;
+                    } else {
+                        statusText.textContent = '已登录';
+                    }
+
                     logoutBtn.classList.remove('hidden');
                     editBtn.textContent = '✏️ 编辑资料';
                 } else {
                     statusIndicator.className = 'w-3 h-3 bg-gray-400 rounded-full';
                     statusText.textContent = '未登录';
                     logoutBtn.classList.add('hidden');
-                    editBtn.textContent = '🔑 登录账户';
+                    editBtn.textContent = '📱 手机号登录';
                 }
             }
 
             // 显示认证模态框
             showAuthModal() {
+                this.resetLoginForm();
                 this.authModal.classList.remove('hidden');
-                this.switchToLogin();
             }
 
             // 隐藏认证模态框
@@ -791,72 +894,149 @@
                 this.authModal.classList.add('hidden');
             }
 
-            // 切换到登录模式
+            // 这些方法保留兼容性但不再使用
             switchToLogin() {
-                this.isLoginMode = true;
-                $('#authModalTitle').textContent = '登录账户';
-                $('#loginForm').classList.remove('hidden');
-                $('#registerForm').classList.add('hidden');
-                $('#switchAuthMode').textContent = '还没有账户？立即注册';
+                // 已改为手机号登录，保留方法避免报错
             }
 
-            // 切换到注册模式
             switchToRegister() {
-                this.isLoginMode = false;
-                $('#authModalTitle').textContent = '注册账户';
-                $('#loginForm').classList.add('hidden');
-                $('#registerForm').classList.remove('hidden');
-                $('#switchAuthMode').textContent = '已有账户？立即登录';
+                // 已改为手机号登录，保留方法避免报错
             }
 
-            // 登录
-            async login(email, password) {
-                try {
-                    if (!auth) throw new Error('Firebase未初始化');
+            // 发送验证码
+            async sendVerificationCode() {
+                const phoneNumber = $('#phoneNumber').value.trim();
+                const countryCode = $('#countryCode').value;
+                const fullPhoneNumber = countryCode + phoneNumber;
 
-                    const result = await auth.signInWithEmailAndPassword(email, password);
-                    this.hideAuthModal();
-                    this.showSuccess('登录成功！');
-                    return result.user;
+                // 验证手机号格式
+                if (!this.validatePhoneNumber(phoneNumber, countryCode)) {
+                    return;
+                }
+
+                try {
+                    $('#sendCodeBtn').disabled = true;
+                    $('#sendCodeBtn').textContent = '正在发送...';
+
+                    // 模拟发送验证码的过程
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                    // 保存待验证的手机号
+                    pendingPhoneNumber = fullPhoneNumber;
+
+                    console.log('📱 演示验证码已"发送"至:', fullPhoneNumber);
+                    this.showSuccess('验证码已发送！请输入：123456');
+
+                    // 切换到验证码输入界面
+                    $('#phoneInputStep').classList.add('hidden');
+                    $('#codeInputStep').classList.remove('hidden');
+                    $('#sentPhoneNumber').textContent = fullPhoneNumber;
+
+                    // 开始倒计时
+                    this.startCountdown();
+
                 } catch (error) {
-                    this.showError('登录失败: ' + error.message);
-                    throw error;
+                    console.error('📱 发送验证码失败:', error);
+                    this.showError('发送验证码失败，请重试');
+                    $('#sendCodeBtn').disabled = false;
+                    $('#sendCodeBtn').textContent = '📤 发送验证码';
                 }
             }
 
-            // 注册
-            async register(email, password, displayName) {
+            // 验证登录码
+            async verifyCode() {
+                const code = $('#verificationCode').value.trim();
+
+                if (!code) {
+                    this.showCodeError('请输入验证码');
+                    return;
+                }
+
+                if (code.length !== 6) {
+                    this.showCodeError('验证码应为6位数字');
+                    return;
+                }
+
+                if (!pendingPhoneNumber) {
+                    this.showCodeError('验证码已失效，请重新获取');
+                    return;
+                }
+
                 try {
-                    if (!auth) throw new Error('Firebase未初始化');
+                    $('#verifyCodeBtn').disabled = true;
+                    $('#verifyCodeBtn').textContent = '正在验证...';
+                    $('#loginLoading').classList.remove('hidden');
 
-                    const result = await auth.createUserWithEmailAndPassword(email, password);
+                    // 模拟验证过程
+                    await new Promise(resolve => setTimeout(resolve, 1000));
 
-                    // 更新用户显示名
-                    await result.user.updateProfile({
-                        displayName: displayName
-                    });
+                    // 简单的验证码检查（演示用）
+                    if (code === '123456') {
+                        // 创建用户对象
+                        currentUser = {
+                            phoneNumber: pendingPhoneNumber,
+                            uid: 'user_' + Date.now(),
+                            loginTime: new Date().toISOString()
+                        };
 
-                    // 创建用户数据
-                    await this.createUserData(result.user.uid, displayName);
+                        isAuthenticated = true;
+                        isLoggedIn = true;
 
-                    this.hideAuthModal();
-                    this.showSuccess('注册成功！');
-                    return result.user;
+                        // 保存登录状态
+                        localStorage.setItem('labubu_user_auth', JSON.stringify(currentUser));
+
+                        console.log('✅ 登录成功:', currentUser.phoneNumber);
+                        this.showSuccess('登录成功！正在同步数据...');
+
+                        // 更新用户数据
+                        userData.uid = currentUser.uid;
+                        userData.name = '手机用户';
+
+                        // 更新用户状态显示
+                        this.updateUIForAuthState(currentUser);
+
+                        // 关闭登录窗口
+                        this.hideAuthModal();
+
+                        // 加载用户数据
+                        this.loadUserData(currentUser.uid);
+
+                    } else {
+                        throw new Error('验证码错误');
+                    }
+
                 } catch (error) {
-                    this.showError('注册失败: ' + error.message);
-                    throw error;
+                    console.error('❌ 验证失败:', error);
+                    let errorMessage = '验证码错误，请输入：123456';
+
+                    this.showCodeError(errorMessage);
+                    $('#verifyCodeBtn').disabled = false;
+                    $('#verifyCodeBtn').textContent = '✅ 验证登录';
+                    $('#loginLoading').classList.add('hidden');
                 }
             }
 
             // 退出登录
             async logout() {
                 try {
-                    if (auth) {
-                        await auth.signOut();
-                    }
-                    this.showSuccess('已退出登录');
+                    // 清除登录状态
+                    currentUser = null;
+                    isAuthenticated = false;
+                    isLoggedIn = false;
+                    pendingPhoneNumber = null;
+
+                    // 清除本地存储的登录信息
+                    localStorage.removeItem('labubu_user_auth');
+                    localStorage.removeItem('labubu_user_bin_id');
+
+                    // 更新UI状态
+                    this.updateUIForAuthState(null);
+
+                    this.showSuccess('已安全退出登录');
+                    console.log('🚪 用户已退出登录');
                 } catch (error) {
-                    this.showError('退出失败: ' + error.message);
+                    console.error('🚪 退出登录失败:', error);
+                    this.showError('退出登录失败');
                 }
             }
 
@@ -882,16 +1062,22 @@
 
             // 加载用户数据
             async loadUserData(uid) {
-                if (!db) return this.loadLocalData();
-
                 try {
-                    const doc = await db.collection('users').doc(uid).get();
+                    // 首先尝试从云端加载数据
+                    const cloudData = await this.downloadUserData();
 
-                    if (doc.exists) {
-                        userData = { ...userData, ...doc.data() };
+                    if (cloudData) {
+                        // 合并云端数据
+                        userData = { ...userData, ...cloudData };
+                        console.log('✅ 从云端加载用户数据成功');
                     } else {
-                        // 如果用户数据不存在，创建新的
-                        await this.createUserData(uid, currentUser.displayName || 'Labubu收集家');
+                        // 如果云端没有数据，从本地加载并同步到云端
+                        this.loadLocalData();
+
+                        // 延迟同步到云端
+                        setTimeout(() => {
+                            this.saveUserData();
+                        }, 2000);
                     }
 
                     renderUserData();
@@ -903,10 +1089,54 @@
 
             // 加载本地数据
             loadLocalData() {
-                const savedData = localStorage.getItem('userData');
-                if (savedData) {
-                    userData = { ...userData, ...JSON.parse(savedData) };
+                try {
+                    // 加载用户基本信息
+                    const savedData = localStorage.getItem('userData');
+                    if (savedData) {
+                        userData = { ...userData, ...JSON.parse(savedData) };
+                    }
+
+                    // 加载积分数据
+                    const points = localStorage.getItem('labubu_user_points');
+                    if (points) {
+                        userData.points = parseInt(points) || 100;
+                    }
+
+                    // 加载抽奖统计
+                    const history = this.loadHistory();
+                    userData.totalDraws = history.length;
+                    userData.totalPrizes = history.filter(h => h.type !== 'empty').length;
+
+                    // 计算稀有度总分
+                    userData.rarityScore = history.reduce((score, h) => {
+                        const rarityPoints = {
+                            'common': 1,
+                            'rare': 5,
+                            'epic': 15,
+                            'legendary': 50,
+                            'mythic': 100
+                        };
+                        return score + (rarityPoints[h.rarity] || 0);
+                    }, 0);
+
+                    // 加载抽奖次数
+                    const drawCount = localStorage.getItem('labubu_user_draw_count');
+                    if (drawCount) {
+                        userData.totalDraws = parseInt(drawCount) || 0;
+                    }
+
+                    // 加载签到数据
+                    const checkinHistory = JSON.parse(localStorage.getItem('checkinHistory') || '{}');
+                    userData.streakDays = Object.keys(checkinHistory).length;
+
+                    // 获取用户数据存储ID
+                    userDataBinId = localStorage.getItem('labubu_user_bin_id');
+
+                    console.log('📁 本地数据加载完成:', userData);
+                } catch (error) {
+                    console.error('加载本地数据失败:', error);
                 }
+
                 renderUserData();
             }
 
@@ -916,21 +1146,235 @@
 
                 // 保存到本地
                 localStorage.setItem('userData', JSON.stringify(userData));
+                localStorage.setItem('labubu_user_points', userData.points.toString());
 
                 // 保存到云端
-                if (db && currentUser) {
+                if (currentUser) {
                     try {
-                        await db.collection('users').doc(currentUser.uid).update({
-                            ...userData,
-                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                        });
-                        this.showSuccess('数据保存成功！');
+                        const success = await this.uploadToJsonBin(userData);
+                        if (success) {
+                            this.showSuccess('数据同步到云端成功！');
+                        } else {
+                            this.showSuccess('数据已保存到本地');
+                        }
                     } catch (error) {
                         console.error('保存到云端失败:', error);
                         this.showSuccess('数据已保存到本地');
                     }
                 } else {
                     this.showSuccess('数据已保存到本地');
+                }
+            }
+
+            // 收集完整用户数据（与index.html保持一致）
+            collectAllUserData() {
+                return {
+                    // 用户基本信息
+                    user: {
+                        phoneNumber: currentUser?.phoneNumber || null,
+                        uid: currentUser?.uid || null,
+                        loginTime: currentUser?.loginTime || null
+                    },
+
+                    // 用户详细数据
+                    userData: userData,
+
+                    // 抽奖相关数据
+                    lottery: {
+                        history: this.loadHistory(),
+                        drawCount: parseInt(localStorage.getItem('labubu_user_draw_count') || '0'),
+                        drawLimit: parseInt(localStorage.getItem('labubu_draw_limit') || '0'),
+                        vipDraws: parseInt(localStorage.getItem('labubu_vip_draws') || '0')
+                    },
+
+                    // 收藏和兑换数据
+                    collection: {
+                        myCollection: JSON.parse(localStorage.getItem('labubu_my_collection') || '{}'),
+                        exchanges: JSON.parse(localStorage.getItem('labubu_exchanges') || '[]'),
+                        wishlist: JSON.parse(localStorage.getItem('labubu_wishlist') || '[]')
+                    },
+
+                    // 签到数据
+                    checkin: {
+                        history: JSON.parse(localStorage.getItem('checkinHistory') || '{}'),
+                        lastCheckin: localStorage.getItem('lastCheckin') || null,
+                        streakDays: userData.streakDays
+                    },
+
+                    // 成就数据
+                    achievements: {
+                        data: JSON.parse(localStorage.getItem('userData_achievements') || '{}'),
+                        unlocked: JSON.parse(localStorage.getItem('labubu_achievements') || '{}'),
+                        progress: JSON.parse(localStorage.getItem('labubu_achievement_progress') || '{}')
+                    },
+
+                    // 任务数据
+                    tasks: {
+                        daily: JSON.parse(localStorage.getItem('labubu_daily_tasks') || '{}'),
+                        weekly: JSON.parse(localStorage.getItem('labubu_weekly_tasks') || '{}'),
+                        special: JSON.parse(localStorage.getItem('labubu_special_tasks') || '{}'),
+                        completed: JSON.parse(localStorage.getItem('labubu_completed_tasks') || '[]')
+                    },
+
+                    // 游戏数据
+                    games: {
+                        scores: JSON.parse(localStorage.getItem('labubu_game_scores') || '{}'),
+                        stats: JSON.parse(localStorage.getItem('labubu_game_stats') || '{}'),
+                        achievements: JSON.parse(localStorage.getItem('labubu_game_achievements') || '{}')
+                    },
+
+                    // 商城数据
+                    shop: {
+                        cart: JSON.parse(localStorage.getItem('labubu_shopping_cart') || '[]'),
+                        orders: JSON.parse(localStorage.getItem('labubu_orders') || '[]'),
+                        favorites: JSON.parse(localStorage.getItem('labubu_shop_favorites') || '[]')
+                    },
+
+                    // 用户设置
+                    settings: {
+                        soundEnabled: localStorage.getItem('labubu_ui_sound_enabled') !== 'false',
+                        musicVolume: localStorage.getItem('labubu_music_volume') || '50',
+                        notifications: localStorage.getItem('labubu_notifications') !== 'false',
+                        theme: localStorage.getItem('labubu_theme') || 'light',
+                        language: localStorage.getItem('labubu_language') || 'zh-CN'
+                    },
+
+                    // 社交数据
+                    social: {
+                        friends: JSON.parse(localStorage.getItem('labubu_friends') || '[]'),
+                        messages: JSON.parse(localStorage.getItem('labubu_messages') || '[]'),
+                        likes: JSON.parse(localStorage.getItem('labubu_likes') || '{}')
+                    },
+
+                    // 系统数据
+                    system: {
+                        lastSync: new Date().toISOString(),
+                        version: '3.0',
+                        clientInfo: {
+                            userAgent: navigator.userAgent,
+                            platform: navigator.platform,
+                            language: navigator.language,
+                            timestamp: Date.now()
+                        }
+                    }
+                };
+            }
+
+            // 上传数据到JSONBin.io
+            async uploadToJsonBin(data) {
+                try {
+                    const config = DATA_STORAGE_CONFIG.jsonbin;
+                    let url = `${config.baseUrl}/b`;
+                    let method = 'POST';
+
+                    // 如果已有binId，使用PUT更新
+                    if (userDataBinId) {
+                        url = `${config.baseUrl}/b/${userDataBinId}`;
+                        method = 'PUT';
+                    }
+
+                    // 如果data是用户详细数据，则收集完整数据
+                    let uploadData;
+                    if (data && typeof data === 'object' && !data.system) {
+                        // 传入的是userData对象，需要包装成完整数据结构
+                        uploadData = this.collectAllUserData();
+                        uploadData.userData = data; // 更新用户详细数据
+                    } else {
+                        // 传入的已经是完整数据结构
+                        uploadData = data || this.collectAllUserData();
+                    }
+
+                    const response = await fetch(url, {
+                        method: method,
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': config.apiKey,
+                            'X-Bin-Name': `labubu_user_${currentUser.uid}`
+                        },
+                        body: JSON.stringify(uploadData)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+
+                        // 保存binId以便后续更新
+                        if (result.metadata && result.metadata.id) {
+                            userDataBinId = result.metadata.id;
+                            localStorage.setItem('labubu_user_bin_id', userDataBinId);
+                        }
+
+                        console.log('📤 完整数据已上传到JSONBin:', result);
+                        return true;
+                    } else {
+                        console.error('📤 上传失败:', response.status, response.statusText);
+                        return false;
+                    }
+
+                } catch (error) {
+                    console.error('📤 上传过程出错:', error);
+                    return false;
+                }
+            }
+
+            // 从云端下载用户数据
+            async downloadUserData() {
+                if (!userDataBinId) {
+                    userDataBinId = localStorage.getItem('labubu_user_bin_id');
+                }
+
+                if (!userDataBinId) {
+                    console.log('📥 没有云端数据ID，跳过下载');
+                    return null;
+                }
+
+                try {
+                    const config = DATA_STORAGE_CONFIG.jsonbin;
+                    const response = await fetch(`${config.baseUrl}/b/${userDataBinId}/latest`, {
+                        method: 'GET',
+                        headers: {
+                            'X-Master-Key': config.apiKey
+                        }
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        const cloudData = result.record;
+
+                        if (cloudData && cloudData.userData) {
+                            // 同步其他数据到本地
+                            if (cloudData.history) {
+                                localStorage.setItem('labubu_history', JSON.stringify(cloudData.history));
+                            }
+                            if (cloudData.collection) {
+                                localStorage.setItem('labubu_my_collection', JSON.stringify(cloudData.collection));
+                            }
+                            if (cloudData.exchanges) {
+                                localStorage.setItem('labubu_exchanges', JSON.stringify(cloudData.exchanges));
+                            }
+                            if (cloudData.checkinHistory) {
+                                localStorage.setItem('checkinHistory', JSON.stringify(cloudData.checkinHistory));
+                            }
+
+                            console.log('📥 从云端下载数据成功');
+                            return cloudData.userData;
+                        }
+                    } else {
+                        console.error('📥 下载失败:', response.status, response.statusText);
+                    }
+                } catch (error) {
+                    console.error('📥 下载过程出错:', error);
+                }
+
+                return null;
+            }
+
+            // 加载抽奖历史
+            loadHistory() {
+                try {
+                    return JSON.parse(localStorage.getItem('labubu_history') || '[]');
+                } catch (error) {
+                    console.error('加载抽奖历史失败:', error);
+                    return [];
                 }
             }
 
@@ -1000,40 +1444,24 @@
                     this.hideAuthModal();
                 });
 
-                // 切换登录/注册模式
-                $('#switchAuthMode').addEventListener('click', () => {
-                    if (this.isLoginMode) {
-                        this.switchToRegister();
-                    } else {
-                        this.switchToLogin();
-                    }
+                // 发送验证码
+                $('#sendCodeBtn').addEventListener('click', async () => {
+                    await this.sendVerificationCode();
                 });
 
-                // 登录表单提交
-                $('#loginForm').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const email = $('#loginEmail').value;
-                    const password = $('#loginPassword').value;
-
-                    try {
-                        await this.login(email, password);
-                    } catch (error) {
-                        console.error('登录失败:', error);
-                    }
+                // 验证码登录
+                $('#verifyCodeBtn').addEventListener('click', async () => {
+                    await this.verifyCode();
                 });
 
-                // 注册表单提交
-                $('#registerForm').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const name = $('#registerName').value;
-                    const email = $('#registerEmail').value;
-                    const password = $('#registerPassword').value;
+                // 返回手机号输入
+                $('#backToPhoneBtn').addEventListener('click', () => {
+                    this.backToPhoneInput();
+                });
 
-                    try {
-                        await this.register(email, password, name);
-                    } catch (error) {
-                        console.error('注册失败:', error);
-                    }
+                // 重新发送验证码
+                $('#resendCodeBtn').addEventListener('click', () => {
+                    this.resendVerificationCode();
                 });
 
                 // 退出登录
@@ -1161,6 +1589,130 @@
                     this.showError('保存失败: ' + error.message);
                 }
             }
+
+            // 验证手机号格式
+            validatePhoneNumber(phoneNumber, countryCode) {
+                $('#phoneError').classList.add('hidden');
+
+                if (!phoneNumber) {
+                    this.showPhoneError('请输入手机号');
+                    return false;
+                }
+
+                // 基本格式验证
+                const phoneRegex = /^[0-9]{7,15}$/;
+                if (!phoneRegex.test(phoneNumber)) {
+                    this.showPhoneError('手机号格式不正确');
+                    return false;
+                }
+
+                // 针对不同国家的特殊验证
+                if (countryCode === '+86') {
+                    if (!/^1[3-9]\d{9}$/.test(phoneNumber)) {
+                        this.showPhoneError('请输入正确的中国大陆手机号');
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            // 显示手机号错误
+            showPhoneError(message) {
+                const errorEl = $('#phoneError');
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+            }
+
+            // 显示验证码错误
+            showCodeError(message) {
+                const errorEl = $('#codeError');
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+            }
+
+            // 开始倒计时
+            startCountdown() {
+                let countdown = 60;
+                const btn = $('#resendCodeBtn');
+                const countdownEl = $('#countdown');
+
+                btn.disabled = true;
+
+                const timer = setInterval(() => {
+                    countdown--;
+                    countdownEl.textContent = countdown;
+
+                    if (countdown <= 0) {
+                        clearInterval(timer);
+                        btn.disabled = false;
+                        btn.innerHTML = '重新发送';
+                    }
+                }, 1000);
+            }
+
+            // 返回手机号输入
+            backToPhoneInput() {
+                $('#codeInputStep').classList.add('hidden');
+                $('#phoneInputStep').classList.remove('hidden');
+                $('#sendCodeBtn').disabled = false;
+                $('#sendCodeBtn').textContent = '📤 发送验证码';
+            }
+
+            // 重新发送验证码
+            resendVerificationCode() {
+                this.backToPhoneInput();
+            }
+
+            // 检查登录状态
+            checkLoginStatus() {
+                try {
+                    const savedAuth = localStorage.getItem('labubu_user_auth');
+                    if (savedAuth) {
+                        currentUser = JSON.parse(savedAuth);
+                        isAuthenticated = true;
+                        isLoggedIn = true;
+
+                        console.log('📱 发现已保存的登录状态:', currentUser.phoneNumber);
+                        this.updateUIForAuthState(currentUser);
+
+                        // 加载用户数据
+                        this.loadUserData(currentUser.uid);
+                    } else {
+                        this.loadLocalData();
+                    }
+                } catch (error) {
+                    console.error('📱 检查登录状态失败:', error);
+                    // 清除损坏的数据
+                    localStorage.removeItem('labubu_user_auth');
+                    localStorage.removeItem('labubu_user_bin_id');
+                    this.loadLocalData();
+                }
+            }
+
+            // 重置登录表单
+            resetLoginForm() {
+                // 重置到手机号输入步骤
+                $('#phoneInputStep').classList.remove('hidden');
+                $('#codeInputStep').classList.add('hidden');
+                $('#loginLoading').classList.add('hidden');
+
+                // 清空输入
+                $('#phoneNumber').value = '';
+                $('#verificationCode').value = '';
+
+                // 清空错误信息
+                $('#phoneError').classList.add('hidden');
+                $('#codeError').classList.add('hidden');
+
+                // 重置按钮状态
+                $('#sendCodeBtn').disabled = false;
+                $('#verifyCodeBtn').disabled = false;
+                $('#sendCodeBtn').textContent = '📤 发送验证码';
+                $('#verifyCodeBtn').textContent = '✅ 验证登录';
+
+                pendingPhoneNumber = null;
+            }
         }
 
         // 创建用户管理实例
@@ -1191,10 +1743,27 @@
 
             // 更新进度条
             const progressBar = $('.level-progress');
-            progressBar.style.width = (userData.exp / userData.maxExp * 100) + '%';
+            if (progressBar) {
+                progressBar.style.width = (userData.exp / userData.maxExp * 100) + '%';
+            }
 
             // 更新头像显示
             userManager.updateAvatarPreview(userData.avatar);
+
+            // 更新积分显示（如果页面中有积分元素）
+            const pointsElements = document.querySelectorAll('.user-points, #userPoints');
+            pointsElements.forEach(el => {
+                if (el) el.textContent = userData.points || 100;
+            });
+
+            console.log('🎯 用户数据渲染完成:', {
+                level: userData.level,
+                exp: userData.exp,
+                totalDraws: userData.totalDraws,
+                totalPrizes: userData.totalPrizes,
+                points: userData.points,
+                streakDays: userData.streakDays
+            });
         }
 
         // 渲染成就
@@ -1316,6 +1885,33 @@
             $('#monthlyCheckins').textContent = signedCount;
         }
 
+        // 页面过渡动画功能
+        function initPageTransitions() {
+            $$('.page-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const href = link.getAttribute('href');
+                    showPageTransition(() => {
+                        window.location.href = href;
+                    });
+                });
+            });
+        }
+
+        function showPageTransition(callback) {
+            const overlay = $('#pageTransitionOverlay');
+            overlay.classList.add('active');
+
+            setTimeout(() => {
+                if (callback) callback();
+            }, 800);
+        }
+
+        function hidePageTransition() {
+            const overlay = $('#pageTransitionOverlay');
+            overlay.classList.remove('active');
+        }
+
         // 初始化事件监听
         function initEventListeners() {
             // 每日签到按钮
@@ -1327,13 +1923,21 @@
             $$('.enhanced-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
                     if (btn.textContent.includes('立即抽奖')) {
-                        window.location.href = 'index.html#draw';
+                        showPageTransition(() => {
+                            window.location.href = 'index.html#draw';
+                        });
                     } else if (btn.textContent.includes('前往商城')) {
-                        window.location.href = 'shop.html';
+                        showPageTransition(() => {
+                            window.location.href = 'shop.html';
+                        });
                     } else if (btn.textContent.includes('查看任务')) {
-                        window.location.href = 'tasks.html';
+                        showPageTransition(() => {
+                            window.location.href = 'tasks.html';
+                        });
                     } else if (btn.textContent.includes('小游戏')) {
-                        window.location.href = 'games.html';
+                        showPageTransition(() => {
+                            window.location.href = 'games.html';
+                        });
                     }
                 });
             });
@@ -1357,8 +1961,16 @@
                 return;
             }
 
-            // 更新用户经验
+            // 检查登录状态
+            if (!isLoggedIn || !currentUser) {
+                userManager.showError('请先登录后再签到');
+                userManager.showAuthModal();
+                return;
+            }
+
+            // 更新用户经验和积分
             userData.exp += 10;
+            userData.points += 5; // 签到奖励5积分
             userData.streakDays += 1;
 
             let leveledUp = false;
@@ -1377,15 +1989,19 @@
             checkinHistory[today] = true;
             localStorage.setItem('checkinHistory', JSON.stringify(checkinHistory));
 
-            // 保存用户数据
+            // 更新本地积分存储
+            localStorage.setItem('labubu_user_points', userData.points.toString());
+
+            // 保存用户数据到云端
             try {
                 await userManager.saveUserData();
+                console.log('✅ 签到数据已同步到云端');
             } catch (error) {
                 console.error('保存签到数据失败:', error);
             }
 
             // 显示签到成功提示
-            userManager.showSuccess('✅ 签到成功！获得 10 EXP');
+            userManager.showSuccess('✅ 签到成功！获得 10 EXP + 5 积分');
 
             // 如果升级了，显示升级提示
             if (leveledUp) {
@@ -1397,9 +2013,14 @@
                             <div class="text-6xl mb-4">🎉</div>
                             <div class="text-2xl font-bold text-[var(--labu)] mb-2">恭喜升级！</div>
                             <div class="text-lg">您现在是 Lv.${userData.level} 了！</div>
+                            <div class="text-sm text-slate-500 mt-2">获得升级奖励：20 积分</div>
                         </div>
                     `;
                     document.body.appendChild(levelUp);
+
+                    // 升级奖励积分
+                    userData.points += 20;
+                    localStorage.setItem('labubu_user_points', userData.points.toString());
 
                     setTimeout(() => {
                         if (document.body.contains(levelUp)) {
@@ -1471,6 +2092,9 @@
         // 页面加载完成后初始化
         document.addEventListener('DOMContentLoaded', init);
     </script>
+
+    <!-- 页面过渡动画 -->
+    <script src="page-transition-fix.js"></script>
 </body>
 
 </html>
