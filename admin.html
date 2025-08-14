@@ -133,6 +133,59 @@
                 </section>
             </div>
 
+            <!-- 抽奖控制 -->
+            <section class="mt-10">
+                <div class="rounded-3xl bg-white border border-slate-200 shadow overflow-hidden">
+                    <div class="p-5 border-b border-slate-100">
+                        <h3 class="font-semibold">抽奖控制设置</h3>
+                    </div>
+                    <div class="p-5 grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-medium mb-3">抽奖次数限制</h4>
+                            <div class="space-y-3">
+                                <div>
+                                    <label for="drawLimitInput"
+                                        class="block text-sm font-medium text-slate-700 mb-1">每用户最大抽奖次数</label>
+                                    <input type="number" id="drawLimitInput" min="1" max="9999"
+                                        class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-[var(--labu)] focus:ring-2 focus:ring-[var(--labu)]/20 focus:outline-none"
+                                        placeholder="输入次数限制（0表示不限制）">
+                                </div>
+                                <div class="flex gap-3">
+                                    <button id="saveDrawLimitBtn"
+                                        class="px-4 py-2 rounded-xl bg-[var(--labu)] text-white font-medium hover:opacity-90">保存设置</button>
+                                    <button id="disableDrawLimitBtn"
+                                        class="px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200">取消限制</button>
+                                </div>
+                                <div class="text-xs text-slate-500">
+                                    当前限制：<span id="currentDrawLimit">未设置</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <h4 class="font-medium mb-3">用户抽奖统计</h4>
+                            <div class="space-y-3">
+                                <div class="p-3 rounded-lg bg-slate-50 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>当前用户已抽奖：</span>
+                                        <span class="font-medium" id="userDrawCount">0 次</span>
+                                    </div>
+                                </div>
+                                <div class="p-3 rounded-lg bg-green-50 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>🟢 实时同步状态：</span>
+                                        <span class="font-medium text-green-600" id="syncStatus">已连接</span>
+                                    </div>
+                                    <div class="text-xs text-slate-500 mt-1">管理员修改将实时推送到所有用户</div>
+                                </div>
+                                <button id="resetUserDrawCountBtn"
+                                    class="w-full px-4 py-2 rounded-xl bg-orange-100 text-orange-700 border border-orange-200 hover:bg-orange-200">重置用户抽奖次数</button>
+                                <div class="text-xs text-slate-500">重置后用户可以重新开始抽奖</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- 数据管理 -->
             <section class="mt-10">
                 <div class="rounded-3xl bg-white border border-slate-200 shadow overflow-hidden">
@@ -176,8 +229,50 @@
         // —— 本地存储键 ——
         const LS_KEYS = {
             HISTORY: 'labubu_lottery_history',
-            POOL: 'labubu_lottery_pool'
+            POOL: 'labubu_lottery_pool',
+            DRAW_LIMIT: 'labubu_draw_limit',
+            USER_DRAW_COUNT: 'labubu_user_draw_count'
         };
+
+        // —— 数据同步广播 ——
+        const dataChannel = new BroadcastChannel('labubu_data_sync');
+
+        function broadcastUpdate(type, data = null) {
+            const message = {
+                type: type,
+                data: data,
+                timestamp: Date.now(),
+                source: 'admin'
+            };
+            dataChannel.postMessage(message);
+            console.log('📡 广播更新:', type);
+            showBroadcastNotification(type);
+        }
+
+        function showBroadcastNotification(type) {
+            const typeNames = {
+                'POOL_UPDATE': '奖池配置',
+                'DRAW_LIMIT_UPDATE': '抽奖限制',
+                'USER_COUNT_RESET': '用户计数重置',
+                'SYSTEM_RESET': '系统重置',
+                'HISTORY_CLEARED': '记录清空'
+            };
+
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm transition-all duration-300';
+            notification.innerHTML = `📡 ${typeNames[type] || type} 已推送到所有用户`;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 2000);
+        }
 
         // —— 默认奖池（可编辑）——
         const DEFAULT_POOL = [
@@ -187,6 +282,9 @@
             { name: '95折优惠券', type: '折扣券', weight: 22, quantity: -1 },
             { name: 'Labubu 限量手办（实体）', type: '实体', weight: 3, quantity: 5 },
             { name: 'Labubu 主题贴纸包（实体）', type: '实体', weight: 7, quantity: 50 },
+            { name: '奶茶一杯（实体）', type: '实体', weight: 12, quantity: 30 },
+            { name: '烤肉券（实体）', type: '实体', weight: 8, quantity: 20 },
+            { name: '精品奶茶券（实体）', type: '实体', weight: 5, quantity: 15 },
             { name: '再接再厉', type: '折扣券', weight: 10, quantity: -1, note: '未中奖提示，可自定义' }
         ];
 
@@ -274,6 +372,7 @@
             if (confirm('确认清空所有抽奖记录？此操作不可恢复！')) {
                 saveHistory([]);
                 updateHistoryCount();
+                broadcastUpdate('HISTORY_CLEARED'); // 广播记录清空（如果需要的话）
                 alert('抽奖记录已清空');
             }
         }
@@ -282,16 +381,103 @@
             if (confirm('确认完全重置系统？这将清空所有数据并恢复默认奖池！')) {
                 localStorage.removeItem(LS_KEYS.HISTORY);
                 localStorage.removeItem(LS_KEYS.POOL);
+                localStorage.removeItem(LS_KEYS.DRAW_LIMIT);
+                localStorage.removeItem(LS_KEYS.USER_DRAW_COUNT);
                 refreshPoolEditor();
                 renderPoolList(loadPool());
                 updateHistoryCount();
-                alert('系统已重置到默认状态');
+                updateDrawLimitDisplay();
+                broadcastUpdate('SYSTEM_RESET'); // 广播系统重置
+                alert('系统已重置到默认状态，所有用户界面将自动刷新');
             }
         }
 
         function updateHistoryCount() {
             const count = loadHistory().length;
             $('#historyCount').textContent = count;
+        }
+
+        // —— 抽奖次数限制管理 ——
+        function loadDrawLimit() {
+            try {
+                const limit = localStorage.getItem(LS_KEYS.DRAW_LIMIT);
+                return limit ? parseInt(limit) : 0; // 0表示不限制
+            } catch { return 0; }
+        }
+
+        function saveDrawLimit(limit) {
+            localStorage.setItem(LS_KEYS.DRAW_LIMIT, limit.toString());
+        }
+
+        function loadUserDrawCount() {
+            try {
+                const count = localStorage.getItem(LS_KEYS.USER_DRAW_COUNT);
+                return count ? parseInt(count) : 0;
+            } catch { return 0; }
+        }
+
+        function saveUserDrawCount(count) {
+            localStorage.setItem(LS_KEYS.USER_DRAW_COUNT, count.toString());
+        }
+
+        function updateDrawLimitDisplay() {
+            const limit = loadDrawLimit();
+            const currentLimitSpan = $('#currentDrawLimit');
+            const drawLimitInput = $('#drawLimitInput');
+
+            if (limit === 0) {
+                currentLimitSpan.textContent = '不限制';
+                drawLimitInput.value = '';
+            } else {
+                currentLimitSpan.textContent = `${limit} 次`;
+                drawLimitInput.value = limit;
+            }
+
+            const userCount = loadUserDrawCount();
+            $('#userDrawCount').textContent = `${userCount} 次`;
+        }
+
+        function setDrawLimit() {
+            const input = $('#drawLimitInput');
+            const limit = parseInt(input.value) || 0;
+
+            if (limit < 0) {
+                alert('抽奖次数不能为负数');
+                return;
+            }
+
+            if (limit > 9999) {
+                alert('抽奖次数不能超过9999次');
+                return;
+            }
+
+            saveDrawLimit(limit);
+            updateDrawLimitDisplay();
+            broadcastUpdate('DRAW_LIMIT_UPDATE', { limit }); // 广播限制更新
+
+            if (limit === 0) {
+                alert('抽奖次数限制已取消并同步到所有用户');
+            } else {
+                alert(`抽奖次数限制已设置为 ${limit} 次并同步到所有用户`);
+            }
+        }
+
+        function disableDrawLimit() {
+            if (confirm('确认取消抽奖次数限制？用户将可以无限制抽奖。')) {
+                saveDrawLimit(0);
+                updateDrawLimitDisplay();
+                broadcastUpdate('DRAW_LIMIT_UPDATE', { limit: 0 }); // 广播限制取消
+                alert('抽奖次数限制已取消并同步到所有用户');
+            }
+        }
+
+        function resetUserDrawCount() {
+            if (confirm('确认重置用户抽奖次数？重置后用户可以重新开始抽奖。')) {
+                saveUserDrawCount(0);
+                updateDrawLimitDisplay();
+                broadcastUpdate('USER_COUNT_RESET'); // 广播用户计数重置
+                alert('用户抽奖次数已重置并同步到所有用户');
+            }
         }
 
         // —— 登录验证相关 ——
@@ -368,7 +554,8 @@
                     const pool = textToPool(text);
                     savePool(pool);
                     renderPoolList(pool);
-                    alert('奖池配置已保存到本地');
+                    broadcastUpdate('POOL_UPDATE', pool); // 广播奖池更新
+                    alert('奖池配置已保存并同步到所有用户');
                 } catch (e) {
                     alert('保存失败：' + e.message);
                 }
@@ -382,10 +569,12 @@
 
             $('#restoreDefaultBtn').addEventListener('click', () => {
                 if (confirm('确认恢复默认奖池配置？当前配置将被覆盖！')) {
-                    savePool(structuredClone(DEFAULT_POOL));
+                    const defaultPool = structuredClone(DEFAULT_POOL);
+                    savePool(defaultPool);
                     refreshPoolEditor();
                     renderPoolList(loadPool());
-                    alert('已恢复默认奖池配置');
+                    broadcastUpdate('POOL_UPDATE', defaultPool); // 广播奖池更新
+                    alert('已恢复默认奖池配置并同步到所有用户');
                 }
             });
 
@@ -396,6 +585,16 @@
             $('#exportHistoryBtn').addEventListener('click', exportHistory);
             $('#clearHistoryBtn').addEventListener('click', clearHistory);
             $('#resetAllBtn').addEventListener('click', resetAll);
+
+            // 抽奖次数限制相关事件
+            $('#saveDrawLimitBtn').addEventListener('click', setDrawLimit);
+            $('#disableDrawLimitBtn').addEventListener('click', disableDrawLimit);
+            $('#resetUserDrawCountBtn').addEventListener('click', resetUserDrawCount);
+            $('#drawLimitInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    setDrawLimit();
+                }
+            });
         }
 
         function init() {
@@ -408,6 +607,7 @@
                 refreshPoolEditor();
                 renderPoolList(loadPool());
                 updateHistoryCount();
+                updateDrawLimitDisplay();
             } else {
                 showLoginOverlay();
             }

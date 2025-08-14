@@ -93,7 +93,10 @@
                 <div class="rounded-3xl bg-white border border-slate-200 shadow">
                     <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                         <h3 class="font-semibold">抽奖面板</h3>
-                        <div class="text-xs text-slate-500">本地时间：<span id="now"></span></div>
+                        <div class="text-xs text-slate-500">
+                            <div>本地时间：<span id="now"></span></div>
+                            <div id="drawLimitInfo" class="mt-1">剩余抽奖次数：<span id="remainingDraws">—</span></div>
+                        </div>
                     </div>
                     <div class="p-6">
                         <div class="grid gap-4">
@@ -105,8 +108,6 @@
                             <div class="flex gap-3 flex-wrap">
                                 <button id="drawBtn"
                                     class="px-5 py-3 rounded-2xl bg-[var(--labu)] text-white font-semibold shadow active:scale-[.98]">开始抽奖</button>
-                                <button id="resetBtn"
-                                    class="px-5 py-3 rounded-2xl bg-slate-100 text-slate-800 font-medium border border-slate-200">重置（清空记录）</button>
                             </div>
                             <div class="text-xs text-slate-500">说明：抽奖会根据奖池权重与库存进行。实体礼品会扣减库存；券码会自动生成并显示。</div>
                         </div>
@@ -119,8 +120,6 @@
                 <div class="rounded-3xl bg-white border border-slate-200 shadow overflow-hidden">
                     <div class="p-5 border-b border-slate-100 flex items-center justify-between">
                         <h3 class="font-semibold">当前奖池</h3>
-                        <button id="restoreDefaultBtn"
-                            class="text-xs px-2 py-1 rounded-lg bg-slate-100 border border-slate-200">恢复默认</button>
                     </div>
                     <div class="p-5">
                         <ul id="poolList" class="text-sm grid gap-2"></ul>
@@ -137,8 +136,6 @@
                     <div class="flex gap-2">
                         <button id="exportJsonBtn"
                             class="text-xs px-2 py-1 rounded-lg bg-slate-100 border border-slate-200">导出 JSON</button>
-                        <button id="clearHistoryBtn"
-                            class="text-xs px-2 py-1 rounded-lg bg-slate-100 border border-slate-200">仅清空记录</button>
                     </div>
                 </div>
                 <div class="p-5 overflow-x-auto">
@@ -171,8 +168,15 @@
         // —— 本地存储键 ——
         const LS_KEYS = {
             HISTORY: 'labubu_lottery_history',
-            POOL: 'labubu_lottery_pool'
+            POOL: 'labubu_lottery_pool',
+            DRAW_LIMIT: 'labubu_draw_limit',
+            USER_DRAW_COUNT: 'labubu_user_draw_count'
         };
+
+        // —— 数据同步通道 ——
+        const dataChannel = new BroadcastChannel('labubu_data_sync');
+        let lastPoolUpdate = Date.now();
+        let lastLimitUpdate = Date.now();
 
         // —— 默认奖池（可编辑）——
         const DEFAULT_POOL = [
@@ -182,6 +186,9 @@
             { name: '95折优惠券', type: '折扣券', weight: 22, quantity: -1 },
             { name: 'Labubu 限量手办（实体）', type: '实体', weight: 3, quantity: 5 },
             { name: 'Labubu 主题贴纸包（实体）', type: '实体', weight: 7, quantity: 50 },
+            { name: '奶茶一杯（实体）', type: '实体', weight: 12, quantity: 30 },
+            { name: '烤肉券（实体）', type: '实体', weight: 8, quantity: 20 },
+            { name: '精品奶茶券（实体）', type: '实体', weight: 5, quantity: 15 },
             { name: '再接再厉', type: '折扣券', weight: 10, quantity: -1, note: '未中奖提示，可自定义' }
         ];
 
@@ -270,6 +277,17 @@
         function onDraw() {
             const btn = $('#drawBtn');
             btn.disabled = true; btn.classList.add('opacity-60');
+
+            // 检查抽奖次数限制
+            if (!canDraw()) {
+                const display = $('#resultDisplay');
+                const meta = $('#resultMeta');
+                display.textContent = '抽奖次数已用完';
+                meta.textContent = '今日抽奖次数已达上限，请明日再来';
+                btn.disabled = false; btn.classList.remove('opacity-60');
+                return;
+            }
+
             const pool = loadPool();
             const picked = weightedPick(pool);
             const display = $('#resultDisplay');
@@ -277,7 +295,7 @@
 
             if (!picked) {
                 display.textContent = '奖池为空或库存不足';
-                meta.textContent = '请在“奖池设置”中添加奖品';
+                meta.textContent = '请联系管理员检查奖池设置';
                 btn.disabled = false; btn.classList.remove('opacity-60');
                 return;
             }
@@ -306,6 +324,11 @@
             const hist = loadHistory();
             hist.push(record); saveHistory(hist);
 
+            // 增加用户抽奖次数计数
+            const userCount = loadUserDrawCount();
+            saveUserDrawCount(userCount + 1);
+            updateDrawLimitDisplay();
+
             display.textContent = picked.name;
             meta.textContent = `${record.type}${record.code ? ' · 券码：' + record.code : ''}`;
             renderHistory();
@@ -313,6 +336,57 @@
         }
 
         function refreshNow() { $('#now').textContent = nowStr(); }
+
+        // —— 抽奖次数限制相关 ——
+        function loadDrawLimit() {
+            try {
+                const limit = localStorage.getItem(LS_KEYS.DRAW_LIMIT);
+                return limit ? parseInt(limit) : 0; // 0表示不限制
+            } catch { return 0; }
+        }
+
+        function loadUserDrawCount() {
+            try {
+                const count = localStorage.getItem(LS_KEYS.USER_DRAW_COUNT);
+                return count ? parseInt(count) : 0;
+            } catch { return 0; }
+        }
+
+        function saveUserDrawCount(count) {
+            localStorage.setItem(LS_KEYS.USER_DRAW_COUNT, count.toString());
+        }
+
+        function updateDrawLimitDisplay() {
+            const limit = loadDrawLimit();
+            const userCount = loadUserDrawCount();
+            const remainingSpan = $('#remainingDraws');
+            const drawLimitInfo = $('#drawLimitInfo');
+
+            if (limit === 0) {
+                drawLimitInfo.style.display = 'none'; // 不限制时隐藏
+            } else {
+                drawLimitInfo.style.display = 'block';
+                const remaining = Math.max(0, limit - userCount);
+                remainingSpan.textContent = `${remaining}`;
+
+                // 根据剩余次数设置颜色
+                if (remaining === 0) {
+                    remainingSpan.className = 'text-red-600 font-medium';
+                } else if (remaining <= 3) {
+                    remainingSpan.className = 'text-orange-600 font-medium';
+                } else {
+                    remainingSpan.className = 'text-green-600 font-medium';
+                }
+            }
+        }
+
+        function canDraw() {
+            const limit = loadDrawLimit();
+            if (limit === 0) return true; // 不限制
+
+            const userCount = loadUserDrawCount();
+            return userCount < limit;
+        }
 
 
 
@@ -337,31 +411,80 @@
             a.click();
         }
 
-        function clearHistory() { saveHistory([]); renderHistory(); }
 
-        function resetAll() {
-            if (!confirm('确认清空记录并恢复默认奖池？')) return;
-            localStorage.removeItem(LS_KEYS.HISTORY);
-            localStorage.removeItem(LS_KEYS.POOL);
-            $('#resultDisplay').textContent = '—';
-            $('#resultMeta').textContent = '—';
-            init();
-        }
 
         // —— 事件绑定 ——
         function bind() {
             $('#drawBtn').addEventListener('click', onDraw);
-            $('#resetBtn').addEventListener('click', resetAll);
-            $('#clearHistoryBtn').addEventListener('click', clearHistory);
             $('#exportJsonBtn').addEventListener('click', exportJSON);
             $('#exportCsvBtn').addEventListener('click', exportCSV);
+        }
 
-            $('#restoreDefaultBtn').addEventListener('click', () => {
-                if (confirm('恢复默认奖池？当前设置将被覆盖。')) {
-                    savePool(structuredClone(DEFAULT_POOL));
-                    renderPoolList(loadPool());
+        // —— 数据同步监听 ——
+        function setupDataSync() {
+            // 监听管理员的数据更新广播
+            dataChannel.addEventListener('message', (event) => {
+                const { type, data, timestamp } = event.data;
+
+                switch (type) {
+                    case 'POOL_UPDATE':
+                        if (timestamp > lastPoolUpdate) {
+                            lastPoolUpdate = timestamp;
+                            renderPoolList(loadPool());
+                            showUpdateNotification('奖池配置已更新');
+                        }
+                        break;
+                    case 'DRAW_LIMIT_UPDATE':
+                        if (timestamp > lastLimitUpdate) {
+                            lastLimitUpdate = timestamp;
+                            updateDrawLimitDisplay();
+                            showUpdateNotification('抽奖次数限制已更新');
+                        }
+                        break;
+                    case 'USER_COUNT_RESET':
+                        updateDrawLimitDisplay();
+                        showUpdateNotification('抽奖次数已重置');
+                        break;
+                    case 'SYSTEM_RESET':
+                        location.reload(); // 系统重置时完全刷新页面
+                        break;
                 }
             });
+
+            // 监听localStorage变化（跨标签页同步）
+            window.addEventListener('storage', (event) => {
+                if (event.key === LS_KEYS.POOL) {
+                    renderPoolList(loadPool());
+                    showUpdateNotification('奖池配置已同步');
+                } else if (event.key === LS_KEYS.DRAW_LIMIT || event.key === LS_KEYS.USER_DRAW_COUNT) {
+                    updateDrawLimitDisplay();
+                    showUpdateNotification('抽奖限制已同步');
+                }
+            });
+
+            // 定期检查数据更新（备用机制）
+            setInterval(() => {
+                const pool = loadPool();
+                renderPoolList(pool);
+                updateDrawLimitDisplay();
+            }, 30000); // 每30秒检查一次
+        }
+
+        function showUpdateNotification(message) {
+            // 创建临时通知
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-20 right-4 bg-[var(--labu)] text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm transition-all duration-300';
+            notification.textContent = `📡 ${message}`;
+            document.body.appendChild(notification);
+
+            // 3秒后自动消失
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
         }
 
         function init() {
@@ -370,6 +493,8 @@
             const pool = loadPool();
             renderPoolList(pool);
             renderHistory();
+            updateDrawLimitDisplay();
+            setupDataSync(); // 启动数据同步
         }
 
         bind();
