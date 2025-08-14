@@ -739,7 +739,7 @@
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-xl bg-[var(--labu)] grid place-content-center text-white text-xl sparkle">🧸
                 </div>
-                <h1 class="font-bold text-lg">Labubu~基金会 · VIP股东专享福利</h1>
+                <h1 class="font-bold text-lg">Labubu_基金会 · VIP股东专享福利</h1>
                 <div class="hidden sm:flex gap-1">
                     <span class="floating">✨</span>
                     <span class="floating" style="animation-delay: 0.2s;">🎀</span>
@@ -750,6 +750,7 @@
                 <a href="#draw" class="hover:underline flex items-center gap-1 smooth-link">🎯 专享抽奖</a>
                 <a href="#history" class="hover:underline flex items-center gap-1 smooth-link">📊 中奖记录</a>
                 <a href="#exchange" class="hover:underline flex items-center gap-1 smooth-link">🔄 积分兑换</a>
+                <a href="games.html" class="hover:underline flex items-center gap-1 smooth-link page-link">🎮 游戏中心</a>
                 <a href="achievements.html" class="hover:underline flex items-center gap-1 smooth-link page-link">🏆
                     个人成就</a>
                 <a href="#comments" class="hover:underline flex items-center gap-1 smooth-link">💬 股东交流</a>
@@ -1768,14 +1769,14 @@
             }
         }
 
-        // 微信专用音乐库（无需外部API）
+        // 微信专用音乐库（包含可播放的音频）
         function getWeChatMusicLibrary() {
             return [
                 {
                     title: "Lucky Draw",
                     artist: "Labubu系统",
                     album: "背景音乐",
-                    url: "", // 微信环境下暂时不播放音频，避免问题
+                    url: "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcBjiS3ezi",
                     duration: "3:24",
                     image: "",
                     jamendoUrl: "#"
@@ -1784,7 +1785,7 @@
                     title: "VIP Experience",
                     artist: "基金会音乐",
                     album: "专享音乐",
-                    url: "",
+                    url: "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcBjiS2fzY",
                     duration: "4:12",
                     image: "",
                     jamendoUrl: "#"
@@ -1793,7 +1794,7 @@
                     title: "Prize Time",
                     artist: "抽奖音效",
                     album: "系统音乐",
-                    url: "",
+                    url: "https://www.soundjay.com/misc/sounds-777.wav",
                     duration: "2:48",
                     image: "",
                     jamendoUrl: "#"
@@ -1802,7 +1803,7 @@
                     title: "Celebration",
                     artist: "庆祝音乐",
                     album: "获奖音效",
-                    url: "",
+                    url: "https://www.soundjay.com/misc/sounds-776.wav",
                     duration: "3:56",
                     image: "",
                     jamendoUrl: "#"
@@ -1811,7 +1812,7 @@
                     title: "Background Melody",
                     artist: "环境音乐",
                     album: "氛围音乐",
-                    url: "",
+                    url: "https://archive.org/download/testmp3testfile/mpthreetest.mp3",
                     duration: "5:30",
                     image: "",
                     jamendoUrl: "#"
@@ -1833,46 +1834,61 @@
         let isPlayerMinimized = true; // 默认最小化
 
         async function initMusicPlayer() {
-            // 显示环境信息
-            if (isWeChatBrowser()) {
-                showMusicNotification('🎵 微信环境已优化，音乐功能正常', 'success');
-            }
-
-            // 先加载音乐库
-            const loadSuccess = await loadMusicFromAPI();
-            if (loadSuccess) {
+            try {
+                // 显示环境信息
                 if (isWeChatBrowser()) {
-                    console.log('🎵 微信环境使用内置音乐库');
-                } else {
-                    console.log('🎵 成功加载Jamendo音乐库');
+                    showMusicNotification('🎵 微信环境已优化，音乐功能正常', 'success');
                 }
-            } else {
-                console.log('🎵 使用备用音乐库');
+
+                // 先加载音乐库
+                const loadSuccess = await loadMusicFromAPI();
+                if (loadSuccess) {
+                    if (isWeChatBrowser()) {
+                        console.log('🎵 微信环境使用内置音乐库');
+                    } else {
+                        console.log('🎵 成功加载Jamendo音乐库');
+                    }
+                } else {
+                    console.log('🎵 使用备用音乐库');
+                }
+
+                renderPlaylist();
+                if (musicLibrary.length > 0) {
+                    loadSong(0);
+                }
+
+                // 确保DOM元素存在后再初始化
+                const content = $('#playerContent');
+                const minimized = $('#playerMinimized');
+                const icon = $('#playerToggleIcon');
+
+                if (content && minimized && icon) {
+                    // 初始化为最小化状态
+                    content.classList.add('hidden');
+                    minimized.classList.remove('hidden');
+                    icon.textContent = '🔼';
+                } else {
+                    console.warn('🎵 音乐播放器DOM元素未找到');
+                }
+
+                // 安全地绑定播放器控制事件
+                const togglePlayer = $('#togglePlayer');
+                const playPauseBtn = $('#playPauseBtn');
+                const miniPlayPause = $('#miniPlayPause');
+                const prevBtn = $('#prevBtn');
+                const nextBtn = $('#nextBtn');
+
+                if (togglePlayer) togglePlayer.addEventListener('click', togglePlayerSize);
+                if (playPauseBtn) playPauseBtn.addEventListener('click', togglePlayPause);
+                if (miniPlayPause) miniPlayPause.addEventListener('click', togglePlayPause);
+                if (prevBtn) prevBtn.addEventListener('click', previousSong);
+                if (nextBtn) nextBtn.addEventListener('click', nextSong);
+
+                console.log('🎵 音乐播放器初始化完成');
+            } catch (error) {
+                console.error('🎵 音乐播放器初始化失败:', error);
+                showMusicNotification('音乐播放器初始化失败', 'error');
             }
-
-            renderPlaylist();
-            if (musicLibrary.length > 0) {
-                loadSong(0);
-            }
-
-            // 初始化为最小化状态
-            const content = $('#playerContent');
-            const minimized = $('#playerMinimized');
-            const icon = $('#playerToggleIcon');
-
-            if (content && minimized && icon) {
-                content.classList.add('hidden');
-                minimized.classList.remove('hidden');
-                icon.textContent = '🔼';
-            }
-
-            // 播放器控制事件
-            $('#togglePlayer').addEventListener('click', togglePlayerSize);
-            $('#playPauseBtn').addEventListener('click', togglePlayPause);
-            $('#miniPlayPause').addEventListener('click', togglePlayPause);
-            $('#prevBtn').addEventListener('click', previousSong);
-            $('#nextBtn').addEventListener('click', nextSong);
-            // 移除音量控制事件监听器
         }
 
         function renderPlaylist() {
@@ -1953,10 +1969,33 @@
                 } catch (error) {
                     console.warn('🎵 音频创建失败:', error);
                 }
-            } else if (isWeChatBrowser()) {
-                console.log('🎵 微信环境，显示音乐信息但不播放音频');
+            } else if (isWeChatBrowser() && song.url && song.url !== '') {
+                // 微信环境下尝试播放音频（如果有URL）
+                try {
+                    currentAudio = new Audio(song.url);
+                    currentAudio.volume = 0.3; // 降低音量避免突然播放
+
+                    currentAudio.addEventListener('loadeddata', () => {
+                        console.log('🎵 微信音频已加载:', song.title);
+                        if (totalTimeEl) {
+                            totalTimeEl.textContent = formatDuration(currentAudio.duration);
+                        }
+                    });
+
+                    currentAudio.addEventListener('timeupdate', updateProgress);
+                    currentAudio.addEventListener('ended', () => {
+                        nextSong();
+                    });
+
+                    currentAudio.addEventListener('error', (e) => {
+                        console.warn('🎵 微信音频加载失败:', song.title, e);
+                        nextSong();
+                    });
+                } catch (error) {
+                    console.warn('🎵 微信音频创建失败:', error);
+                }
             } else {
-                console.warn('🎵 无有效音频URL:', song.title);
+                console.log('🎵 当前歌曲无音频URL:', song.title);
             }
 
             renderPlaylist();
@@ -1983,7 +2022,29 @@
 
         function togglePlayPause() {
             if (!currentAudio) {
-                console.warn('🎵 没有可播放的音频');
+                // 如果没有音频，尝试重新加载当前歌曲
+                if (musicLibrary.length > 0) {
+                    loadSong(currentSongIndex);
+                    setTimeout(() => {
+                        if (currentAudio) {
+                            togglePlayPause();
+                        } else {
+                            showMusicNotification('🎵 模拟播放模式', 'info');
+                            isPlaying = !isPlaying;
+                            updatePlayButtons();
+                            if (isPlaying) {
+                                simulatePlayback();
+                            }
+                        }
+                    }, 500);
+                } else {
+                    showMusicNotification('🎵 模拟播放模式', 'info');
+                    isPlaying = !isPlaying;
+                    updatePlayButtons();
+                    if (isPlaying) {
+                        simulatePlayback();
+                    }
+                }
                 return;
             }
 
@@ -1999,12 +2060,44 @@
                         showMusicNotification('▶️ 开始播放', 'success');
                     }).catch(error => {
                         console.error('🎵 播放失败:', error);
-                        showMusicNotification('播放失败，请检查音频', 'error');
+                        showMusicNotification('🎵 模拟播放模式', 'info');
+                        isPlaying = true;
+                        simulatePlayback();
                     });
                 }
             }
 
             updatePlayButtons();
+        }
+
+        // 模拟播放功能（当没有真实音频时）
+        let simulationInterval;
+        function simulatePlayback() {
+            if (simulationInterval) clearInterval(simulationInterval);
+
+            let simTime = 0;
+            const maxTime = 180; // 3分钟
+
+            simulationInterval = setInterval(() => {
+                if (!isPlaying) {
+                    clearInterval(simulationInterval);
+                    return;
+                }
+
+                simTime += 1;
+                const progress = (simTime / maxTime) * 100;
+                const progressBar = $('#progressBar');
+                const currentTimeEl = $('#currentTime');
+
+                if (progressBar) progressBar.style.width = Math.min(progress, 100) + '%';
+                if (currentTimeEl) currentTimeEl.textContent = formatDuration(simTime);
+
+                // 模拟播放完成
+                if (simTime >= maxTime) {
+                    clearInterval(simulationInterval);
+                    nextSong();
+                }
+            }, 1000);
         }
 
         function updatePlayButtons() {
@@ -2221,13 +2314,7 @@
         }
 
         // 音乐播放器和留言系统初始化完成
-
-        function init() {
-            originalInit();
-            initMusicPlayer();
-            initCommentSystem();
-            updateNavigation();
-        }
+        // 这个init函数已经合并到下面的主init函数中
 
         // —— 自定义鼠标和交互效果 ——
         function initCustomCursor() {
@@ -2424,9 +2511,14 @@
 
         // 安全初始化函数 (防篡改)
         const _0x9f2e = function () {
-            // VIP权限验证
+            // VIP权限验证 - 只在首次访问时验证
             if (!window.checkVIPAccess || !window.checkVIPAccess()) {
                 return false;
+            }
+
+            // 显示VIP标识（只显示一次）
+            if (window.showVIPBadge) {
+                window.showVIPBadge();
             }
 
             // 域名验证
@@ -2775,11 +2867,16 @@
             if (!_0x9f2e()) return;
             if (!checkTermsAgreement()) return;
 
-            $('#year').textContent = new Date().getFullYear();
+            loadData();
             renderHistory();
             updateDrawLimitDisplay();
             setupDataSync();
             initExchangeSystem(); // 初始化兑换系统
+
+            // 初始化音乐播放器
+            initMusicPlayer();
+            initCommentSystem();
+            updateNavigation();
 
             setTimeout(() => {
                 initCustomCursor();
@@ -2800,7 +2897,5 @@
         init();
     </script>
 </body>
-
-</html>
 
 </html>

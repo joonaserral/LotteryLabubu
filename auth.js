@@ -49,9 +49,18 @@
 
     // 检查VIP访问权限
     window.checkVIPAccess = function () {
+        // 防止重复认证的标记
+        if (window._vipAuthInProgress) {
+            console.log('🔄 认证进行中，请稍候...');
+            return false;
+        }
+
         const stored = localStorage.getItem('_vip_auth_token');
         if (!stored) {
-            return requestVIPCode();
+            window._vipAuthInProgress = true;
+            const result = requestVIPCode();
+            window._vipAuthInProgress = false;
+            return result;
         }
 
         try {
@@ -62,20 +71,29 @@
             // Token有效期24小时
             if (now - timestamp > 86400000) {
                 localStorage.removeItem('_vip_auth_token');
-                return requestVIPCode();
+                window._vipAuthInProgress = true;
+                const result = requestVIPCode();
+                window._vipAuthInProgress = false;
+                return result;
             }
 
+            console.log('✅ 股东身份验证成功');
             return true;
         } catch (e) {
             localStorage.removeItem('_vip_auth_token');
-            return requestVIPCode();
+            window._vipAuthInProgress = true;
+            const result = requestVIPCode();
+            window._vipAuthInProgress = false;
+            return result;
         }
     };
 
     function requestVIPCode() {
-        const code = prompt('请输入股东姓名：');
+        console.log('🔐 开始股东身份验证...');
+        const code = prompt('🏢 Labubu基金会VIP系统\n\n请输入股东姓名：');
         if (!code) {
-            console.log('🚫 VIP认证取消');
+            console.log('🚫 股东认证已取消');
+            alert('系统需要验证股东身份才能访问');
             window.location.href = 'welcome.html';
             return false;
         }
@@ -83,22 +101,26 @@
         if (_vipCodes.includes(code)) {
             const token = btoa(code + '|' + Date.now());
             localStorage.setItem('_vip_auth_token', token);
+            console.log('✅ 股东身份验证成功，欢迎 ' + code);
             return true;
         } else {
-            alert('股东姓名验证失败，请确认您的股东身份');
+            console.log('❌ 股东姓名验证失败');
+            alert('❌ 股东姓名验证失败\n\n请确认您的股东身份，或联系基金会管理员');
             window.location.href = 'welcome.html';
             return false;
         }
     }
 
-    // 页面加载时验证
-    document.addEventListener('DOMContentLoaded', function () {
-        if (!checkVIPAccess()) {
+    // VIP标识显示函数（由主程序调用）
+    window.showVIPBadge = function () {
+        // 检查是否已经显示过标识
+        if (document.querySelector('.vip-badge')) {
             return;
         }
 
         // 显示VIP标识
         const vipBadge = document.createElement('div');
+        vipBadge.className = 'vip-badge';
         vipBadge.style.cssText = `
             position: fixed;
             top: 10px;
@@ -114,7 +136,7 @@
         `;
         vipBadge.textContent = '👑 股东身份已认证';
         document.body.appendChild(vipBadge);
-    });
+    };
 
     // 防复制保护
     document.addEventListener('copy', function (e) {

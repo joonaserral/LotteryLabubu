@@ -1626,37 +1626,51 @@
             let isPlayerMinimized = true; // 默认最小化
 
             async function initMusicPlayer() {
-                // 先加载音乐库
-                const loadSuccess = await loadMusicFromAPI();
-                if (loadSuccess) {
-                    console.log('🎵 管理员界面成功加载Jamendo音乐库');
-                } else {
-                    console.log('🎵 管理员界面使用备用音乐库');
+                try {
+                    // 先加载音乐库
+                    const loadSuccess = await loadMusicFromAPI();
+                    if (loadSuccess) {
+                        console.log('🎵 管理员界面成功加载Jamendo音乐库');
+                    } else {
+                        console.log('🎵 管理员界面使用备用音乐库');
+                    }
+
+                    renderPlaylist();
+                    if (musicLibrary.length > 0) {
+                        loadSong(0);
+                    }
+
+                    // 确保DOM元素存在后再初始化
+                    const content = $('#playerContent');
+                    const minimized = $('#playerMinimized');
+                    const icon = $('#playerToggleIcon');
+
+                    if (content && minimized && icon) {
+                        // 初始化为最小化状态
+                        content.classList.add('hidden');
+                        minimized.classList.remove('hidden');
+                        icon.textContent = '🔼';
+                    } else {
+                        console.warn('🎵 管理员音乐播放器DOM元素未找到');
+                    }
+
+                    // 安全地绑定播放器控制事件
+                    const togglePlayer = $('#togglePlayer');
+                    const playPauseBtn = $('#playPauseBtn');
+                    const miniPlayPause = $('#miniPlayPause');
+                    const prevBtn = $('#prevBtn');
+                    const nextBtn = $('#nextBtn');
+
+                    if (togglePlayer) togglePlayer.addEventListener('click', togglePlayerSize);
+                    if (playPauseBtn) playPauseBtn.addEventListener('click', togglePlayPause);
+                    if (miniPlayPause) miniPlayPause.addEventListener('click', togglePlayPause);
+                    if (prevBtn) prevBtn.addEventListener('click', previousSong);
+                    if (nextBtn) nextBtn.addEventListener('click', nextSong);
+
+                    console.log('🎵 管理员音乐播放器初始化完成');
+                } catch (error) {
+                    console.error('🎵 管理员音乐播放器初始化失败:', error);
                 }
-
-                renderPlaylist();
-                if (musicLibrary.length > 0) {
-                    loadSong(0);
-                }
-
-                // 初始化为最小化状态
-                const content = $('#playerContent');
-                const minimized = $('#playerMinimized');
-                const icon = $('#playerToggleIcon');
-
-                if (content && minimized && icon) {
-                    content.classList.add('hidden');
-                    minimized.classList.remove('hidden');
-                    icon.textContent = '🔼';
-                }
-
-                // 播放器控制事件
-                $('#togglePlayer').addEventListener('click', togglePlayerSize);
-                $('#playPauseBtn').addEventListener('click', togglePlayPause);
-                $('#miniPlayPause').addEventListener('click', togglePlayPause);
-                $('#prevBtn').addEventListener('click', previousSong);
-                $('#nextBtn').addEventListener('click', nextSong);
-                // 移除音量控制事件监听器
             }
 
             function renderPlaylist() {
@@ -1872,7 +1886,7 @@
                     updateHistoryCount();
                     updateDrawLimitDisplay();
                     updateSyncStatus(); // 更新同步状态显示
-                    initMusicPlayer(); // 初始化音乐播放器
+                    // 音乐播放器初始化移到下面的主init函数中
                 } else {
                     showLoginOverlay();
                 }
