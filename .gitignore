@@ -1,0 +1,13 @@
+
+# Playwright
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+
+.cache-synpress/
+.cache-synpress-*/
+.env
+.DS_Store
