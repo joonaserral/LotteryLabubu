@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>光标显示测试页面</title>
+    <style>
+        /* 自定义鼠标样式 */
+        * {
+            cursor: none !important;
+        }
+
+        /* 恢复文本输入元素的光标 */
+        input,
+        textarea,
+        [contenteditable="true"],
+        .text-input {
+            cursor: text !important;
+        }
+
+        /* 恢复可点击元素的光标 */
+        button,
+        a,
+        [role="button"],
+        .cursor-pointer,
+        select {
+            cursor: pointer !important;
+        }
+
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #ff69b4 30%, transparent 70%);
+            border: 2px solid #ff69b4;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 99999 !important;
+            transition: transform 0.1s ease;
+            transform: translate(-50%, -50%);
+            opacity: 1 !important;
+            display: block !important;
+            visibility: visible !important;
+            box-shadow: 0 0 10px rgba(255, 105, 180, 0.5), 0 0 20px rgba(255, 105, 180, 0.3);
+        }
+
+        .custom-cursor.clicking {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 2rem;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            min-height: 100vh;
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-section {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 0.5rem;
+        }
+
+        .test-section h3 {
+            color: #ff69b4;
+            margin-bottom: 1rem;
+        }
+
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        button {
+            background: linear-gradient(45deg, #ff69b4, #ff1493);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.25rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .status {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: #ff69b4;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 自定义光标 -->
+    <div class="custom-cursor"></div>
+
+    <div class="status">
+        🖱️ 光标测试页面
+    </div>
+
+    <div class="test-container">
+        <h1>🖱️ 光标显示测试页面</h1>
+        <p>这个页面用于测试不同元素的光标显示效果。您应该在不同区域看到不同的光标样式。</p>
+
+        <div class="test-section">
+            <h3>📝 文本输入区域（应显示文本光标）</h3>
+            <input type="text" placeholder="在这里输入文本，应该看到文本光标">
+            <textarea placeholder="这是一个文本区域，鼠标悬停时应显示文本光标" rows="3"></textarea>
+            <div contenteditable="true" style="border: 1px solid #ccc; padding: 0.5rem; border-radius: 0.25rem;">
+                这是一个可编辑的div，点击后应该看到文本光标
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>🖱️ 可点击元素（应显示指针光标）</h3>
+            <button onclick="alert('按钮被点击了！')">普通按钮</button>
+            <button onclick="testCustomCursor()">测试自定义光标</button>
+            <br>
+            <a href="#" onclick="alert('链接被点击了！'); return false;">这是一个链接</a>
+            <br><br>
+            <select>
+                <option>选择选项1</option>
+                <option>选择选项2</option>
+                <option>选择选项3</option>
+            </select>
+        </div>
+
+        <div class="test-section">
+            <h3>🎨 普通区域（应显示自定义粉色光标）</h3>
+            <p>在这个区域移动鼠标，您应该看到粉色的自定义光标。</p>
+            <p>光标应该跟随鼠标移动，并且有发光效果。</p>
+            <p>点击时光标应该会变大。</p>
+        </div>
+
+        <div class="test-section">
+            <h3>✅ 测试结果</h3>
+            <div id="testResults">
+                <p><strong>预期效果：</strong></p>
+                <ul>
+                    <li>📝 文本输入框：竖线文本光标</li>
+                    <li>🖱️ 按钮和链接：手型指针光标</li>
+                    <li>🎨 其他区域：粉色圆形自定义光标</li>
+                    <li>✨ 自定义光标有发光效果</li>
+                    <li>🔄 点击时光标会放大</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const $ = (sel) => document.querySelector(sel);
+
+        // 自定义光标功能
+        let cursorInitialized = false;
+
+        function initCustomCursor() {
+            if (cursorInitialized) return;
+
+            const cursor = $('.custom-cursor');
+            if (!cursor) return;
+
+            let mouseX = 0, mouseY = 0;
+
+            cursor.style.left = '0px';
+            cursor.style.top = '0px';
+            cursor.style.display = 'block';
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                cursor.style.left = mouseX + 'px';
+                cursor.style.top = mouseY + 'px';
+            });
+
+            document.addEventListener('mousedown', () => {
+                cursor.classList.add('clicking');
+            });
+
+            document.addEventListener('mouseup', () => {
+                cursor.classList.remove('clicking');
+            });
+
+            cursorInitialized = true;
+            console.log('🖱️ 自定义光标初始化完成');
+        }
+
+        function testCustomCursor() {
+            const cursor = $('.custom-cursor');
+            if (cursor) {
+                cursor.style.background = 'radial-gradient(circle, #00ff00 30%, transparent 70%)';
+                cursor.style.borderColor = '#00ff00';
+                setTimeout(() => {
+                    cursor.style.background = 'radial-gradient(circle, #ff69b4 30%, transparent 70%)';
+                    cursor.style.borderColor = '#ff69b4';
+                }, 1000);
+                alert('自定义光标测试：光标颜色已临时变为绿色！');
+            }
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                initCustomCursor();
+            }, 100);
+        });
+    </script>
+</body>
+
+</html>

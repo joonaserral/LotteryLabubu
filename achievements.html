@@ -40,6 +40,23 @@
             cursor: none !important;
         }
 
+        /* 恢复文本输入元素的光标 */
+        input,
+        textarea,
+        [contenteditable="true"],
+        .text-input {
+            cursor: text !important;
+        }
+
+        /* 恢复可点击元素的光标 */
+        button,
+        a,
+        [role="button"],
+        .cursor-pointer,
+        select {
+            cursor: pointer !important;
+        }
+
         .custom-cursor {
             position: fixed;
             width: 20px;
