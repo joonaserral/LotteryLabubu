@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>个人成就 - Labubu 幸运抽奖 🏆</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- VIP安全验证 -->
+    <script src="auth.js"></script>
+    <script src="config.enc.js"></script>
+    <!-- 移除Google Fonts确保微信兼容性 -->
+    <style>
+        body, html, * {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        }
+    </style>
+    <style>
+        :root {
+            --labu: #6b5b95;
+            --labu2: #ffcc00;
+        }
+
+        body {
+            font-family: 'Zen Maru Gothic', system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans SC', 'PingFang SC', 'Microsoft Yahei', sans-serif;
+        }
+
+        .labu-gradient {
+            background-image: linear-gradient(135deg, rgba(107, 91, 149, .12), rgba(255, 204, 0, .12));
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 自定义鼠标样式和交互效果 */
+        * {
+            cursor: none !important;
+        }
+
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff69b4"><path d="M8 2C8 2 8.5 3 10.5 3C12.5 3 13 2 13 2C14 2 15 3 15 4C15 5 14 6 13 6C12 6 11 7 11 8C11 9 12 10 13 10C14 10 15 9 15 8C15 7 16 6 17 6C18 6 19 7 19 8C19 9 18 10 17 10C16 10 15 11 15 12C15 13 16 14 17 14C18 14 19 13 19 12C19 11 20 10 21 10C22 10 23 11 23 12C23 13 22 14 21 14C20 14 19 15 19 16C19 17 18 18 17 18C16 18 15 17 15 16C15 15 14 14 13 14C12 14 11 15 11 16C11 17 10 18 9 18C8 18 7 17 7 16C7 15 8 14 9 14C10 14 11 13 11 12C11 11 10 10 9 10C8 10 7 11 7 12C7 13 6 14 5 14C4 14 3 13 3 12C3 11 4 10 5 10C6 10 7 9 7 8C7 7 6 6 5 6C4 6 3 7 3 8C3 9 2 10 1 10C0 10 -1 9 -1 8C-1 7 0 6 1 6C2 6 3 5 3 4C3 3 4 2 5 2C6 2 7 3 7 4C7 5 8 6 9 6C10 6 11 5 11 4C11 3 10 2 9 2C8.5 2 8 2 8 2Z"/></svg>') no-repeat center;
+            background-size: contain;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .custom-cursor.clicking {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .cursor-trail {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, rgba(255, 105, 180, 0.8) 0%, rgba(255, 105, 180, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            animation: cursorTrailFade 0.5s ease-out forwards;
+        }
+
+        @keyframes cursorTrailFade {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+        }
+
+        .enhanced-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .enhanced-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .enhanced-btn:hover::before {
+            left: 100%;
+        }
+
+        .enhanced-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(107, 91, 149, 0.3);
+        }
+
+        /* 勋章卡片动画 */
+        .achievement-card {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .achievement-card.unlocked {
+            background: linear-gradient(135deg, #fef3c7, #fbbf24);
+            border: 2px solid #f59e0b;
+        }
+
+        .achievement-card.locked {
+            background: linear-gradient(135deg, #f3f4f6, #d1d5db);
+            border: 2px solid #9ca3af;
+            filter: grayscale(100%);
+        }
+
+        .achievement-icon {
+            font-size: 3rem;
+            transition: all 0.3s ease;
+        }
+
+        .achievement-card:hover .achievement-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .achievement-card.locked .achievement-icon {
+            opacity: 0.5;
+        }
+
+        /* 闪光效果 */
+        .sparkle-effect {
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            animation: sparkle 2s ease-in-out infinite;
+        }
+
+        @keyframes sparkle {
+            0% {
+                left: -100%;
+            }
+
+            50% {
+                left: 100%;
+            }
+
+            100% {
+                left: -100%;
+            }
+        }
+
+        /* 用户信息编辑 */
+        .profile-card {
+            background: linear-gradient(135deg, rgba(107, 91, 149, 0.1), rgba(255, 204, 0, 0.1));
+            border: 2px solid rgba(107, 91, 149, 0.2);
+            border-radius: 1.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .edit-input {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(107, 91, 149, 0.3);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .edit-input:focus {
+            border-color: var(--labu);
+            box-shadow: 0 0 0 3px rgba(107, 91, 149, 0.1);
+            outline: none;
+        }
+
+        /* 进度条样式 */
+        .progress-bar {
+            background: linear-gradient(90deg, #6b5b95, #ffcc00);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: progressShine 2s ease-in-out infinite;
+        }
+
+        @keyframes progressShine {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            50% {
+                transform: translateX(100%);
+            }
+
+            100% {
+                transform: translateX(-100%);
+            }
+        }
+
+        /* 好友系统样式 */
+        .friend-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(107, 91, 149, 0.2);
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .friend-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 页面过渡动画 */
+        .page-transition {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: pageEnter 0.6s ease-out forwards;
+        }
+
+        @keyframes pageEnter {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .achievement-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            /* 移动端导航优化 */
+            header .max-w-6xl {
+                padding: 0 15px;
+            }
+
+            header h1 {
+                font-size: 16px;
+            }
+
+            nav {
+                font-size: 12px;
+                gap: 8px;
+            }
+
+            nav a {
+                padding: 8px 4px;
+            }
+
+            /* 移动端个人信息卡片优化 */
+            .profile-card {
+                margin: 0 15px;
+                border-radius: 16px;
+            }
+
+            .profile-card .grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            /* 移动端成就卡片优化 */
+            .achievement-card {
+                padding: 16px;
+                border-radius: 12px;
+            }
+
+            .achievement-icon {
+                font-size: 2.5rem;
+            }
+
+            .achievement-card h3 {
+                font-size: 16px;
+            }
+
+            .achievement-card p {
+                font-size: 12px;
+            }
+
+            /* 移动端好友卡片优化 */
+            .friend-card {
+                border-radius: 12px;
+                padding: 16px;
+            }
+
+            .friend-card .grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            /* 移动端表单优化 */
+            .edit-input {
+                min-height: 44px;
+                font-size: 16px;
+                border-radius: 8px;
+            }
+
+            .enhanced-btn {
+                min-height: 44px;
+                font-size: 14px;
+            }
+
+            /* 移动端模态框优化 */
+            #achievementModal .bg-white {
+                margin: 20px;
+                border-radius: 16px;
+                max-width: calc(100vw - 40px);
+            }
+
+            #modalIcon {
+                font-size: 48px;
+            }
+
+            #modalTitle {
+                font-size: 18px;
+            }
+
+            #modalDescription {
+                font-size: 14px;
+            }
+
+            /* 移动端头像选择优化 */
+            .avatar-option {
+                min-width: 44px;
+                min-height: 44px;
+                font-size: 18px;
+            }
+        }
+
+        /* 小屏幕设备优化 */
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 14px;
+            }
+
+            nav {
+                font-size: 11px;
+                gap: 6px;
+            }
+
+            .achievement-icon {
+                font-size: 2rem;
+            }
+
+            .achievement-card {
+                padding: 12px;
+            }
+
+            .profile-card {
+                margin: 0 10px;
+                padding: 16px;
+            }
+
+            .enhanced-btn {
+                font-size: 13px;
+                padding: 12px 16px;
+            }
+        }
+
+        /* 触摸设备优化 */
+        @media (hover: none) {
+            .achievement-card:hover {
+                transform: none;
+            }
+
+            .achievement-card:active {
+                transform: scale(0.98);
+            }
+
+            .enhanced-btn:hover {
+                transform: none;
+            }
+
+            .enhanced-btn:active {
+                transform: scale(0.98);
+            }
+
+            .friend-card:hover {
+                transform: none;
+            }
+        }
+
+        /* 页面过渡动画 */
+        .page-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(107, 91, 149, 0.9), rgba(255, 204, 0, 0.9));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .page-transition-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .smooth-link {
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .smooth-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .smooth-link:hover::before {
+            left: 100%;
+        }
+
+        .smooth-link:hover {
+            transform: translateY(-1px);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+    <!-- 页面过渡动画覆盖层 -->
+    <div id="pageTransitionOverlay" class="page-transition-overlay">
+        <div class="page-transition-content">
+            <div class="transition-loader"></div>
+            <h3 class="text-2xl font-bold mb-2">🏆 正在跳转...</h3>
+            <p class="text-lg opacity-90">正在为您加载成就系统</p>
+        </div>
+    </div>
+
+    <!-- 自定义鼠标光标 -->
+    <div class="custom-cursor"></div>
+
+    <!-- 顶部导航 -->
+    <header class="sticky top-0 z-10 backdrop-blur bg-white/60 border-b border-slate-200">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-[var(--labu)] grid place-content-center text-white text-xl">🏆</div>
+                <h1 class="font-bold text-lg">个人成就中心</h1>
+            </div>
+            <nav class="flex items-center gap-6">
+                <a href="index.html" class="hover:underline flex items-center gap-1 smooth-link page-link">🎯 返回抽奖</a>
+                <a href="shop.html" class="hover:underline flex items-center gap-1 smooth-link page-link">🛒 商城</a>
+                <a href="admin.html" class="hover:underline flex items-center gap-1 smooth-link page-link" style="display: none;">⚙️ 管理</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="page-transition">
+        <!-- 个人信息卡片 -->
+        <section class="labu-gradient py-8">
+            <div class="max-w-6xl mx-auto px-4">
+                <div class="profile-card p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold flex items-center gap-2">
+                            👤 个人信息
+                        </h2>
+                        <button id="editProfileBtn"
+                            class="enhanced-btn px-4 py-2 bg-[var(--labu)] text-white rounded-lg text-sm">
+                            ✏️ 编辑资料
+                        </button>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <div class="flex items-center gap-4 mb-4">
+                                <div
+                                    class="w-16 h-16 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-2xl">
+                                    <span id="userAvatar">🧸</span>
+                                </div>
+                                <div>
+                                    <h3 id="displayUserName" class="text-xl font-bold">VIP股东</h3>
+                                    <p class="text-sm text-slate-600">🎯 抽奖达人 · 🏆 成就收集者</p>
+                                </div>
+                            </div>
+
+                            <!-- 编辑表单（默认隐藏） -->
+                            <div id="editForm" class="hidden space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">用户名</label>
+                                    <input type="text" id="editUserName" class="edit-input w-full"
+                                        placeholder="请输入您的用户名">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">个性签名</label>
+                                    <input type="text" id="editUserBio" class="edit-input w-full"
+                                        placeholder="请输入您的个性签名">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium mb-2">头像表情</label>
+                                    <div class="flex gap-2 flex-wrap">
+                                        <button
+                                            class="avatar-option p-2 bg-white rounded border-2 border-transparent hover:border-[var(--labu)]"
+                                            data-avatar="🧸">🧸</button>
+                                        <button
+                                            class="avatar-option p-2 bg-white rounded border-2 border-transparent hover:border-[var(--labu)]"
+                                            data-avatar="🎮">🎮</button>
+                                        <button
+                                            class="avatar-option p-2 bg-white rounded border-2 border-transparent hover:border-[var(--labu)]"
+                                            data-avatar="👑">👑</button>
+                                        <button
+                                            class="avatar-option p-2 bg-white rounded border-2 border-transparent hover:border-[var(--labu)]"
+                                            data-avatar="🌟">🌟</button>
+                                        <button
+                                            class="avatar-option p-2 bg-white rounded border-2 border-transparent hover:border-[var(--labu)]"
+                                            data-avatar="💎">💎</button>
+                                        <button
+                                            class="avatar-option p-2 bg-white rounded border-2 border-transparent hover:border-[var(--labu)]"
+                                            data-avatar="🏆">🏆</button>
+                                        <button
+                                            class="avatar-option p-2 bg-white rounded border-2 border-transparent hover:border-[var(--labu)]"
+                                            data-avatar="🎯">🎯</button>
+                                        <button
+                                            class="avatar-option p-2 bg-white rounded border-2 border-transparent hover:border-[var(--labu)]"
+                                            data-avatar="🚀">🚀</button>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button id="saveProfileBtn"
+                                        class="enhanced-btn px-4 py-2 bg-green-600 text-white rounded-lg text-sm">
+                                        💾 保存
+                                    </button>
+                                    <button id="cancelEditBtn"
+                                        class="enhanced-btn px-4 py-2 bg-gray-500 text-white rounded-lg text-sm">
+                                        ❌ 取消
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="bg-white/50 rounded-lg p-4">
+                                <h4 class="font-medium mb-2">🎯 抽奖统计</h4>
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-slate-600">总抽奖次数</span>
+                                        <p class="text-lg font-bold text-[var(--labu)]" id="totalDraws">0</p>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-600">中奖次数</span>
+                                        <p class="text-lg font-bold text-green-600" id="totalWins">0</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-white/50 rounded-lg p-4">
+                                <h4 class="font-medium mb-2">🏆 成就进度</h4>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between text-sm">
+                                        <span>成就完成度</span>
+                                        <span id="achievementProgress">0/12</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 成就勋章区域 -->
+        <section class="py-8">
+            <div class="max-w-6xl mx-auto px-4">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                    🏆 我的成就勋章
+                    <span class="text-sm font-normal text-slate-600">(点击查看详情)</span>
+                </h2>
+
+                <div id="achievementsGrid" class="achievement-grid grid md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <!-- 成就卡片将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 好友互动成就 -->
+        <section class="py-8 bg-white/50">
+            <div class="max-w-6xl mx-auto px-4">
+                <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
+                    👥 好友互动成就
+                </h2>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="friend-card p-6">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            💝 亲密好友邀请
+                        </h3>
+                        <p class="text-sm text-slate-600 mb-4">邀请好友加入VIP股东，一起分享抽奖乐趣！</p>
+
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-sm">
+                                <span>已邀请好友</span>
+                                <span id="invitedFriends">0 人</span>
+                            </div>
+                            <button id="inviteFriendBtn"
+                                class="enhanced-btn w-full py-2 bg-pink-500 text-white rounded-lg text-sm">
+                                💌 邀请好友
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="friend-card p-6">
+                        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            🎁 礼物分享
+                        </h3>
+                        <p class="text-sm text-slate-600 mb-4">与好友分享中奖喜悦，赠送小礼品！</p>
+
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-sm">
+                                <span>已分享礼物</span>
+                                <span id="sharedGifts">0 次</span>
+                            </div>
+                            <button id="shareGiftBtn"
+                                class="enhanced-btn w-full py-2 bg-orange-500 text-white rounded-lg text-sm">
+                                🎁 分享礼物
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- 成就详情弹窗 -->
+    <div id="achievementModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4 transform transition-all">
+            <div class="text-center">
+                <div id="modalIcon" class="text-6xl mb-4">🏆</div>
+                <h3 id="modalTitle" class="text-xl font-bold mb-2">成就名称</h3>
+                <p id="modalDescription" class="text-slate-600 mb-4">成就描述</p>
+                <div id="modalReward" class="text-sm text-green-600 mb-4">奖励：+100积分</div>
+                <div id="modalProgress" class="mb-4">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="modalProgressFill" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-slate-600 mt-1" id="modalProgressText">进度：0/10</p>
+                </div>
+                <button id="closeModalBtn" class="enhanced-btn px-6 py-2 bg-[var(--labu)] text-white rounded-lg">
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 安全检查
+        if (!window._secureConfig || !window._secureConfig.validate()) {
+            window.location.href = 'index.html';
+        }
+
+        // 检查条款同意状态
+        function checkTermsAgreement() {
+            const agreed = localStorage.getItem('terms_agreed');
+            if (!agreed) {
+                window.location.href = 'welcome.html';
+                return false;
+            }
+
+            const agreeTime = parseInt(agreed);
+            const now = Date.now();
+            const dayInMs = 24 * 60 * 60 * 1000;
+
+            // 条款同意有效期7天
+            if (now - agreeTime > 7 * dayInMs) {
+                localStorage.removeItem('terms_agreed');
+                window.location.href = 'welcome.html';
+                return false;
+            }
+
+            return true;
+        }
+
+        // 页面加载时检查条款
+        if (!checkTermsAgreement()) {
+            // 如果条款检查失败，停止后续执行
+        } else {
+
+            // 基础函数
+            const $ = (selector) => document.querySelector(selector);
+            const $$ = (selector) => document.querySelectorAll(selector);
+
+            // 页面过渡动画功能
+            function initPageTransitions() {
+                $$('.page-link').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const href = link.getAttribute('href');
+                        showPageTransition(() => {
+                            window.location.href = href;
+                        });
+                    });
+                });
+            }
+
+            function showPageTransition(callback) {
+                const overlay = $('#pageTransitionOverlay');
+                overlay.classList.add('active');
+
+                setTimeout(() => {
+                    if (callback) callback();
+                }, 800);
+            }
+
+            function hidePageTransition() {
+                const overlay = $('#pageTransitionOverlay');
+                overlay.classList.remove('active');
+            }
+
+            // 页面加载时隐藏过渡层
+            window.addEventListener('load', () => {
+                setTimeout(hidePageTransition, 300);
+            });
+
+            // 成就数据
+            const ACHIEVEMENTS = [
+                {
+                    id: 'first_draw',
+                    name: '初试牛刀',
+                    description: '完成第一次抽奖',
+                    icon: '🎯',
+                    reward: 50,
+                    condition: { type: 'draws', value: 1 },
+                    category: 'basic'
+                },
+                {
+                    id: 'draw_master',
+                    name: '抽奖达人',
+                    description: '累计抽奖10次',
+                    icon: '🎮',
+                    reward: 200,
+                    condition: { type: 'draws', value: 10 },
+                    category: 'basic'
+                },
+                {
+                    id: 'lucky_star',
+                    name: '幸运之星',
+                    description: '首次中奖',
+                    icon: '⭐',
+                    reward: 100,
+                    condition: { type: 'wins', value: 1 },
+                    category: 'basic'
+                },
+                {
+                    id: 'legendary_hunter',
+                    name: '传说猎人',
+                    description: '获得传说级奖品',
+                    icon: '🏆',
+                    reward: 500,
+                    condition: { type: 'legendary_wins', value: 1 },
+                    category: 'rare'
+                },
+                {
+                    id: 'coin_collector',
+                    name: '货币收集者',
+                    description: '累计获得100U币',
+                    icon: '💰',
+                    reward: 300,
+                    condition: { type: 'coins', value: 100 },
+                    category: 'basic'
+                },
+                {
+                    id: 'loyal_player',
+                    name: '忠实玩家',
+                    description: '连续7天参与抽奖',
+                    icon: '🔥',
+                    reward: 400,
+                    condition: { type: 'daily_streak', value: 7 },
+                    category: 'rare'
+                },
+                {
+                    id: 'social_butterfly',
+                    name: '社交达人',
+                    description: '邀请5位好友',
+                    icon: '👥',
+                    reward: 600,
+                    condition: { type: 'friends', value: 5 },
+                    category: 'friend'
+                },
+                {
+                    id: 'gift_giver',
+                    name: '礼物达人',
+                    description: '分享礼物10次',
+                    icon: '🎁',
+                    reward: 350,
+                    condition: { type: 'gifts', value: 10 },
+                    category: 'friend'
+                },
+                {
+                    id: 'comment_king',
+                    name: '留言之王',
+                    description: '发表20条留言',
+                    icon: '💬',
+                    reward: 250,
+                    condition: { type: 'comments', value: 20 },
+                    category: 'social'
+                },
+                {
+                    id: 'perfectionist',
+                    name: '完美主义者',
+                    description: '收集所有稀有以上奖品',
+                    icon: '💎',
+                    reward: 1000,
+                    condition: { type: 'rare_collection', value: 5 },
+                    category: 'rare'
+                },
+                {
+                    id: 'vip_supporter',
+                    name: 'VIP支持者',
+                    description: '累计积分达到5000',
+                    icon: '👑',
+                    reward: 800,
+                    condition: { type: 'points', value: 5000 },
+                    category: 'rare'
+                },
+                {
+                    id: 'ultimate_collector',
+                    name: '终极收藏家',
+                    description: '解锁所有成就',
+                    icon: '🌟',
+                    reward: 2000,
+                    condition: { type: 'achievements', value: 11 },
+                    category: 'legendary'
+                }
+            ];
+
+            // 用户数据管理
+            class UserManager {
+                constructor() {
+                    this.userData = this.loadUserData();
+                    this.initCustomCursor();
+                }
+
+                loadUserData() {
+                    const defaultData = {
+                        name: 'VIP股东',
+                        bio: '🎯 抽奖达人 · 🏆 成就收集者',
+                        avatar: '🧸',
+                        achievements: {},
+                        stats: {
+                            totalDraws: 0,
+                            totalWins: 0,
+                            coins: 0,
+                            dailyStreak: 0,
+                            friends: 0,
+                            gifts: 0,
+                            comments: 0,
+                            points: 0
+                        }
+                    };
+
+                    const saved = localStorage.getItem('userData_achievements');
+                    return saved ? { ...defaultData, ...JSON.parse(saved) } : defaultData;
+                }
+
+                saveUserData() {
+                    localStorage.setItem('userData_achievements', JSON.stringify(this.userData));
+                    this.broadcastUpdate();
+                }
+
+                broadcastUpdate() {
+                    if (window.dataSync) {
+                        window.dataSync.postMessage({
+                            type: 'userData_update',
+                            data: this.userData
+                        });
+                    }
+                }
+
+                updateStats() {
+                    // 从抽奖历史更新统计数据
+                    const history = JSON.parse(localStorage.getItem('lotteryHistory') || '[]');
+                    const wins = history.filter(item => item.prize !== '再接再厉');
+
+                    this.userData.stats.totalDraws = history.length;
+                    this.userData.stats.totalWins = wins.length;
+
+                    // 计算货币总数
+                    let totalCoins = 0;
+                    wins.forEach(win => {
+                        if (win.prize.includes('U币')) {
+                            const match = win.prize.match(/(\d+)U币/);
+                            if (match) totalCoins += parseInt(match[1]);
+                        }
+                    });
+                    this.userData.stats.coins = totalCoins;
+
+                    // 计算积分
+                    this.userData.stats.points = this.calculatePoints();
+
+                    // 检查成就
+                    this.checkAchievements();
+                    this.saveUserData();
+                }
+
+                calculatePoints() {
+                    const history = JSON.parse(localStorage.getItem('lotteryHistory') || '[]');
+                    let points = 0;
+
+                    history.forEach(item => {
+                        if (item.points) {
+                            points += item.points;
+                        }
+                    });
+
+                    // 添加成就奖励积分
+                    Object.values(this.userData.achievements).forEach(achievement => {
+                        if (achievement.unlocked) {
+                            const achievementData = ACHIEVEMENTS.find(a => a.id === achievement.id);
+                            if (achievementData) points += achievementData.reward;
+                        }
+                    });
+
+                    return points;
+                }
+
+                checkAchievements() {
+                    ACHIEVEMENTS.forEach(achievement => {
+                        if (!this.userData.achievements[achievement.id]) {
+                            this.userData.achievements[achievement.id] = {
+                                id: achievement.id,
+                                unlocked: false,
+                                progress: 0,
+                                unlockedAt: null
+                            };
+                        }
+
+                        const userAchievement = this.userData.achievements[achievement.id];
+                        if (userAchievement.unlocked) return;
+
+                        const progress = this.calculateProgress(achievement);
+                        userAchievement.progress = progress;
+
+                        if (progress >= achievement.condition.value) {
+                            userAchievement.unlocked = true;
+                            userAchievement.unlockedAt = new Date().toISOString();
+                            this.showAchievementNotification(achievement);
+                        }
+                    });
+                }
+
+                calculateProgress(achievement) {
+                    const { type, value } = achievement.condition;
+                    const stats = this.userData.stats;
+
+                    switch (type) {
+                        case 'draws': return stats.totalDraws;
+                        case 'wins': return stats.totalWins;
+                        case 'legendary_wins': return this.countLegendaryWins();
+                        case 'coins': return stats.coins;
+                        case 'daily_streak': return stats.dailyStreak;
+                        case 'friends': return stats.friends;
+                        case 'gifts': return stats.gifts;
+                        case 'comments': return this.countComments();
+                        case 'points': return stats.points;
+                        case 'rare_collection': return this.countRareCollection();
+                        case 'achievements': return Object.values(this.userData.achievements).filter(a => a.unlocked).length;
+                        default: return 0;
+                    }
+                }
+
+                countLegendaryWins() {
+                    const history = JSON.parse(localStorage.getItem('lotteryHistory') || '[]');
+                    return history.filter(item =>
+                        item.rarity === 'legendary' ||
+                        item.rarity === 'mythic'
+                    ).length;
+                }
+
+                countComments() {
+                    const comments = JSON.parse(localStorage.getItem('comments') || '[]');
+                    return comments.filter(comment => comment.userName === this.userData.name).length;
+                }
+
+                countRareCollection() {
+                    const history = JSON.parse(localStorage.getItem('lotteryHistory') || '[]');
+                    const rareItems = new Set();
+                    history.forEach(item => {
+                        if (item.rarity === 'rare' || item.rarity === 'epic' ||
+                            item.rarity === 'legendary' || item.rarity === 'mythic') {
+                            rareItems.add(item.prize);
+                        }
+                    });
+                    return rareItems.size;
+                }
+
+                showAchievementNotification(achievement) {
+                    // 创建成就解锁通知
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed top-20 right-4 bg-gradient-to-r from-yellow-400 to-orange-400 text-white p-4 rounded-lg shadow-lg z-50 transform transition-all duration-500 translate-x-full';
+                    notification.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="text-2xl">${achievement.icon}</div>
+                        <div>
+                            <h4 class="font-bold">🎉 成就解锁！</h4>
+                            <p class="text-sm">${achievement.name}</p>
+                            <p class="text-xs opacity-90">+${achievement.reward} 积分</p>
+                        </div>
+                    </div>
+                `;
+
+                    document.body.appendChild(notification);
+
+                    // 动画效果
+                    setTimeout(() => {
+                        notification.style.transform = 'translateX(0)';
+                    }, 100);
+
+                    setTimeout(() => {
+                        notification.style.transform = 'translateX(100%)';
+                        setTimeout(() => notification.remove(), 500);
+                    }, 4000);
+                }
+
+                initCustomCursor() {
+                    const cursor = $('.custom-cursor');
+                    let trails = [];
+
+                    document.addEventListener('mousemove', (e) => {
+                        cursor.style.left = e.clientX + 'px';
+                        cursor.style.top = e.clientY + 'px';
+
+                        // 创建光迹
+                        if (Math.random() > 0.7) {
+                            const trail = document.createElement('div');
+                            trail.className = 'cursor-trail';
+                            trail.style.left = e.clientX + 'px';
+                            trail.style.top = e.clientY + 'px';
+                            document.body.appendChild(trail);
+
+                            setTimeout(() => trail.remove(), 500);
+                        }
+                    });
+
+                    document.addEventListener('mousedown', () => {
+                        cursor.classList.add('clicking');
+                    });
+
+                    document.addEventListener('mouseup', () => {
+                        cursor.classList.remove('clicking');
+                    });
+                }
+            }
+
+            // 成就界面管理
+            class AchievementUI {
+                constructor(userManager) {
+                    this.userManager = userManager;
+                    this.init();
+                }
+
+                init() {
+                    this.renderProfile();
+                    this.renderAchievements();
+                    this.bindEvents();
+                    this.userManager.updateStats();
+                    initPageTransitions(); // 初始化页面过渡
+                }
+
+                renderProfile() {
+                    const userData = this.userManager.userData;
+                    $('#displayUserName').textContent = userData.name;
+                    $('#userAvatar').textContent = userData.avatar;
+                    $('#totalDraws').textContent = userData.stats.totalDraws;
+                    $('#totalWins').textContent = userData.stats.totalWins;
+
+                    // 更新进度
+                    const unlockedCount = Object.values(userData.achievements).filter(a => a.unlocked).length;
+                    const totalCount = ACHIEVEMENTS.length;
+                    const progressPercent = (unlockedCount / totalCount) * 100;
+
+                    $('#achievementProgress').textContent = `${unlockedCount}/${totalCount}`;
+                    $('#progressFill').style.width = `${progressPercent}%`;
+                }
+
+                renderAchievements() {
+                    const grid = $('#achievementsGrid');
+                    grid.innerHTML = '';
+
+                    ACHIEVEMENTS.forEach(achievement => {
+                        const userAchievement = this.userManager.userData.achievements[achievement.id];
+                        const isUnlocked = userAchievement?.unlocked || false;
+                        const progress = userAchievement?.progress || 0;
+                        const progressPercent = Math.min((progress / achievement.condition.value) * 100, 100);
+
+                        const card = document.createElement('div');
+                        card.className = `achievement-card ${isUnlocked ? 'unlocked' : 'locked'} p-6 rounded-xl cursor-pointer`;
+                        card.dataset.achievementId = achievement.id;
+
+                        card.innerHTML = `
+                        <div class="text-center">
+                            <div class="achievement-icon mb-3">${achievement.icon}</div>
+                            <h3 class="font-bold text-lg mb-2">${achievement.name}</h3>
+                            <p class="text-sm text-slate-600 mb-3">${achievement.description}</p>
+                            <div class="text-xs text-green-600 mb-3">奖励：+${achievement.reward}积分</div>
+                            
+                            ${!isUnlocked ? `
+                                <div class="progress-bar mb-2">
+                                    <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                                </div>
+                                <div class="text-xs text-slate-500">
+                                    进度：${progress}/${achievement.condition.value}
+                                </div>
+                            ` : `
+                                <div class="text-xs text-green-600">
+                                    ✅ 已解锁
+                                </div>
+                            `}
+                        </div>
+                        ${isUnlocked ? '<div class="sparkle-effect"></div>' : ''}
+                    `;
+
+                        grid.appendChild(card);
+                    });
+                }
+
+                bindEvents() {
+                    // 编辑资料
+                    $('#editProfileBtn').addEventListener('click', () => {
+                        $('#editForm').classList.remove('hidden');
+                        $('#editUserName').value = this.userManager.userData.name;
+                        $('#editUserBio').value = this.userManager.userData.bio;
+
+                        // 选中当前头像
+                        $$('.avatar-option').forEach(btn => {
+                            btn.classList.remove('border-[var(--labu)]');
+                            if (btn.dataset.avatar === this.userManager.userData.avatar) {
+                                btn.classList.add('border-[var(--labu)]');
+                            }
+                        });
+                    });
+
+                    // 头像选择
+                    $$('.avatar-option').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            $$('.avatar-option').forEach(b => b.classList.remove('border-[var(--labu)]'));
+                            btn.classList.add('border-[var(--labu)]');
+                        });
+                    });
+
+                    // 保存资料
+                    $('#saveProfileBtn').addEventListener('click', () => {
+                        const newName = $('#editUserName').value.trim();
+                        const newBio = $('#editUserBio').value.trim();
+                        const selectedAvatar = $('.avatar-option.border-\\[var\\(--labu\\)\\]')?.dataset.avatar || this.userManager.userData.avatar;
+
+                        if (newName) {
+                            this.userManager.userData.name = newName;
+                            this.userManager.userData.bio = newBio;
+                            this.userManager.userData.avatar = selectedAvatar;
+                            this.userManager.saveUserData();
+                            this.renderProfile();
+
+                            $('#editForm').classList.add('hidden');
+                            this.showNotification('资料保存成功！', 'success');
+                        }
+                    });
+
+                    // 取消编辑
+                    $('#cancelEditBtn').addEventListener('click', () => {
+                        $('#editForm').classList.add('hidden');
+                    });
+
+                    // 成就卡片点击
+                    $('#achievementsGrid').addEventListener('click', (e) => {
+                        const card = e.target.closest('.achievement-card');
+                        if (card) {
+                            const achievementId = card.dataset.achievementId;
+                            this.showAchievementModal(achievementId);
+                        }
+                    });
+
+                    // 关闭模态框
+                    $('#closeModalBtn').addEventListener('click', () => {
+                        $('#achievementModal').classList.add('hidden');
+                    });
+
+                    // 好友互动
+                    $('#inviteFriendBtn').addEventListener('click', () => {
+                        this.inviteFriend();
+                    });
+
+                    $('#shareGiftBtn').addEventListener('click', () => {
+                        this.shareGift();
+                    });
+                }
+
+                showAchievementModal(achievementId) {
+                    const achievement = ACHIEVEMENTS.find(a => a.id === achievementId);
+                    const userAchievement = this.userManager.userData.achievements[achievementId];
+
+                    if (!achievement) return;
+
+                    $('#modalIcon').textContent = achievement.icon;
+                    $('#modalTitle').textContent = achievement.name;
+                    $('#modalDescription').textContent = achievement.description;
+                    $('#modalReward').textContent = `奖励：+${achievement.reward}积分`;
+
+                    const progress = userAchievement?.progress || 0;
+                    const progressPercent = Math.min((progress / achievement.condition.value) * 100, 100);
+
+                    $('#modalProgressFill').style.width = `${progressPercent}%`;
+                    $('#modalProgressText').textContent = `进度：${progress}/${achievement.condition.value}`;
+
+                    $('#achievementModal').classList.remove('hidden');
+                }
+
+                inviteFriend() {
+                    this.userManager.userData.stats.friends += 1;
+                    this.userManager.saveUserData();
+                    this.userManager.updateStats();
+                    $('#invitedFriends').textContent = `${this.userManager.userData.stats.friends} 人`;
+                    this.renderAchievements();
+                    this.showNotification('好友邀请发送成功！', 'success');
+                }
+
+                shareGift() {
+                    this.userManager.userData.stats.gifts += 1;
+                    this.userManager.saveUserData();
+                    this.userManager.updateStats();
+                    $('#sharedGifts').textContent = `${this.userManager.userData.stats.gifts} 次`;
+                    this.renderAchievements();
+                    this.showNotification('礼物分享成功！', 'success');
+                }
+
+                showNotification(message, type = 'info') {
+                    const notification = document.createElement('div');
+                    const bgColor = type === 'success' ? 'bg-green-500' : 'bg-blue-500';
+                    notification.className = `fixed top-4 right-4 ${bgColor} text-white p-4 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full`;
+                    notification.textContent = message;
+
+                    document.body.appendChild(notification);
+
+                    setTimeout(() => {
+                        notification.style.transform = 'translateX(0)';
+                    }, 100);
+
+                    setTimeout(() => {
+                        notification.style.transform = 'translateX(100%)';
+                        setTimeout(() => notification.remove(), 300);
+                    }, 3000);
+                }
+            }
+
+            // 初始化应用
+            document.addEventListener('DOMContentLoaded', () => {
+                if (checkTermsAgreement()) {
+                    const userManager = new UserManager();
+                    const achievementUI = new AchievementUI(userManager);
+                }
+            });
+        } // 关闭条款检查的else块
+    </script>
+</body>
+
+</html>

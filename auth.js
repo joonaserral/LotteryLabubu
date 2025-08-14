@@ -23,7 +23,7 @@
             (e.ctrlKey && e.shiftKey && e.key === 'J') ||
             (e.ctrlKey && e.key === 'U')) {
             e.preventDefault();
-            window.location.href = 'https://www.labubu.com';
+            console.log('🚫 开发者工具被禁用');
         }
     });
 
@@ -39,11 +39,7 @@
 
     // VIP认证码验证
     const _vipCodes = [
-        'VIP2024LAB',
-        'STOCK2024',
-        'LABUBU888',
-        'SHAREHOLDER',
-        'PREMIUM2024'
+        '雷爽'
     ];
 
     // 基础混淆的验证函数
@@ -77,19 +73,20 @@
     };
 
     function requestVIPCode() {
-        const code = prompt('请输入VIP股东专享访问码：');
+        const code = prompt('请输入股东姓名：');
         if (!code) {
-            window.location.href = 'https://www.labubu.com';
+            console.log('🚫 VIP认证取消');
+            window.location.href = 'welcome.html';
             return false;
         }
 
-        if (_vipCodes.includes(code.toUpperCase())) {
+        if (_vipCodes.includes(code)) {
             const token = btoa(code + '|' + Date.now());
             localStorage.setItem('_vip_auth_token', token);
             return true;
         } else {
-            alert('访问码错误，请联系基金会获取VIP专享码');
-            window.location.href = 'https://www.labubu.com';
+            alert('股东姓名验证失败，请确认您的股东身份');
+            window.location.href = 'welcome.html';
             return false;
         }
     }
@@ -115,7 +112,7 @@
             z-index: 10000;
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
         `;
-        vipBadge.textContent = '👑 VIP股东认证';
+        vipBadge.textContent = '👑 股东身份已认证';
         document.body.appendChild(vipBadge);
     });
 
@@ -125,25 +122,6 @@
         e.preventDefault();
     });
 
-    // 水印保护
-    function addWatermark() {
-        const watermark = document.createElement('div');
-        watermark.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) rotate(-45deg);
-            font-size: 48px;
-            color: rgba(0, 0, 0, 0.05);
-            pointer-events: none;
-            z-index: 1;
-            user-select: none;
-            font-weight: bold;
-        `;
-        watermark.textContent = 'VIP SHAREHOLDERS ONLY';
-        document.body.appendChild(watermark);
-    }
-
-    setTimeout(addWatermark, 1000);
+    // 水印保护已移除 - 根据用户要求
 
 })();

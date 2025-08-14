@@ -11,10 +11,13 @@
     <!-- VIP安全验证 -->
     <script src="auth.js"></script>
     <script src="config.enc.js"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap"
-        rel="stylesheet">
+    <!-- 移除Google Fonts以避免微信环境下的加载问题 -->
+    <style>
+        /* 使用系统字体代替Google Fonts，确保微信兼容性 */
+        body, html, * {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
+        }
+    </style>
     <style>
         :root {
             --labu: #6b5b95;
@@ -312,6 +315,118 @@
                     </div>
                 </div>
             </section>
+
+            <!-- 成就勋章管理 -->
+            <section class="mt-10">
+                <div class="rounded-3xl bg-white border border-slate-200 shadow overflow-hidden">
+                    <div class="p-5 border-b border-slate-100">
+                        <h3 class="font-semibold flex items-center gap-2">
+                            🏆 成就勋章管理
+                        </h3>
+                    </div>
+                    <div class="p-5">
+                        <!-- 用户搜索 -->
+                        <div class="mb-6">
+                            <h4 class="font-medium mb-3">用户管理</h4>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="userSearchInput"
+                                        class="block text-sm font-medium text-slate-700 mb-1">搜索用户</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="userSearchInput"
+                                            class="flex-1 px-3 py-2 rounded-lg border border-slate-300 focus:border-[var(--labu)] focus:ring-2 focus:ring-[var(--labu)]/20 focus:outline-none"
+                                            placeholder="输入用户名搜索...">
+                                        <button id="searchUserBtn"
+                                            class="px-4 py-2 rounded-lg bg-[var(--labu)] text-white hover:opacity-90">搜索</button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label for="selectedUser"
+                                        class="block text-sm font-medium text-slate-700 mb-1">选择用户</label>
+                                    <select id="selectedUser"
+                                        class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:border-[var(--labu)] focus:ring-2 focus:ring-[var(--labu)]/20 focus:outline-none">
+                                        <option value="">请选择用户...</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 用户信息显示 -->
+                        <div id="userInfoSection" class="mb-6 p-4 rounded-lg bg-slate-50 hidden">
+                            <h4 class="font-medium mb-3">用户信息</h4>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div
+                                            class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-xl">
+                                            <span id="userInfoAvatar">🧸</span>
+                                        </div>
+                                        <div>
+                                            <h5 id="userInfoName" class="font-bold">用户名</h5>
+                                            <p id="userInfoBio" class="text-sm text-slate-600">个性签名</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-sm">
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>总抽奖：<span id="userTotalDraws" class="font-medium">0</span></div>
+                                        <div>中奖次数：<span id="userTotalWins" class="font-medium">0</span></div>
+                                        <div>积分：<span id="userPoints" class="font-medium">0</span></div>
+                                        <div>成就：<span id="userAchievements" class="font-medium">0/12</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 成就发放 -->
+                        <div id="achievementGrantSection" class="hidden">
+                            <h4 class="font-medium mb-3">发放成就勋章</h4>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <!-- 成就列表 -->
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">选择成就</label>
+                                    <div id="achievementsList" class="space-y-2 max-h-64 overflow-y-auto">
+                                        <!-- 成就项将通过JavaScript动态生成 -->
+                                    </div>
+                                </div>
+
+                                <!-- 批量操作 -->
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">批量操作</label>
+                                    <div class="space-y-3">
+                                        <button id="grantSelectedBtn"
+                                            class="w-full px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                            disabled>发放选中成就</button>
+                                        <button id="revokeSelectedBtn"
+                                            class="w-full px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                            disabled>撤销选中成就</button>
+                                        <button id="grantAllBtn"
+                                            class="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                            disabled>发放全部成就</button>
+                                        <button id="resetAllAchievementsBtn"
+                                            class="w-full px-4 py-2 rounded-lg bg-orange-600 text-white hover:bg-orange-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                            disabled>重置全部成就</button>
+                                    </div>
+
+                                    <div class="mt-4 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+                                        <p class="text-xs text-yellow-700">
+                                            <strong>注意：</strong>管理员手动发放的成就会覆盖系统自动判定，请谨慎操作。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 全局成就统计 -->
+                        <div class="mt-6 pt-6 border-t border-slate-200">
+                            <h4 class="font-medium mb-3">全局成就统计</h4>
+                            <div id="globalAchievementStats" class="grid md:grid-cols-4 gap-4 text-sm">
+                                <!-- 统计数据将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </main>
 
         <footer class="max-w-5xl mx-auto px-4 py-10 text-center text-xs text-slate-500">
@@ -359,12 +474,7 @@
                 <button id="nextBtn" class="text-xl hover:scale-110 transition-transform">⏭️</button>
             </div>
 
-            <!-- 音量控制 -->
-            <div class="flex items-center gap-2">
-                <span class="text-sm">🔊</span>
-                <input type="range" id="volumeSlider" min="0" max="100" value="50"
-                    class="flex-1 h-1 rounded-lg appearance-none">
-            </div>
+            <!-- 音量控制已移除，简化界面 -->
 
             <!-- 播放列表 -->
             <div class="max-h-32 overflow-y-auto space-y-1">
@@ -387,214 +497,241 @@
     <script>
         // —— 安全检查 ——
         if (!window._secureConfig || !window._secureConfig.validate()) {
-            window.location.href = 'https://www.labubu.com';
+                            console.log('🎵 管理员系统');
         }
 
-        // —— 加密配置常量 ——
-        const _0x7c3f = window._secureConfig.decode(window._secureConfig._0x1a2b);
-        const _0x8d4e = 'labubu_vip_admin_' + btoa('secure_session');
-
-        const ADMIN_PASSWORD = _0x7c3f;
-        const SESSION_KEY = _0x8d4e;
-
-        // —— 本地存储键 ——
-        const LS_KEYS = {
-            HISTORY: 'labubu_lottery_history',
-            POOL: 'labubu_lottery_pool',
-            DRAW_LIMIT: 'labubu_draw_limit',
-            USER_DRAW_COUNT: 'labubu_user_draw_count'
-        };
-
-        // —— 数据同步广播 ——
-        let dataChannel = null;
-        let syncEnabled = false;
-
-        // 检查浏览器兼容性
-        if ('BroadcastChannel' in window) {
-            try {
-                dataChannel = new BroadcastChannel('labubu_data_sync');
-                syncEnabled = true;
-            } catch (error) {
-                console.warn('BroadcastChannel初始化失败:', error);
-                syncEnabled = false;
+        // 检查条款同意状态
+        function checkTermsAgreement() {
+            const agreed = localStorage.getItem('terms_agreed');
+            if (!agreed) {
+                window.location.href = 'welcome.html';
+                return false;
             }
+
+            const agreeTime = parseInt(agreed);
+            const now = Date.now();
+            const dayInMs = 24 * 60 * 60 * 1000;
+
+            // 条款同意有效期7天
+            if (now - agreeTime > 7 * dayInMs) {
+                localStorage.removeItem('terms_agreed');
+                window.location.href = 'welcome.html';
+                return false;
+            }
+
+            return true;
+        }
+
+        // 页面初始化前检查条款
+        if (!checkTermsAgreement()) {
+            // 如果条款检查失败，停止后续执行
         } else {
-            console.warn('浏览器不支持BroadcastChannel，实时同步功能将不可用');
-            syncEnabled = false;
-        }
 
-        function broadcastUpdate(type, data = null) {
-            if (!syncEnabled || !dataChannel) {
-                console.warn('数据同步不可用，跳过广播:', type);
-                return;
-            }
+            // —— 加密配置常量 ——
+            const _0x7c3f = window._secureConfig.decode(window._secureConfig._0x1a2b);
+            const _0x8d4e = 'labubu_vip_admin_' + btoa('secure_session');
 
-            try {
-                const message = {
-                    type: type,
-                    data: data,
-                    timestamp: Date.now(),
-                    source: 'admin'
-                };
-                dataChannel.postMessage(message);
-                console.log('📡 广播更新:', type);
-                showBroadcastNotification(type);
-            } catch (error) {
-                console.error('广播失败:', error);
-                showBroadcastNotification('SYNC_ERROR');
-            }
-        }
+            const ADMIN_PASSWORD = _0x7c3f;
+            const SESSION_KEY = _0x8d4e;
 
-        function showBroadcastNotification(type) {
-            const typeNames = {
-                'POOL_UPDATE': '奖池配置',
-                'DRAW_LIMIT_UPDATE': '抽奖限制',
-                'USER_COUNT_RESET': '用户计数重置',
-                'SYSTEM_RESET': '系统重置',
-                'HISTORY_CLEARED': '记录清空',
-                'SYNC_ERROR': '同步失败'
+            // —— 本地存储键 ——
+            const LS_KEYS = {
+                HISTORY: 'labubu_lottery_history',
+                POOL: 'labubu_lottery_pool',
+                DRAW_LIMIT: 'labubu_draw_limit',
+                USER_DRAW_COUNT: 'labubu_user_draw_count'
             };
 
-            const notification = document.createElement('div');
-            const isError = type === 'SYNC_ERROR';
-            const bgColor = isError ? 'bg-red-500' : 'bg-green-500';
-            const icon = isError ? '❌' : '📡';
-            const message = isError ? '同步失败，请检查网络连接' : `${typeNames[type] || type} 已推送到所有用户`;
+            // —— 数据同步广播 ——
+            let dataChannel = null;
+            let syncEnabled = false;
 
-            notification.className = `fixed top-20 right-4 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm transition-all duration-300`;
-            notification.innerHTML = `${icon} ${message}`;
-            document.body.appendChild(notification);
+            // 检查浏览器兼容性
+            if ('BroadcastChannel' in window) {
+                try {
+                    dataChannel = new BroadcastChannel('labubu_data_sync');
+                    syncEnabled = true;
+                } catch (error) {
+                    console.warn('BroadcastChannel初始化失败:', error);
+                    syncEnabled = false;
+                }
+            } else {
+                console.warn('浏览器不支持BroadcastChannel，实时同步功能将不可用');
+                syncEnabled = false;
+            }
 
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transform = 'translateX(100%)';
+            function broadcastUpdate(type, data = null) {
+                if (!syncEnabled || !dataChannel) {
+                    console.warn('数据同步不可用，跳过广播:', type);
+                    return;
+                }
+
+                try {
+                    const message = {
+                        type: type,
+                        data: data,
+                        timestamp: Date.now(),
+                        source: 'admin'
+                    };
+                    dataChannel.postMessage(message);
+                    console.log('📡 广播更新:', type);
+                    showBroadcastNotification(type);
+                } catch (error) {
+                    console.error('广播失败:', error);
+                    showBroadcastNotification('SYNC_ERROR');
+                }
+            }
+
+            function showBroadcastNotification(type) {
+                const typeNames = {
+                    'POOL_UPDATE': '奖池配置',
+                    'DRAW_LIMIT_UPDATE': '抽奖限制',
+                    'USER_COUNT_RESET': '用户计数重置',
+                    'SYSTEM_RESET': '系统重置',
+                    'HISTORY_CLEARED': '记录清空',
+                    'SYNC_ERROR': '同步失败'
+                };
+
+                const notification = document.createElement('div');
+                const isError = type === 'SYNC_ERROR';
+                const bgColor = isError ? 'bg-red-500' : 'bg-green-500';
+                const icon = isError ? '❌' : '📡';
+                const message = isError ? '同步失败，请检查网络连接' : `${typeNames[type] || type} 已推送到所有用户`;
+
+                notification.className = `fixed top-20 right-4 ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg z-50 text-sm transition-all duration-300`;
+                notification.innerHTML = `${icon} ${message}`;
+                document.body.appendChild(notification);
+
                 setTimeout(() => {
-                    if (document.body.contains(notification)) {
-                        document.body.removeChild(notification);
-                    }
-                }, 300);
-            }, isError ? 5000 : 2000); // 错误消息显示更长时间
-        }
-
-        function updateSyncStatus() {
-            const statusElement = $('#syncStatus');
-            if (statusElement) {
-                if (syncEnabled) {
-                    statusElement.textContent = '已连接';
-                    statusElement.className = 'font-medium text-green-600';
-                } else {
-                    statusElement.textContent = '不可用';
-                    statusElement.className = 'font-medium text-red-600';
-                }
-            }
-        }
-
-        // —— VIP专享奖池 (含超稀有上迪挂件) ——
-        const DEFAULT_POOL = [
-            // 普通奖品
-            { name: "再接再厉", type: '折扣券', weight: 30, quantity: 50, rarity: 'common', points: 10 },
-            { name: "奶茶一杯", type: '实体', weight: 25, quantity: 30, rarity: 'common', points: 20 },
-            { name: "烤肉券（清真记录）", type: '实体', weight: 20, quantity: 25, rarity: 'common', points: 30 },
-            { name: "烤肉券", type: '实体', weight: 20, quantity: 20, rarity: 'common', points: 30 },
-            { name: "精品奶茶券", type: '实体', weight: 15, quantity: 15, rarity: 'rare', points: 50 },
-            { name: "1U币", type: '实体', weight: 25, quantity: 100, rarity: 'common', points: 1 },
-            { name: "3U币", type: '实体', weight: 15, quantity: 60, rarity: 'common', points: 3 },
-            { name: "5U币", type: '实体', weight: 10, quantity: 40, rarity: 'rare', points: 5 },
-
-            // 普通Labubu收藏
-            { name: "经典Labubu公仔", type: '实体', weight: 8, quantity: 10, rarity: 'rare', points: 100 },
-            { name: "彩虹Labubu限定", type: '实体', weight: 6, quantity: 8, rarity: 'epic', points: 150 },
-            { name: "圣诞Labubu特别版", type: '实体', weight: 4, quantity: 5, rarity: 'epic', points: 200 },
-            { name: "黄金Labubu收藏版", type: '实体', weight: 2, quantity: 3, rarity: 'legendary', points: 500 },
-
-            // 超稀有上迪挂件 - 中奖率极低 (几乎为0)
-            { name: "24上迪万圣节饼饼挂件", type: '实体', weight: 0.1, quantity: 1, rarity: 'mythic', points: 2000 },
-            { name: "24上迪万圣节露露挂件", type: '实体', weight: 0.1, quantity: 1, rarity: 'mythic', points: 2000 },
-            { name: "25上迪夏日海洋饼饼挂件", type: '实体', weight: 0.05, quantity: 1, rarity: 'mythic', points: 3000 }
-        ];
-
-        // —— 工具函数 ——
-        const $ = (sel) => document.querySelector(sel);
-
-        function loadHistory() {
-            try { return JSON.parse(localStorage.getItem(LS_KEYS.HISTORY)) || []; } catch { return []; }
-        }
-        function saveHistory(arr) { localStorage.setItem(LS_KEYS.HISTORY, JSON.stringify(arr)); }
-        function loadPool() {
-            try {
-                const raw = localStorage.getItem(LS_KEYS.POOL);
-                return raw ? JSON.parse(raw) : structuredClone(DEFAULT_POOL);
-            } catch { return structuredClone(DEFAULT_POOL); }
-        }
-        function savePool(pool) { localStorage.setItem(LS_KEYS.POOL, JSON.stringify(pool)); }
-
-        function poolToText(pool) {
-            return pool.map(p => [p.name, p.type, p.weight, (p.quantity ?? -1)].join(',')).join('\n');
-        }
-        function textToPool(txt) {
-            const lines = txt.split(/\n+/).map(l => l.trim()).filter(Boolean);
-
-            if (lines.length === 0) {
-                throw new Error('奖池不能为空');
+                    notification.style.opacity = '0';
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 300);
+                }, isError ? 5000 : 2000); // 错误消息显示更长时间
             }
 
-            if (lines.length > 100) {
-                throw new Error('奖池项目不能超过100个');
-            }
-
-            return lines.map((line, i) => {
-                const parts = line.split(',').map(s => s?.trim());
-
-                if (parts.length < 3 || parts.length > 4) {
-                    throw new Error(`第 ${i + 1} 行格式不正确：应为 name,type,weight[,quantity]`);
-                }
-
-                const [name, type, weightStr, qtyStr] = parts;
-
-                // 名称验证
-                if (!name || name.length > 50) {
-                    throw new Error(`第 ${i + 1} 行：奖品名称不能为空且不能超过50字符`);
-                }
-
-                // 类型验证
-                if (!['抵扣券', '实体', '折扣券'].includes(type)) {
-                    throw new Error(`第 ${i + 1} 行：奖品类型只能是 抵扣券/实体/折扣券`);
-                }
-
-                // 权重验证
-                const weight = Number(weightStr);
-                if (!Number.isFinite(weight) || weight < 0 || weight > 10000) {
-                    throw new Error(`第 ${i + 1} 行：权重必须是0-10000之间的数字`);
-                }
-
-                // 数量验证
-                let quantity = -1;
-                if (qtyStr !== undefined && qtyStr !== '') {
-                    quantity = Number(qtyStr);
-                    if (!Number.isInteger(quantity) || quantity < -1 || quantity > 99999) {
-                        throw new Error(`第 ${i + 1} 行：数量必须是-1到99999之间的整数`);
+            function updateSyncStatus() {
+                const statusElement = $('#syncStatus');
+                if (statusElement) {
+                    if (syncEnabled) {
+                        statusElement.textContent = '已连接';
+                        statusElement.className = 'font-medium text-green-600';
+                    } else {
+                        statusElement.textContent = '不可用';
+                        statusElement.className = 'font-medium text-red-600';
                     }
                 }
+            }
 
-                return { name, type, weight, quantity };
-            });
-        }
+            // —— VIP专享奖池 (含超稀有上迪挂件) ——
+            const DEFAULT_POOL = [
+                // 普通奖品
+                { name: "再接再厉", type: '折扣券', weight: 30, quantity: 50, rarity: 'common', points: 10 },
+                { name: "奶茶一杯", type: '实体', weight: 25, quantity: 30, rarity: 'common', points: 20 },
+                { name: "烤肉券（清真记录）", type: '实体', weight: 20, quantity: 25, rarity: 'common', points: 30 },
+                { name: "烤肉券", type: '实体', weight: 20, quantity: 20, rarity: 'common', points: 30 },
+                { name: "精品奶茶券", type: '实体', weight: 15, quantity: 15, rarity: 'rare', points: 50 },
+                { name: "1U币", type: '实体', weight: 25, quantity: 100, rarity: 'common', points: 1 },
+                { name: "3U币", type: '实体', weight: 15, quantity: 60, rarity: 'common', points: 3 },
+                { name: "5U币", type: '实体', weight: 10, quantity: 40, rarity: 'rare', points: 5 },
 
-        function renderPoolList(pool) {
-            const ul = $('#poolList');
-            ul.innerHTML = '';
-            const totalW = pool.reduce((s, p) => s + Math.max(0, p.weight || 0), 0) || 1;
+                // 普通Labubu收藏
+                { name: "经典Labubu公仔", type: '实体', weight: 8, quantity: 10, rarity: 'rare', points: 100 },
+                { name: "彩虹Labubu限定", type: '实体', weight: 6, quantity: 8, rarity: 'epic', points: 150 },
+                { name: "圣诞Labubu特别版", type: '实体', weight: 4, quantity: 5, rarity: 'epic', points: 200 },
+                { name: "黄金Labubu收藏版", type: '实体', weight: 2, quantity: 3, rarity: 'legendary', points: 500 },
 
-            pool.forEach(p => {
-                const left = p.quantity === -1 ? '∞' : p.quantity;
-                const w = p.weight || 0;
-                const pct = ((w / totalW) * 100).toFixed(1);
-                const color = p.type === '实体' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                    (p.type === '抵扣券' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-amber-50 text-amber-700 border-amber-200');
+                // 超稀有上迪挂件 - 中奖率极低 (几乎为0)
+                { name: "24上迪万圣节饼饼挂件", type: '实体', weight: 0.1, quantity: 1, rarity: 'mythic', points: 2000 },
+                { name: "24上迪万圣节露露挂件", type: '实体', weight: 0.1, quantity: 1, rarity: 'mythic', points: 2000 },
+                { name: "25上迪夏日海洋饼饼挂件", type: '实体', weight: 0.05, quantity: 1, rarity: 'mythic', points: 3000 }
+            ];
 
-                const li = document.createElement('li');
-                li.className = `border rounded-xl p-3 ${color}`;
-                li.innerHTML = `
+            // —— 工具函数 ——
+            const $ = (sel) => document.querySelector(sel);
+
+            function loadHistory() {
+                try { return JSON.parse(localStorage.getItem(LS_KEYS.HISTORY)) || []; } catch { return []; }
+            }
+            function saveHistory(arr) { localStorage.setItem(LS_KEYS.HISTORY, JSON.stringify(arr)); }
+            function loadPool() {
+                try {
+                    const raw = localStorage.getItem(LS_KEYS.POOL);
+                    return raw ? JSON.parse(raw) : structuredClone(DEFAULT_POOL);
+                } catch { return structuredClone(DEFAULT_POOL); }
+            }
+            function savePool(pool) { localStorage.setItem(LS_KEYS.POOL, JSON.stringify(pool)); }
+
+            function poolToText(pool) {
+                return pool.map(p => [p.name, p.type, p.weight, (p.quantity ?? -1)].join(',')).join('\n');
+            }
+            function textToPool(txt) {
+                const lines = txt.split(/\n+/).map(l => l.trim()).filter(Boolean);
+
+                if (lines.length === 0) {
+                    throw new Error('奖池不能为空');
+                }
+
+                if (lines.length > 100) {
+                    throw new Error('奖池项目不能超过100个');
+                }
+
+                return lines.map((line, i) => {
+                    const parts = line.split(',').map(s => s?.trim());
+
+                    if (parts.length < 3 || parts.length > 4) {
+                        throw new Error(`第 ${i + 1} 行格式不正确：应为 name,type,weight[,quantity]`);
+                    }
+
+                    const [name, type, weightStr, qtyStr] = parts;
+
+                    // 名称验证
+                    if (!name || name.length > 50) {
+                        throw new Error(`第 ${i + 1} 行：奖品名称不能为空且不能超过50字符`);
+                    }
+
+                    // 类型验证
+                    if (!['抵扣券', '实体', '折扣券'].includes(type)) {
+                        throw new Error(`第 ${i + 1} 行：奖品类型只能是 抵扣券/实体/折扣券`);
+                    }
+
+                    // 权重验证
+                    const weight = Number(weightStr);
+                    if (!Number.isFinite(weight) || weight < 0 || weight > 10000) {
+                        throw new Error(`第 ${i + 1} 行：权重必须是0-10000之间的数字`);
+                    }
+
+                    // 数量验证
+                    let quantity = -1;
+                    if (qtyStr !== undefined && qtyStr !== '') {
+                        quantity = Number(qtyStr);
+                        if (!Number.isInteger(quantity) || quantity < -1 || quantity > 99999) {
+                            throw new Error(`第 ${i + 1} 行：数量必须是-1到99999之间的整数`);
+                        }
+                    }
+
+                    return { name, type, weight, quantity };
+                });
+            }
+
+            function renderPoolList(pool) {
+                const ul = $('#poolList');
+                ul.innerHTML = '';
+                const totalW = pool.reduce((s, p) => s + Math.max(0, p.weight || 0), 0) || 1;
+
+                pool.forEach(p => {
+                    const left = p.quantity === -1 ? '∞' : p.quantity;
+                    const w = p.weight || 0;
+                    const pct = ((w / totalW) * 100).toFixed(1);
+                    const color = p.type === '实体' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                        (p.type === '抵扣券' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-amber-50 text-amber-700 border-amber-200');
+
+                    const li = document.createElement('li');
+                    li.className = `border rounded-xl p-3 ${color}`;
+                    li.innerHTML = `
                     <div class="flex items-center justify-between">
                         <div class="font-medium">${p.name}</div>
                         <span class="text-xs px-2 py-0.5 rounded-lg bg-white/60 border">${p.type}</span>
@@ -604,570 +741,1241 @@
                         <span>剩余: <b>${left}</b></span>
                     </div>
                 `;
-                ul.appendChild(li);
-            });
+                    ul.appendChild(li);
+                });
 
-            // 更新统计信息
-            const stats = $('#poolStats');
-            const totalItems = pool.length;
-            const totalWeight = totalW;
-            const physicalItems = pool.filter(p => p.type === '实体').length;
-            stats.innerHTML = `总计 ${totalItems} 种奖品 | 总权重: ${totalWeight} | 实体奖品: ${physicalItems} 种`;
-        }
-
-        function refreshPoolEditor() {
-            const pool = loadPool();
-            $('#poolEditor').value = poolToText(pool);
-        }
-
-        function exportHistory() {
-            const history = loadHistory();
-            const data = JSON.stringify(history, null, 2);
-            const blob = new Blob([data], { type: 'application/json' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = `labubu_lottery_history_${Date.now()}.json`;
-            a.click();
-        }
-
-        function clearHistory() {
-            if (confirm('确认清空所有抽奖记录？此操作不可恢复！')) {
-                saveHistory([]);
-                updateHistoryCount();
-                broadcastUpdate('HISTORY_CLEARED'); // 广播记录清空（如果需要的话）
-                alert('抽奖记录已清空');
-            }
-        }
-
-        function resetAll() {
-            if (confirm('确认完全重置系统？这将清空所有数据并恢复默认奖池！')) {
-                localStorage.removeItem(LS_KEYS.HISTORY);
-                localStorage.removeItem(LS_KEYS.POOL);
-                localStorage.removeItem(LS_KEYS.DRAW_LIMIT);
-                localStorage.removeItem(LS_KEYS.USER_DRAW_COUNT);
-                refreshPoolEditor();
-                renderPoolList(loadPool());
-                updateHistoryCount();
-                updateDrawLimitDisplay();
-                broadcastUpdate('SYSTEM_RESET'); // 广播系统重置
-                alert('系统已重置到默认状态，所有用户界面将自动刷新');
-            }
-        }
-
-        function updateHistoryCount() {
-            const count = loadHistory().length;
-            $('#historyCount').textContent = count;
-        }
-
-        // —— 抽奖次数限制管理 ——
-        function loadDrawLimit() {
-            try {
-                const limit = localStorage.getItem(LS_KEYS.DRAW_LIMIT);
-                return limit ? parseInt(limit) : 0; // 0表示不限制
-            } catch { return 0; }
-        }
-
-        function saveDrawLimit(limit) {
-            localStorage.setItem(LS_KEYS.DRAW_LIMIT, limit.toString());
-        }
-
-        function loadUserDrawCount() {
-            try {
-                const count = localStorage.getItem(LS_KEYS.USER_DRAW_COUNT);
-                return count ? parseInt(count) : 0;
-            } catch { return 0; }
-        }
-
-        function saveUserDrawCount(count) {
-            localStorage.setItem(LS_KEYS.USER_DRAW_COUNT, count.toString());
-        }
-
-        function updateDrawLimitDisplay() {
-            const limit = loadDrawLimit();
-            const currentLimitSpan = $('#currentDrawLimit');
-            const drawLimitInput = $('#drawLimitInput');
-
-            if (limit === 0) {
-                currentLimitSpan.textContent = '不限制';
-                drawLimitInput.value = '';
-            } else {
-                currentLimitSpan.textContent = `${limit} 次`;
-                drawLimitInput.value = limit;
+                // 更新统计信息
+                const stats = $('#poolStats');
+                const totalItems = pool.length;
+                const totalWeight = totalW;
+                const physicalItems = pool.filter(p => p.type === '实体').length;
+                stats.innerHTML = `总计 ${totalItems} 种奖品 | 总权重: ${totalWeight} | 实体奖品: ${physicalItems} 种`;
             }
 
-            const userCount = loadUserDrawCount();
-            $('#userDrawCount').textContent = `${userCount} 次`;
-        }
-
-        function setDrawLimit() {
-            const input = $('#drawLimitInput');
-            const limit = parseInt(input.value) || 0;
-
-            if (limit < 0) {
-                alert('抽奖次数不能为负数');
-                return;
+            function refreshPoolEditor() {
+                const pool = loadPool();
+                $('#poolEditor').value = poolToText(pool);
             }
 
-            if (limit > 9999) {
-                alert('抽奖次数不能超过9999次');
-                return;
+            function exportHistory() {
+                const history = loadHistory();
+                const data = JSON.stringify(history, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `labubu_lottery_history_${Date.now()}.json`;
+                a.click();
             }
 
-            saveDrawLimit(limit);
-            updateDrawLimitDisplay();
-            broadcastUpdate('DRAW_LIMIT_UPDATE', { limit }); // 广播限制更新
-
-            if (limit === 0) {
-                alert('抽奖次数限制已取消并同步到所有用户');
-            } else {
-                alert(`抽奖次数限制已设置为 ${limit} 次并同步到所有用户`);
-            }
-        }
-
-        function disableDrawLimit() {
-            if (confirm('确认取消抽奖次数限制？用户将可以无限制抽奖。')) {
-                saveDrawLimit(0);
-                updateDrawLimitDisplay();
-                broadcastUpdate('DRAW_LIMIT_UPDATE', { limit: 0 }); // 广播限制取消
-                alert('抽奖次数限制已取消并同步到所有用户');
-            }
-        }
-
-        function resetUserDrawCount() {
-            if (confirm('确认重置用户抽奖次数？重置后用户可以重新开始抽奖。')) {
-                saveUserDrawCount(0);
-                updateDrawLimitDisplay();
-                broadcastUpdate('USER_COUNT_RESET'); // 广播用户计数重置
-                alert('用户抽奖次数已重置并同步到所有用户');
-            }
-        }
-
-        // —— 登录验证相关 ——
-        function isLoggedIn() {
-            return sessionStorage.getItem(SESSION_KEY) === 'authenticated';
-        }
-
-        function login(password) {
-            if (password === ADMIN_PASSWORD) {
-                sessionStorage.setItem(SESSION_KEY, 'authenticated');
-                showMainContent();
-                return true;
-            }
-            return false;
-        }
-
-        function logout() {
-            sessionStorage.removeItem(SESSION_KEY);
-            showLoginOverlay();
-        }
-
-        function showLoginOverlay() {
-            $('#loginOverlay').classList.remove('hidden');
-            $('#mainContent').classList.add('hidden');
-            $('#adminPassword').value = '';
-            $('#loginError').classList.add('hidden');
-            $('#adminPassword').focus();
-        }
-
-        function showMainContent() {
-            $('#loginOverlay').classList.add('hidden');
-            $('#mainContent').classList.remove('hidden');
-        }
-
-        // 防暴力破解计数器
-        let loginAttempts = 0;
-        let lastFailedLogin = 0;
-        const MAX_LOGIN_ATTEMPTS = 5;
-        const LOCKOUT_TIME = 5 * 60 * 1000; // 5分钟
-
-        function handleLogin() {
-            const password = $('#adminPassword').value;
-            const errorDiv = $('#loginError');
-            const now = Date.now();
-
-            // 检查是否处于锁定状态
-            if (loginAttempts >= MAX_LOGIN_ATTEMPTS && (now - lastFailedLogin) < LOCKOUT_TIME) {
-                const remainingTime = Math.ceil((LOCKOUT_TIME - (now - lastFailedLogin)) / 1000 / 60);
-                errorDiv.textContent = `登录已锁定，请${remainingTime}分钟后重试`;
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-
-            // 重置锁定状态
-            if ((now - lastFailedLogin) >= LOCKOUT_TIME) {
-                loginAttempts = 0;
-            }
-
-            if (!password) {
-                errorDiv.textContent = '请输入密码';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-
-            if (login(password)) {
-                errorDiv.classList.add('hidden');
-                // 登录成功，重置失败计数
-                loginAttempts = 0;
-                lastFailedLogin = 0;
-            } else {
-                loginAttempts++;
-                lastFailedLogin = now;
-
-                if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
-                    errorDiv.textContent = `密码错误次数过多，已锁定5分钟`;
-                } else {
-                    errorDiv.textContent = `密码错误，还可尝试${MAX_LOGIN_ATTEMPTS - loginAttempts}次`;
+            function clearHistory() {
+                if (confirm('确认清空所有抽奖记录？此操作不可恢复！')) {
+                    saveHistory([]);
+                    updateHistoryCount();
+                    broadcastUpdate('HISTORY_CLEARED'); // 广播记录清空（如果需要的话）
+                    alert('抽奖记录已清空');
                 }
-                errorDiv.classList.remove('hidden');
-                $('#adminPassword').value = '';
-                $('#adminPassword').focus();
             }
-        }
 
-        // —— 事件绑定 ——
-        function bind() {
-            // 登录相关事件
-            $('#loginBtn').addEventListener('click', handleLogin);
-            $('#logoutBtn').addEventListener('click', () => {
-                if (confirm('确认退出管理系统？')) {
-                    logout();
-                }
-            });
-            $('#adminPassword').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    handleLogin();
-                }
-            });
-
-            // 原有功能事件
-            $('#savePoolBtn').addEventListener('click', () => {
-                try {
-                    const text = $('#poolEditor').value;
-                    const pool = textToPool(text);
-                    savePool(pool);
-                    renderPoolList(pool);
-                    broadcastUpdate('POOL_UPDATE', pool); // 广播奖池更新
-                    alert('奖池配置已保存并同步到所有用户');
-                } catch (e) {
-                    alert('保存失败：' + e.message);
-                }
-            });
-
-            $('#reloadBtn').addEventListener('click', () => {
-                refreshPoolEditor();
-                renderPoolList(loadPool());
-                alert('已重新载入当前配置');
-            });
-
-            $('#restoreDefaultBtn').addEventListener('click', () => {
-                if (confirm('确认恢复默认奖池配置？当前配置将被覆盖！')) {
-                    const defaultPool = structuredClone(DEFAULT_POOL);
-                    savePool(defaultPool);
+            function resetAll() {
+                if (confirm('确认完全重置系统？这将清空所有数据并恢复默认奖池！')) {
+                    localStorage.removeItem(LS_KEYS.HISTORY);
+                    localStorage.removeItem(LS_KEYS.POOL);
+                    localStorage.removeItem(LS_KEYS.DRAW_LIMIT);
+                    localStorage.removeItem(LS_KEYS.USER_DRAW_COUNT);
                     refreshPoolEditor();
                     renderPoolList(loadPool());
-                    broadcastUpdate('POOL_UPDATE', defaultPool); // 广播奖池更新
-                    alert('已恢复默认奖池配置并同步到所有用户');
+                    updateHistoryCount();
+                    updateDrawLimitDisplay();
+                    broadcastUpdate('SYSTEM_RESET'); // 广播系统重置
+                    alert('系统已重置到默认状态，所有用户界面将自动刷新');
                 }
-            });
+            }
 
-            $('#refreshPreviewBtn').addEventListener('click', () => {
-                renderPoolList(loadPool());
-            });
+            function updateHistoryCount() {
+                const count = loadHistory().length;
+                $('#historyCount').textContent = count;
+            }
 
-            $('#exportHistoryBtn').addEventListener('click', exportHistory);
-            $('#clearHistoryBtn').addEventListener('click', clearHistory);
-            $('#resetAllBtn').addEventListener('click', resetAll);
+            // —— 抽奖次数限制管理 ——
+            function loadDrawLimit() {
+                try {
+                    const limit = localStorage.getItem(LS_KEYS.DRAW_LIMIT);
+                    return limit ? parseInt(limit) : 0; // 0表示不限制
+                } catch { return 0; }
+            }
 
-            // 抽奖次数限制相关事件
-            $('#saveDrawLimitBtn').addEventListener('click', setDrawLimit);
-            $('#disableDrawLimitBtn').addEventListener('click', disableDrawLimit);
-            $('#resetUserDrawCountBtn').addEventListener('click', resetUserDrawCount);
-            $('#drawLimitInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    setDrawLimit();
+            function saveDrawLimit(limit) {
+                localStorage.setItem(LS_KEYS.DRAW_LIMIT, limit.toString());
+            }
+
+            function loadUserDrawCount() {
+                try {
+                    const count = localStorage.getItem(LS_KEYS.USER_DRAW_COUNT);
+                    return count ? parseInt(count) : 0;
+                } catch { return 0; }
+            }
+
+            function saveUserDrawCount(count) {
+                localStorage.setItem(LS_KEYS.USER_DRAW_COUNT, count.toString());
+            }
+
+            function updateDrawLimitDisplay() {
+                const limit = loadDrawLimit();
+                const currentLimitSpan = $('#currentDrawLimit');
+                const drawLimitInput = $('#drawLimitInput');
+
+                if (limit === 0) {
+                    currentLimitSpan.textContent = '不限制';
+                    drawLimitInput.value = '';
+                } else {
+                    currentLimitSpan.textContent = `${limit} 次`;
+                    drawLimitInput.value = limit;
                 }
-            });
-        }
 
-        function init() {
-            $('#year').textContent = new Date().getFullYear();
+                const userCount = loadUserDrawCount();
+                $('#userDrawCount').textContent = `${userCount} 次`;
+            }
 
-            // 检查登录状态
-            if (isLoggedIn()) {
-                showMainContent();
-                // 初始化主界面内容
-                refreshPoolEditor();
-                renderPoolList(loadPool());
-                updateHistoryCount();
+            function setDrawLimit() {
+                const input = $('#drawLimitInput');
+                const limit = parseInt(input.value) || 0;
+
+                if (limit < 0) {
+                    alert('抽奖次数不能为负数');
+                    return;
+                }
+
+                if (limit > 9999) {
+                    alert('抽奖次数不能超过9999次');
+                    return;
+                }
+
+                saveDrawLimit(limit);
                 updateDrawLimitDisplay();
-                updateSyncStatus(); // 更新同步状态显示
-            } else {
+                broadcastUpdate('DRAW_LIMIT_UPDATE', { limit }); // 广播限制更新
+
+                if (limit === 0) {
+                    alert('抽奖次数限制已取消并同步到所有用户');
+                } else {
+                    alert(`抽奖次数限制已设置为 ${limit} 次并同步到所有用户`);
+                }
+            }
+
+            function disableDrawLimit() {
+                if (confirm('确认取消抽奖次数限制？用户将可以无限制抽奖。')) {
+                    saveDrawLimit(0);
+                    updateDrawLimitDisplay();
+                    broadcastUpdate('DRAW_LIMIT_UPDATE', { limit: 0 }); // 广播限制取消
+                    alert('抽奖次数限制已取消并同步到所有用户');
+                }
+            }
+
+            function resetUserDrawCount() {
+                if (confirm('确认重置用户抽奖次数？重置后用户可以重新开始抽奖。')) {
+                    saveUserDrawCount(0);
+                    updateDrawLimitDisplay();
+                    broadcastUpdate('USER_COUNT_RESET'); // 广播用户计数重置
+                    alert('用户抽奖次数已重置并同步到所有用户');
+                }
+            }
+
+            // —— 登录验证相关 ——
+            function isLoggedIn() {
+                return sessionStorage.getItem(SESSION_KEY) === 'authenticated';
+            }
+
+            function login(password) {
+                if (password === ADMIN_PASSWORD) {
+                    sessionStorage.setItem(SESSION_KEY, 'authenticated');
+                    showMainContent();
+                    return true;
+                }
+                return false;
+            }
+
+            function logout() {
+                sessionStorage.removeItem(SESSION_KEY);
                 showLoginOverlay();
             }
-        }
 
-        // —— 音乐播放器功能 ——
-        const musicLibrary = [
-            { title: "Shape of You", artist: "Ed Sheeran", url: "" },
-            { title: "Blinding Lights", artist: "The Weeknd", url: "" },
-            { title: "Someone Like You", artist: "Adele", url: "" },
-            { title: "Perfect", artist: "Ed Sheeran", url: "" },
-            { title: "Bad Guy", artist: "Billie Eilish", url: "" },
-            { title: "Watermelon Sugar", artist: "Harry Styles", url: "" },
-            { title: "Don't Start Now", artist: "Dua Lipa", url: "" },
-            { title: "Rolling in the Deep", artist: "Adele", url: "" },
-            { title: "Uptown Funk", artist: "Bruno Mars", url: "" },
-            { title: "Havana", artist: "Camila Cabello", url: "" }
-        ];
+            function showLoginOverlay() {
+                $('#loginOverlay').classList.remove('hidden');
+                $('#mainContent').classList.add('hidden');
+                $('#adminPassword').value = '';
+                $('#loginError').classList.add('hidden');
+                $('#adminPassword').focus();
+            }
 
-        let currentSongIndex = 0;
-        let isPlaying = false;
-        let currentAudio = null;
-        let isPlayerMinimized = false;
+            function showMainContent() {
+                $('#loginOverlay').classList.add('hidden');
+                $('#mainContent').classList.remove('hidden');
+            }
 
-        function initMusicPlayer() {
-            renderPlaylist();
-            loadSong(0);
+            // 防暴力破解计数器
+            let loginAttempts = 0;
+            let lastFailedLogin = 0;
+            const MAX_LOGIN_ATTEMPTS = 5;
+            const LOCKOUT_TIME = 5 * 60 * 1000; // 5分钟
 
-            // 播放器控制事件
-            $('#togglePlayer').addEventListener('click', togglePlayerSize);
-            $('#playPauseBtn').addEventListener('click', togglePlayPause);
-            $('#miniPlayPause').addEventListener('click', togglePlayPause);
-            $('#prevBtn').addEventListener('click', previousSong);
-            $('#nextBtn').addEventListener('click', nextSong);
-            $('#volumeSlider').addEventListener('input', changeVolume);
-        }
+            function handleLogin() {
+                const password = $('#adminPassword').value;
+                const errorDiv = $('#loginError');
+                const now = Date.now();
 
-        function renderPlaylist() {
-            const playlist = $('#playlist');
-            playlist.innerHTML = '';
-            musicLibrary.forEach((song, index) => {
-                const songItem = document.createElement('div');
-                songItem.className = `cursor-pointer p-2 rounded text-xs hover:bg-slate-100 ${index === currentSongIndex ? 'bg-[var(--labu)] text-white' : ''}`;
-                songItem.innerHTML = `
-                    <div class="font-medium">${song.title}</div>
-                    <div class="text-xs opacity-75">${song.artist}</div>
+                // 检查是否处于锁定状态
+                if (loginAttempts >= MAX_LOGIN_ATTEMPTS && (now - lastFailedLogin) < LOCKOUT_TIME) {
+                    const remainingTime = Math.ceil((LOCKOUT_TIME - (now - lastFailedLogin)) / 1000 / 60);
+                    errorDiv.textContent = `登录已锁定，请${remainingTime}分钟后重试`;
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+
+                // 重置锁定状态
+                if ((now - lastFailedLogin) >= LOCKOUT_TIME) {
+                    loginAttempts = 0;
+                }
+
+                if (!password) {
+                    errorDiv.textContent = '请输入密码';
+                    errorDiv.classList.remove('hidden');
+                    return;
+                }
+
+                if (login(password)) {
+                    errorDiv.classList.add('hidden');
+                    // 登录成功，重置失败计数
+                    loginAttempts = 0;
+                    lastFailedLogin = 0;
+                } else {
+                    loginAttempts++;
+                    lastFailedLogin = now;
+
+                    if (loginAttempts >= MAX_LOGIN_ATTEMPTS) {
+                        errorDiv.textContent = `密码错误次数过多，已锁定5分钟`;
+                    } else {
+                        errorDiv.textContent = `密码错误，还可尝试${MAX_LOGIN_ATTEMPTS - loginAttempts}次`;
+                    }
+                    errorDiv.classList.remove('hidden');
+                    $('#adminPassword').value = '';
+                    $('#adminPassword').focus();
+                }
+            }
+
+            // —— 事件绑定 ——
+            function bind() {
+                // 登录相关事件
+                $('#loginBtn').addEventListener('click', handleLogin);
+                $('#logoutBtn').addEventListener('click', () => {
+                    if (confirm('确认退出管理系统？')) {
+                        logout();
+                    }
+                });
+                $('#adminPassword').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        handleLogin();
+                    }
+                });
+
+                // 原有功能事件
+                $('#savePoolBtn').addEventListener('click', () => {
+                    try {
+                        const text = $('#poolEditor').value;
+                        const pool = textToPool(text);
+                        savePool(pool);
+                        renderPoolList(pool);
+                        broadcastUpdate('POOL_UPDATE', pool); // 广播奖池更新
+                        alert('奖池配置已保存并同步到所有用户');
+                    } catch (e) {
+                        alert('保存失败：' + e.message);
+                    }
+                });
+
+                $('#reloadBtn').addEventListener('click', () => {
+                    refreshPoolEditor();
+                    renderPoolList(loadPool());
+                    alert('已重新载入当前配置');
+                });
+
+                $('#restoreDefaultBtn').addEventListener('click', () => {
+                    if (confirm('确认恢复默认奖池配置？当前配置将被覆盖！')) {
+                        const defaultPool = structuredClone(DEFAULT_POOL);
+                        savePool(defaultPool);
+                        refreshPoolEditor();
+                        renderPoolList(loadPool());
+                        broadcastUpdate('POOL_UPDATE', defaultPool); // 广播奖池更新
+                        alert('已恢复默认奖池配置并同步到所有用户');
+                    }
+                });
+
+                $('#refreshPreviewBtn').addEventListener('click', () => {
+                    renderPoolList(loadPool());
+                });
+
+                $('#exportHistoryBtn').addEventListener('click', exportHistory);
+                $('#clearHistoryBtn').addEventListener('click', clearHistory);
+                $('#resetAllBtn').addEventListener('click', resetAll);
+
+                // 抽奖次数限制相关事件
+                $('#saveDrawLimitBtn').addEventListener('click', setDrawLimit);
+                $('#disableDrawLimitBtn').addEventListener('click', disableDrawLimit);
+                $('#resetUserDrawCountBtn').addEventListener('click', resetUserDrawCount);
+                $('#drawLimitInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        setDrawLimit();
+                    }
+                });
+
+                // 成就管理相关事件
+                $('#searchUserBtn').addEventListener('click', searchUsers);
+                $('#userSearchInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        searchUsers();
+                    }
+                });
+                $('#selectedUser').addEventListener('change', selectUser);
+                $('#grantSelectedBtn').addEventListener('click', grantSelectedAchievements);
+                $('#revokeSelectedBtn').addEventListener('click', revokeSelectedAchievements);
+                $('#grantAllBtn').addEventListener('click', grantAllAchievements);
+                $('#resetAllAchievementsBtn').addEventListener('click', resetAllAchievements);
+            }
+
+            function init() {
+                $('#year').textContent = new Date().getFullYear();
+
+                // 检查登录状态
+                if (isLoggedIn()) {
+                    showMainContent();
+                    // 初始化主界面内容
+                    refreshPoolEditor();
+                    renderPoolList(loadPool());
+                    updateHistoryCount();
+                    updateDrawLimitDisplay();
+                    updateSyncStatus(); // 更新同步状态显示
+                    initAchievementManagement(); // 初始化成就管理
+                } else {
+                    showLoginOverlay();
+                }
+            }
+
+            // —— 成就管理功能 ——
+            const ACHIEVEMENTS = [
+                {
+                    id: 'first_draw',
+                    name: '初试牛刀',
+                    description: '完成第一次抽奖',
+                    icon: '🎯',
+                    reward: 50,
+                    category: 'basic'
+                },
+                {
+                    id: 'draw_master',
+                    name: '抽奖达人',
+                    description: '累计抽奖10次',
+                    icon: '🎮',
+                    reward: 200,
+                    category: 'basic'
+                },
+                {
+                    id: 'lucky_star',
+                    name: '幸运之星',
+                    description: '首次中奖',
+                    icon: '⭐',
+                    reward: 100,
+                    category: 'basic'
+                },
+                {
+                    id: 'legendary_hunter',
+                    name: '传说猎人',
+                    description: '获得传说级奖品',
+                    icon: '🏆',
+                    reward: 500,
+                    category: 'rare'
+                },
+                {
+                    id: 'coin_collector',
+                    name: '货币收集者',
+                    description: '累计获得100U币',
+                    icon: '💰',
+                    reward: 300,
+                    category: 'basic'
+                },
+                {
+                    id: 'loyal_player',
+                    name: '忠实玩家',
+                    description: '连续7天参与抽奖',
+                    icon: '🔥',
+                    reward: 400,
+                    category: 'rare'
+                },
+                {
+                    id: 'social_butterfly',
+                    name: '社交达人',
+                    description: '邀请5位好友',
+                    icon: '👥',
+                    reward: 600,
+                    category: 'friend'
+                },
+                {
+                    id: 'gift_giver',
+                    name: '礼物达人',
+                    description: '分享礼物10次',
+                    icon: '🎁',
+                    reward: 350,
+                    category: 'friend'
+                },
+                {
+                    id: 'comment_king',
+                    name: '留言之王',
+                    description: '发表20条留言',
+                    icon: '💬',
+                    reward: 250,
+                    category: 'social'
+                },
+                {
+                    id: 'perfectionist',
+                    name: '完美主义者',
+                    description: '收集所有稀有以上奖品',
+                    icon: '💎',
+                    reward: 1000,
+                    category: 'rare'
+                },
+                {
+                    id: 'vip_supporter',
+                    name: 'VIP支持者',
+                    description: '累计积分达到5000',
+                    icon: '👑',
+                    reward: 800,
+                    category: 'rare'
+                },
+                {
+                    id: 'ultimate_collector',
+                    name: '终极收藏家',
+                    description: '解锁所有成就',
+                    icon: '🌟',
+                    reward: 2000,
+                    category: 'legendary'
+                }
+            ];
+
+            let selectedUserId = null;
+            let currentUserData = null;
+
+            function initAchievementManagement() {
+                loadAllUsers();
+                renderAchievementsList();
+                updateGlobalStats();
+            }
+
+            function loadAllUsers() {
+                const userSelect = $('#selectedUser');
+                const comments = JSON.parse(localStorage.getItem('comments') || '[]');
+                const userData = JSON.parse(localStorage.getItem('userData_achievements') || '{}');
+
+                // 清空现有选项
+                userSelect.innerHTML = '<option value="">请选择用户...</option>';
+
+                // 获取所有曾经留言的用户
+                const userNames = new Set();
+                comments.forEach(comment => {
+                    if (comment.userName) {
+                        userNames.add(comment.userName);
+                    }
+                });
+
+                // 添加默认VIP用户
+                if (userData.name) {
+                    userNames.add(userData.name);
+                } else {
+                    userNames.add('VIP股东');
+                }
+
+                // 填充选择框
+                Array.from(userNames).sort().forEach(userName => {
+                    const option = document.createElement('option');
+                    option.value = userName;
+                    option.textContent = userName;
+                    userSelect.appendChild(option);
+                });
+            }
+
+            function searchUsers() {
+                const searchTerm = $('#userSearchInput').value.trim().toLowerCase();
+                const userSelect = $('#selectedUser');
+
+                if (!searchTerm) {
+                    alert('请输入搜索关键词');
+                    return;
+                }
+
+                // 搜索匹配的用户
+                Array.from(userSelect.options).forEach(option => {
+                    if (option.value.toLowerCase().includes(searchTerm)) {
+                        option.selected = true;
+                        selectUser();
+                        return;
+                    }
+                });
+            }
+
+            function selectUser() {
+                const userName = $('#selectedUser').value;
+                if (!userName) {
+                    hideUserInfo();
+                    return;
+                }
+
+                selectedUserId = userName;
+                loadUserData(userName);
+                showUserInfo();
+            }
+
+            function loadUserData(userName) {
+                // 加载用户数据
+                const userData = JSON.parse(localStorage.getItem('userData_achievements') || '{}');
+                const history = JSON.parse(localStorage.getItem('lotteryHistory') || '[]');
+
+                if (userName === userData.name || userName === 'VIP股东') {
+                    currentUserData = {
+                        name: userData.name || 'VIP股东',
+                        bio: userData.bio || '🎯 抽奖达人 · 🏆 成就收集者',
+                        avatar: userData.avatar || '🧸',
+                        achievements: userData.achievements || {},
+                        stats: {
+                            totalDraws: history.length,
+                            totalWins: history.filter(item => item.prize !== '再接再厉').length,
+                            points: calculateUserPoints(history, userData.achievements || {})
+                        }
+                    };
+                } else {
+                    // 为其他用户创建默认数据
+                    currentUserData = {
+                        name: userName,
+                        bio: '普通用户',
+                        avatar: '👤',
+                        achievements: {},
+                        stats: {
+                            totalDraws: 0,
+                            totalWins: 0,
+                            points: 0
+                        }
+                    };
+                }
+
+                updateUserDisplay();
+            }
+
+            function calculateUserPoints(history, achievements) {
+                let points = 0;
+
+                // 从抽奖历史计算积分
+                history.forEach(item => {
+                    if (item.points) {
+                        points += item.points;
+                    }
+                });
+
+                // 添加成就奖励积分
+                Object.values(achievements).forEach(achievement => {
+                    if (achievement.unlocked) {
+                        const achievementData = ACHIEVEMENTS.find(a => a.id === achievement.id);
+                        if (achievementData) points += achievementData.reward;
+                    }
+                });
+
+                return points;
+            }
+
+            function updateUserDisplay() {
+                if (!currentUserData) return;
+
+                $('#userInfoName').textContent = currentUserData.name;
+                $('#userInfoBio').textContent = currentUserData.bio;
+                $('#userInfoAvatar').textContent = currentUserData.avatar;
+                $('#userTotalDraws').textContent = currentUserData.stats.totalDraws;
+                $('#userTotalWins').textContent = currentUserData.stats.totalWins;
+                $('#userPoints').textContent = currentUserData.stats.points;
+
+                const unlockedCount = Object.values(currentUserData.achievements).filter(a => a.unlocked).length;
+                $('#userAchievements').textContent = `${unlockedCount}/${ACHIEVEMENTS.length}`;
+
+                updateAchievementsDisplay();
+                updateButtonStates();
+            }
+
+            function updateAchievementsDisplay() {
+                const achievementsList = $('#achievementsList');
+                achievementsList.innerHTML = '';
+
+                ACHIEVEMENTS.forEach(achievement => {
+                    const userAchievement = currentUserData.achievements[achievement.id];
+                    const isUnlocked = userAchievement?.unlocked || false;
+
+                    const achievementItem = document.createElement('div');
+                    achievementItem.className = `p-3 rounded-lg border-2 cursor-pointer transition-all ${isUnlocked
+                        ? 'border-green-300 bg-green-50'
+                        : 'border-gray-200 bg-gray-50'
+                        }`;
+
+                    achievementItem.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" class="achievement-checkbox" 
+                               data-achievement-id="${achievement.id}" 
+                               ${isUnlocked ? 'checked' : ''}>
+                        <div class="text-2xl">${achievement.icon}</div>
+                        <div class="flex-1">
+                            <h5 class="font-medium text-sm">${achievement.name}</h5>
+                            <p class="text-xs text-gray-600">${achievement.description}</p>
+                            <div class="text-xs text-green-600">+${achievement.reward}积分</div>
+                        </div>
+                        <div class="text-xs ${isUnlocked ? 'text-green-600' : 'text-gray-400'}">
+                            ${isUnlocked ? '✅ 已解锁' : '🔒 未解锁'}
+                        </div>
+                    </div>
                 `;
-                songItem.addEventListener('click', () => loadSong(index));
-                playlist.appendChild(songItem);
-            });
-        }
 
-        function loadSong(index) {
-            currentSongIndex = index;
-            const song = musicLibrary[index];
-            $('#currentSong').textContent = song.title;
-            $('#currentArtist').textContent = song.artist;
-            $('#miniSongName').textContent = `${song.title} - ${song.artist}`;
-            renderPlaylist();
+                    achievementItem.addEventListener('click', (e) => {
+                        if (e.target.type !== 'checkbox') {
+                            const checkbox = achievementItem.querySelector('.achievement-checkbox');
+                            checkbox.checked = !checkbox.checked;
+                            updateButtonStates();
+                        }
+                    });
 
-            // 模拟播放（实际项目中需要真实音频文件）
-            $('#totalTime').textContent = "3:45";
-        }
+                    const checkbox = achievementItem.querySelector('.achievement-checkbox');
+                    checkbox.addEventListener('change', updateButtonStates);
 
-        function togglePlayerSize() {
-            isPlayerMinimized = !isPlayerMinimized;
-            const content = $('#playerContent');
-            const minimized = $('#playerMinimized');
-            const icon = $('#playerToggleIcon');
-
-            if (isPlayerMinimized) {
-                content.classList.add('hidden');
-                minimized.classList.remove('hidden');
-                icon.textContent = '🔼';
-            } else {
-                content.classList.remove('hidden');
-                minimized.classList.add('hidden');
-                icon.textContent = '🔽';
+                    achievementsList.appendChild(achievementItem);
+                });
             }
-        }
 
-        function togglePlayPause() {
-            isPlaying = !isPlaying;
-            const playBtn = $('#playPauseBtn');
-            const miniBtn = $('#miniPlayPause');
+            function updateButtonStates() {
+                const selectedCheckboxes = $$('.achievement-checkbox:checked');
+                const hasSelection = selectedCheckboxes.length > 0;
+                const hasUser = selectedUserId !== null;
 
-            if (isPlaying) {
-                playBtn.textContent = '⏸️';
-                miniBtn.textContent = '⏸️';
-                startProgressSimulation();
-            } else {
-                playBtn.textContent = '▶️';
-                miniBtn.textContent = '▶️';
-                stopProgressSimulation();
+                $('#grantSelectedBtn').disabled = !hasSelection || !hasUser;
+                $('#revokeSelectedBtn').disabled = !hasSelection || !hasUser;
+                $('#grantAllBtn').disabled = !hasUser;
+                $('#resetAllAchievementsBtn').disabled = !hasUser;
             }
-        }
 
-        function previousSong() {
-            currentSongIndex = (currentSongIndex - 1 + musicLibrary.length) % musicLibrary.length;
-            loadSong(currentSongIndex);
-            if (isPlaying) {
-                startProgressSimulation();
-            }
-        }
+            function grantSelectedAchievements() {
+                const selectedCheckboxes = $$('.achievement-checkbox:checked');
+                const achievementIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.achievementId);
 
-        function nextSong() {
-            currentSongIndex = (currentSongIndex + 1) % musicLibrary.length;
-            loadSong(currentSongIndex);
-            if (isPlaying) {
-                startProgressSimulation();
-            }
-        }
-
-        function changeVolume(event) {
-            const volume = event.target.value;
-            // 实际项目中会设置音频音量
-            console.log('Volume set to:', volume);
-        }
-
-        let progressInterval;
-        let currentTime = 0;
-
-        function startProgressSimulation() {
-            currentTime = 0;
-            progressInterval = setInterval(() => {
-                currentTime += 1;
-                const minutes = Math.floor(currentTime / 60);
-                const seconds = currentTime % 60;
-                $('#currentTime').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-                // 模拟进度条（总长度225秒 = 3分45秒）
-                const progress = (currentTime / 225) * 100;
-                $('#progressBar').style.width = Math.min(progress, 100) + '%';
-
-                // 歌曲结束自动下一首
-                if (currentTime >= 225) {
-                    nextSong();
+                if (achievementIds.length === 0) {
+                    alert('请选择要发放的成就');
+                    return;
                 }
-            }, 1000);
+
+                if (!confirm(`确认为用户"${currentUserData.name}"发放${achievementIds.length}个成就？`)) {
+                    return;
+                }
+
+                grantAchievements(achievementIds);
+            }
+
+            function revokeSelectedAchievements() {
+                const selectedCheckboxes = $$('.achievement-checkbox:checked');
+                const achievementIds = Array.from(selectedCheckboxes).map(cb => cb.dataset.achievementId);
+
+                if (achievementIds.length === 0) {
+                    alert('请选择要撤销的成就');
+                    return;
+                }
+
+                if (!confirm(`确认撤销用户"${currentUserData.name}"的${achievementIds.length}个成就？`)) {
+                    return;
+                }
+
+                revokeAchievements(achievementIds);
+            }
+
+            function grantAllAchievements() {
+                if (!confirm(`确认为用户"${currentUserData.name}"发放所有成就？`)) {
+                    return;
+                }
+
+                const allAchievementIds = ACHIEVEMENTS.map(a => a.id);
+                grantAchievements(allAchievementIds);
+            }
+
+            function resetAllAchievements() {
+                if (!confirm(`确认重置用户"${currentUserData.name}"的所有成就？此操作不可恢复！`)) {
+                    return;
+                }
+
+                const allAchievementIds = ACHIEVEMENTS.map(a => a.id);
+                revokeAchievements(allAchievementIds);
+            }
+
+            function grantAchievements(achievementIds) {
+                if (selectedUserId === currentUserData.name || selectedUserId === 'VIP股东') {
+                    // 更新主用户数据
+                    const userData = JSON.parse(localStorage.getItem('userData_achievements') || '{}');
+
+                    achievementIds.forEach(id => {
+                        if (!userData.achievements) userData.achievements = {};
+                        userData.achievements[id] = {
+                            id: id,
+                            unlocked: true,
+                            progress: ACHIEVEMENTS.find(a => a.id === id)?.condition?.value || 1,
+                            unlockedAt: new Date().toISOString(),
+                            adminGranted: true
+                        };
+                    });
+
+                    localStorage.setItem('userData_achievements', JSON.stringify(userData));
+                    currentUserData.achievements = userData.achievements;
+                }
+
+                updateUserDisplay();
+                broadcastUpdate('ACHIEVEMENT_UPDATE', { userId: selectedUserId, achievements: currentUserData.achievements });
+                alert('成就发放成功！');
+            }
+
+            function revokeAchievements(achievementIds) {
+                if (selectedUserId === currentUserData.name || selectedUserId === 'VIP股东') {
+                    // 更新主用户数据
+                    const userData = JSON.parse(localStorage.getItem('userData_achievements') || '{}');
+
+                    achievementIds.forEach(id => {
+                        if (userData.achievements && userData.achievements[id]) {
+                            delete userData.achievements[id];
+                        }
+                    });
+
+                    localStorage.setItem('userData_achievements', JSON.stringify(userData));
+                    currentUserData.achievements = userData.achievements;
+                }
+
+                updateUserDisplay();
+                broadcastUpdate('ACHIEVEMENT_UPDATE', { userId: selectedUserId, achievements: currentUserData.achievements });
+                alert('成就撤销成功！');
+            }
+
+            function renderAchievementsList() {
+                // 初始渲染，等待用户选择
+            }
+
+            function showUserInfo() {
+                $('#userInfoSection').classList.remove('hidden');
+                $('#achievementGrantSection').classList.remove('hidden');
+            }
+
+            function hideUserInfo() {
+                $('#userInfoSection').classList.add('hidden');
+                $('#achievementGrantSection').classList.add('hidden');
+                selectedUserId = null;
+                currentUserData = null;
+            }
+
+            function updateGlobalStats() {
+                const statsContainer = $('#globalAchievementStats');
+                const userData = JSON.parse(localStorage.getItem('userData_achievements') || '{}');
+                const achievements = userData.achievements || {};
+
+                const totalUsers = 1; // 简化统计，主要针对VIP用户
+                const totalAchievements = ACHIEVEMENTS.length;
+                const unlockedAchievements = Object.values(achievements).filter(a => a.unlocked).length;
+                const completionRate = totalAchievements > 0 ? Math.round((unlockedAchievements / totalAchievements) * 100) : 0;
+
+                statsContainer.innerHTML = `
+                <div class="text-center p-3 bg-blue-50 rounded-lg">
+                    <div class="text-lg font-bold text-blue-600">${totalUsers}</div>
+                    <div class="text-xs text-blue-700">总用户数</div>
+                </div>
+                <div class="text-center p-3 bg-green-50 rounded-lg">
+                    <div class="text-lg font-bold text-green-600">${totalAchievements}</div>
+                    <div class="text-xs text-green-700">总成就数</div>
+                </div>
+                <div class="text-center p-3 bg-yellow-50 rounded-lg">
+                    <div class="text-lg font-bold text-yellow-600">${unlockedAchievements}</div>
+                    <div class="text-xs text-yellow-700">已解锁成就</div>
+                </div>
+                <div class="text-center p-3 bg-purple-50 rounded-lg">
+                    <div class="text-lg font-bold text-purple-600">${completionRate}%</div>
+                    <div class="text-xs text-purple-700">完成度</div>
+                </div>
+            `;
+            }
+
+            // —— 音乐播放器功能 ——
+            let musicLibrary = [
+                // 默认音乐库，将通过API动态加载
+            ];
+
+            // Jamendo API配置
+            const JAMENDO_CLIENT_ID = '709fa152'; // 官方测试ID
+            const JAMENDO_API_BASE = 'https://api.jamendo.com/v3.0';
+
+        // 检测微信环境
+        function isWeChatBrowser() {
+            return /micromessenger/i.test(navigator.userAgent);
         }
 
-        function stopProgressSimulation() {
-            if (progressInterval) {
-                clearInterval(progressInterval);
+        async function loadMusicFromAPI() {
+            // 微信环境直接使用备用音乐库
+            if (isWeChatBrowser()) {
+                console.log('🎵 管理员界面检测到微信环境，使用内置音乐库');
+                musicLibrary = getBackupMusicLibrary();
+                return true;
+            }
+
+            try {
+                // 添加超时控制
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8秒超时
+
+                // 获取流行音乐和电子音乐
+                const [popResponse, electroResponse, rockResponse] = await Promise.all([
+                    fetch(`${JAMENDO_API_BASE}/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=5&tags=pop&include=musicinfo&audioformat=mp32`, {
+                        signal: controller.signal,
+                        mode: 'cors'
+                    }),
+                    fetch(`${JAMENDO_API_BASE}/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=3&tags=electronic&include=musicinfo&audioformat=mp32`, {
+                        signal: controller.signal,
+                        mode: 'cors'
+                    }),
+                    fetch(`${JAMENDO_API_BASE}/tracks/?client_id=${JAMENDO_CLIENT_ID}&format=json&limit=2&tags=rock&include=musicinfo&audioformat=mp32`, {
+                        signal: controller.signal,
+                        mode: 'cors'
+                    })
+                ]);
+
+                clearTimeout(timeoutId);
+
+                if (!popResponse.ok || !electroResponse.ok || !rockResponse.ok) {
+                    throw new Error('API请求失败');
+                }
+
+                const popData = await popResponse.json();
+                const electroData = await electroResponse.json();
+                const rockData = await rockResponse.json();
+
+                // 合并所有音乐
+                const allTracks = [
+                    ...(popData.results || []),
+                    ...(electroData.results || []),
+                    ...(rockData.results || [])
+                ];
+
+                if (allTracks.length === 0) {
+                    throw new Error('未获取到音乐数据');
+                }
+
+                // 转换为我们的音乐库格式
+                musicLibrary = allTracks.map(track => ({
+                    id: track.id,
+                    title: track.name || 'Unknown Title',
+                    artist: track.artist_name || 'Unknown Artist',
+                    album: track.album_name || 'Unknown Album',
+                    url: track.audio || track.audiodownload,
+                    duration: formatDuration(track.duration),
+                    image: track.album_image || track.image,
+                    jamendoUrl: `https://www.jamendo.com/track/${track.id}`
+                }));
+
+                console.log('🎵 管理员界面已加载', musicLibrary.length, '首免费音乐');
+                return true;
+            } catch (error) {
+                console.error('❌ 管理员界面加载音乐失败:', error);
+                // 使用备用音乐库
+                musicLibrary = getBackupMusicLibrary();
+                return false;
             }
         }
 
-        // 更新初始化函数
-        const originalAdminInit = init;
-
-        function init() {
-            $('#year').textContent = new Date().getFullYear();
-
-            // 检查登录状态
-            if (isLoggedIn()) {
-                showMainContent();
-                // 初始化主界面内容
-                refreshPoolEditor();
-                renderPoolList(loadPool());
-                updateHistoryCount();
-                updateDrawLimitDisplay();
-                updateSyncStatus(); // 更新同步状态显示
-                initMusicPlayer(); // 初始化音乐播放器
-            } else {
-                showLoginOverlay();
+        // 备用音乐库（如果API失败）
+        function getBackupMusicLibrary() {
+                return [
+                    {
+                        title: "Admin Music 1",
+                        artist: "System Sound",
+                        album: "Background Tracks",
+                        url: "",
+                        duration: "3:24",
+                        image: "",
+                        jamendoUrl: "#"
+                    },
+                    {
+                        title: "Admin Music 2",
+                        artist: "System Sound",
+                        album: "Background Tracks",
+                        url: "",
+                        duration: "4:12",
+                        image: "",
+                        jamendoUrl: "#"
+                    }
+                ];
             }
-        }
 
-        // —— 自定义鼠标和交互效果 ——
-        function initCustomCursor() {
-            const cursor = $('.custom-cursor');
-            let mouseX = 0, mouseY = 0;
+            // 时长格式化
+            function formatDuration(seconds) {
+                if (!seconds) return "0:00";
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            }
 
-            document.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-                cursor.style.left = mouseX + 'px';
-                cursor.style.top = mouseY + 'px';
+            let currentSongIndex = 0;
+            let isPlaying = false;
+            let currentAudio = null;
+            let isPlayerMinimized = true; // 默认最小化
 
-                createCursorTrail(mouseX, mouseY);
-            });
-
-            document.addEventListener('mousedown', () => {
-                cursor.classList.add('clicking');
-            });
-
-            document.addEventListener('mouseup', () => {
-                cursor.classList.remove('clicking');
-            });
-        }
-
-        function createCursorTrail(x, y) {
-            const trail = document.createElement('div');
-            trail.className = 'cursor-trail';
-            trail.style.left = (x - 4) + 'px';
-            trail.style.top = (y - 4) + 'px';
-            document.body.appendChild(trail);
-
-            setTimeout(() => {
-                if (document.body.contains(trail)) {
-                    document.body.removeChild(trail);
+            async function initMusicPlayer() {
+                // 先加载音乐库
+                const loadSuccess = await loadMusicFromAPI();
+                if (loadSuccess) {
+                    console.log('🎵 管理员界面成功加载Jamendo音乐库');
+                } else {
+                    console.log('🎵 管理员界面使用备用音乐库');
                 }
-            }, 500);
-        }
 
-        function initButtonEffects() {
-            document.querySelectorAll('.enhanced-btn').forEach(button => {
-                button.addEventListener('click', createRipple);
-            });
-        }
-
-        function createRipple(event) {
-            const button = event.currentTarget;
-            const rect = button.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const x = event.clientX - rect.left - size / 2;
-            const y = event.clientY - rect.top - size / 2;
-
-            const ripple = document.createElement('div');
-            ripple.className = 'btn-ripple';
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = x + 'px';
-            ripple.style.top = y + 'px';
-
-            button.appendChild(ripple);
-
-            setTimeout(() => {
-                if (button.contains(ripple)) {
-                    button.removeChild(ripple);
+                renderPlaylist();
+                if (musicLibrary.length > 0) {
+                    loadSong(0);
                 }
-            }, 600);
-        }
 
-        // 更新admin初始化函数
-        const originalAdminInit2 = init;
+                // 初始化为最小化状态
+                const content = $('#playerContent');
+                const minimized = $('#playerMinimized');
+                const icon = $('#playerToggleIcon');
 
-        function init() {
-            $('#year').textContent = new Date().getFullYear();
+                if (content && minimized && icon) {
+                    content.classList.add('hidden');
+                    minimized.classList.remove('hidden');
+                    icon.textContent = '🔼';
+                }
 
-            // 检查登录状态
-            if (isLoggedIn()) {
-                showMainContent();
-                // 初始化主界面内容
-                refreshPoolEditor();
-                renderPoolList(loadPool());
-                updateHistoryCount();
-                updateDrawLimitDisplay();
-                updateSyncStatus(); // 更新同步状态显示
-                initMusicPlayer(); // 初始化音乐播放器
+                // 播放器控制事件
+                $('#togglePlayer').addEventListener('click', togglePlayerSize);
+                $('#playPauseBtn').addEventListener('click', togglePlayPause);
+                $('#miniPlayPause').addEventListener('click', togglePlayPause);
+                $('#prevBtn').addEventListener('click', previousSong);
+                $('#nextBtn').addEventListener('click', nextSong);
+                // 移除音量控制事件监听器
+            }
 
-                // 初始化交互效果
+            function renderPlaylist() {
+                const playlist = $('#playlist');
+                if (!playlist) return;
+
+                playlist.innerHTML = '';
+
+                if (musicLibrary.length === 0) {
+                    playlist.innerHTML = '<div class="text-xs text-slate-500 p-2">🎵 正在加载音乐...</div>';
+                    return;
+                }
+
+                musicLibrary.forEach((song, index) => {
+                    const songItem = document.createElement('div');
+                    songItem.className = `cursor-pointer p-2 rounded text-xs hover:bg-slate-100 transition-colors ${index === currentSongIndex ? 'bg-[var(--labu)] text-white' : ''}`;
+                    songItem.innerHTML = `
+                        <div class="font-medium truncate">${song.title}</div>
+                        <div class="text-xs opacity-75 truncate">${song.artist}</div>
+                        <div class="text-xs opacity-60 truncate">${song.duration || ''}</div>
+                    `;
+                    songItem.addEventListener('click', () => loadSong(index));
+                    playlist.appendChild(songItem);
+                });
+            }
+
+            // 旧的loadSong函数已被上面的真实音频版本替代
+
+            function togglePlayerSize() {
+                isPlayerMinimized = !isPlayerMinimized;
+                const content = $('#playerContent');
+                const minimized = $('#playerMinimized');
+                const icon = $('#playerToggleIcon');
+
+                if (isPlayerMinimized) {
+                    content.classList.add('hidden');
+                    minimized.classList.remove('hidden');
+                    icon.textContent = '🔼';
+                } else {
+                    content.classList.remove('hidden');
+                    minimized.classList.add('hidden');
+                    icon.textContent = '🔽';
+                }
+            }
+
+            // 旧的播放控制函数已被上面的真实音频版本替代
+
+            // 真实音频播放功能
+            function loadSong(index) {
+                if (!musicLibrary || musicLibrary.length === 0) return;
+
+                currentSongIndex = index;
+                const song = musicLibrary[index];
+
+                // 停止当前播放
+                if (currentAudio) {
+                    currentAudio.pause();
+                    currentAudio = null;
+                }
+
+                // 更新UI
+                const currentSongEl = $('#currentSong');
+                const currentArtistEl = $('#currentArtist');
+                const miniSongNameEl = $('#miniSongName');
+                const totalTimeEl = $('#totalTime');
+
+                if (currentSongEl) currentSongEl.textContent = song.title;
+                if (currentArtistEl) currentArtistEl.textContent = song.artist;
+                if (miniSongNameEl) miniSongNameEl.textContent = `${song.title} - ${song.artist}`;
+                if (totalTimeEl) totalTimeEl.textContent = song.duration || "0:00";
+
+                // 创建新的音频对象
+                if (song.url && song.url !== '') {
+                    currentAudio = new Audio(song.url);
+                    currentAudio.crossOrigin = "anonymous";
+
+                    // 音频加载完成
+                    currentAudio.addEventListener('loadeddata', () => {
+                        console.log('🎵 管理员音频已加载:', song.title);
+                        if (totalTimeEl) {
+                            totalTimeEl.textContent = formatDuration(currentAudio.duration);
+                        }
+                    });
+
+                    // 播放时更新进度
+                    currentAudio.addEventListener('timeupdate', updateProgress);
+
+                    // 播放结束自动下一首
+                    currentAudio.addEventListener('ended', () => {
+                        nextSong();
+                    });
+
+                    // 错误处理
+                    currentAudio.addEventListener('error', (e) => {
+                        console.warn('🎵 管理员音频加载失败:', song.title, e);
+                        nextSong();
+                    });
+                } else {
+                    console.warn('🎵 无有效音频URL:', song.title);
+                }
+
+                renderPlaylist();
+                isPlaying = false;
+                updatePlayButtons();
+            }
+
+            function togglePlayPause() {
+                if (!currentAudio) {
+                    console.warn('🎵 没有可播放的音频');
+                    return;
+                }
+
+                if (isPlaying) {
+                    currentAudio.pause();
+                    isPlaying = false;
+                } else {
+                    const playPromise = currentAudio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            isPlaying = true;
+                        }).catch(error => {
+                            console.error('🎵 播放失败:', error);
+                        });
+                    }
+                }
+
+                updatePlayButtons();
+            }
+
+            function updatePlayButtons() {
+                const playBtn = $('#playPauseBtn');
+                const miniBtn = $('#miniPlayPause');
+
+                if (playBtn) playBtn.textContent = isPlaying ? '⏸️' : '▶️';
+                if (miniBtn) miniBtn.textContent = isPlaying ? '⏸️' : '▶️';
+            }
+
+            function previousSong() {
+                if (musicLibrary.length === 0) return;
+                currentSongIndex = (currentSongIndex - 1 + musicLibrary.length) % musicLibrary.length;
+                loadSong(currentSongIndex);
+                if (isPlaying && currentAudio) {
+                    currentAudio.play().catch(console.error);
+                }
+            }
+
+            function nextSong() {
+                if (musicLibrary.length === 0) return;
+                currentSongIndex = (currentSongIndex + 1) % musicLibrary.length;
+                loadSong(currentSongIndex);
+                if (isPlaying && currentAudio) {
+                    currentAudio.play().catch(console.error);
+                }
+            }
+
+            // 更新播放进度
+            function updateProgress() {
+                if (!currentAudio) return;
+
+                const currentTime = currentAudio.currentTime;
+                const duration = currentAudio.duration;
+
+                if (duration) {
+                    const progress = (currentTime / duration) * 100;
+                    const progressBar = $('#progressBar');
+                    const currentTimeEl = $('#currentTime');
+
+                    if (progressBar) progressBar.style.width = progress + '%';
+                    if (currentTimeEl) currentTimeEl.textContent = formatDuration(currentTime);
+                }
+            }
+
+            let progressInterval;
+            let currentTime = 0;
+
+            function startProgressSimulation() {
+                currentTime = 0;
+                progressInterval = setInterval(() => {
+                    currentTime += 1;
+                    const minutes = Math.floor(currentTime / 60);
+                    const seconds = currentTime % 60;
+                    $('#currentTime').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                    // 模拟进度条（总长度225秒 = 3分45秒）
+                    const progress = (currentTime / 225) * 100;
+                    $('#progressBar').style.width = Math.min(progress, 100) + '%';
+
+                    // 歌曲结束自动下一首
+                    if (currentTime >= 225) {
+                        nextSong();
+                    }
+                }, 1000);
+            }
+
+            function stopProgressSimulation() {
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                }
+            }
+
+            // 更新初始化函数
+            const originalAdminInit = init;
+
+            function init() {
+                $('#year').textContent = new Date().getFullYear();
+
+                // 检查登录状态
+                if (isLoggedIn()) {
+                    showMainContent();
+                    // 初始化主界面内容
+                    refreshPoolEditor();
+                    renderPoolList(loadPool());
+                    updateHistoryCount();
+                    updateDrawLimitDisplay();
+                    updateSyncStatus(); // 更新同步状态显示
+                    initMusicPlayer(); // 初始化音乐播放器
+                } else {
+                    showLoginOverlay();
+                }
+            }
+
+            // —— 自定义鼠标和交互效果 ——
+            function initCustomCursor() {
+                const cursor = $('.custom-cursor');
+                let mouseX = 0, mouseY = 0;
+
+                document.addEventListener('mousemove', (e) => {
+                    mouseX = e.clientX;
+                    mouseY = e.clientY;
+                    cursor.style.left = mouseX + 'px';
+                    cursor.style.top = mouseY + 'px';
+
+                    createCursorTrail(mouseX, mouseY);
+                });
+
+                document.addEventListener('mousedown', () => {
+                    cursor.classList.add('clicking');
+                });
+
+                document.addEventListener('mouseup', () => {
+                    cursor.classList.remove('clicking');
+                });
+            }
+
+            function createCursorTrail(x, y) {
+                const trail = document.createElement('div');
+                trail.className = 'cursor-trail';
+                trail.style.left = (x - 4) + 'px';
+                trail.style.top = (y - 4) + 'px';
+                document.body.appendChild(trail);
+
                 setTimeout(() => {
-                    initCustomCursor();
-                    initButtonEffects();
-                }, 100);
-            } else {
-                showLoginOverlay();
-                // 为登录界面也初始化交互效果
-                setTimeout(() => {
-                    initCustomCursor();
-                    initButtonEffects();
-                }, 100);
+                    if (document.body.contains(trail)) {
+                        document.body.removeChild(trail);
+                    }
+                }, 500);
             }
-        }
 
-        bind();
-        init();
+            function initButtonEffects() {
+                document.querySelectorAll('.enhanced-btn').forEach(button => {
+                    button.addEventListener('click', createRipple);
+                });
+            }
+
+            function createRipple(event) {
+                const button = event.currentTarget;
+                const rect = button.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = event.clientX - rect.left - size / 2;
+                const y = event.clientY - rect.top - size / 2;
+
+                const ripple = document.createElement('div');
+                ripple.className = 'btn-ripple';
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+
+                button.appendChild(ripple);
+
+                setTimeout(() => {
+                    if (button.contains(ripple)) {
+                        button.removeChild(ripple);
+                    }
+                }, 600);
+            }
+
+            // 更新admin初始化函数
+            const originalAdminInit2 = init;
+
+            function init() {
+                $('#year').textContent = new Date().getFullYear();
+
+                // 检查登录状态
+                if (isLoggedIn()) {
+                    showMainContent();
+                    // 初始化主界面内容
+                    refreshPoolEditor();
+                    renderPoolList(loadPool());
+                    updateHistoryCount();
+                    updateDrawLimitDisplay();
+                    updateSyncStatus(); // 更新同步状态显示
+                    initMusicPlayer(); // 初始化音乐播放器
+
+                    // 初始化交互效果
+                    setTimeout(() => {
+                        initCustomCursor();
+                        initButtonEffects();
+                    }, 100);
+                } else {
+                    showLoginOverlay();
+                    // 为登录界面也初始化交互效果
+                    setTimeout(() => {
+                        initCustomCursor();
+                        initButtonEffects();
+                    }, 100);
+                }
+            }
+
+            bind();
+            init();
+        } // 关闭条款检查的else块
     </script>
 </body>
 

@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Labubu基金会 - 欢迎页面 🧸</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧸</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- VIP安全验证 -->
+    <script src="auth.js"></script>
+    <script src="config.enc.js"></script>
+    <!-- 移除Google Fonts确保微信兼容性 -->
+    <style>
+        body, html, * {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+        }
+    </style>
+    <style>
+        :root {
+            --labu: #6b5b95;
+            --labu2: #ffcc00;
+            --disney-blue: #0074E4;
+            --disney-yellow: #FFD700;
+        }
+
+        body {
+            font-family: 'Zen Maru Gothic', system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans SC', 'PingFang SC', 'Microsoft Yahei', sans-serif;
+            overflow: hidden;
+        }
+
+        /* 开场动画容器 */
+        .opening-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            opacity: 1;
+            transition: opacity 1s ease-out;
+        }
+
+        .opening-animation.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 迪士尼角色容器 */
+        .characters-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 迪士尼角色动画 */
+        .disney-character {
+            position: absolute;
+            font-size: 4rem;
+            animation: gatherToCenter 3s ease-in-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes gatherToCenter {
+            0% {
+                opacity: 1;
+                transform: scale(0.5) rotate(0deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2) rotate(180deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0) rotate(360deg) translate(calc(50vw - 50%), calc(50vh - 50%));
+            }
+        }
+
+        /* 中心Labubu动画 */
+        .center-labubu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8rem;
+            opacity: 0;
+            animation: labubuAppear 2s ease-in-out 2.5s forwards;
+        }
+
+        @keyframes labubuAppear {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0) rotate(-360deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.5) rotate(0deg);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+            }
+        }
+
+        /* 星星粒子效果 */
+        .star-particle {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0;
+            animation: starTwinkle 4s ease-in-out infinite;
+        }
+
+        @keyframes starTwinkle {
+
+            0%,
+            100% {
+                opacity: 0;
+                transform: scale(0);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* 法律条款界面 */
+        .terms-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #f8fafc;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.8s ease-in-out;
+        }
+
+        .terms-container.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .terms-content {
+            max-width: 600px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .terms-header {
+            text-align: center;
+            padding: 40px 0 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .terms-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 0;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .terms-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terms-body::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+
+        .terms-body::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+
+        .terms-body::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .terms-footer {
+            padding: 20px 0;
+            border-top: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .agree-button {
+            width: 100%;
+            padding: 16px;
+            background: #94a3b8;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: not-allowed;
+            transition: all 0.3s ease;
+        }
+
+        .agree-button.enabled {
+            background: linear-gradient(135deg, var(--labu), var(--labu2));
+            cursor: pointer;
+            transform: translateY(0);
+        }
+
+        .agree-button.enabled:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(107, 91, 149, 0.3);
+        }
+
+        .highlight-text {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .important-section {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(245, 101, 101, 0.1));
+            border-left: 4px solid #ef4444;
+            padding: 16px;
+            margin: 16px 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .disney-character {
+                font-size: 2.5rem;
+            }
+
+            .center-labubu {
+                font-size: 5rem;
+            }
+
+            .terms-content {
+                padding: 15px;
+                max-width: 100%;
+            }
+
+            .terms-header {
+                padding: 20px 0 15px;
+            }
+
+            .terms-header h1 {
+                font-size: 20px;
+            }
+
+            .terms-header p {
+                font-size: 12px;
+            }
+
+            .terms-body {
+                font-size: 14px;
+                line-height: 1.6;
+                padding: 20px 0;
+            }
+
+            .terms-body h2 {
+                font-size: 18px;
+                margin-bottom: 12px;
+            }
+
+            .terms-body h3 {
+                font-size: 16px;
+            }
+
+            .terms-body h4 {
+                font-size: 15px;
+            }
+
+            .agree-button {
+                font-size: 15px;
+                min-height: 48px;
+                padding: 14px;
+            }
+
+            .highlight-text {
+                font-size: 13px;
+                padding: 3px 8px;
+            }
+
+            .important-section {
+                margin: 12px 0;
+                padding: 12px;
+            }
+
+            /* 移动端星星粒子优化 */
+            .star-particle {
+                font-size: 1rem;
+            }
+        }
+
+        /* 小屏幕设备优化 */
+        @media (max-width: 480px) {
+            .disney-character {
+                font-size: 2rem;
+            }
+
+            .center-labubu {
+                font-size: 4rem;
+            }
+
+            .terms-content {
+                padding: 10px;
+            }
+
+            .terms-header h1 {
+                font-size: 18px;
+            }
+
+            .terms-body {
+                font-size: 13px;
+            }
+
+            .terms-body h2 {
+                font-size: 16px;
+            }
+
+            .agree-button {
+                font-size: 14px;
+            }
+        }
+
+        /* 触摸设备优化 */
+        @media (hover: none) {
+            .agree-button.enabled:hover {
+                transform: none;
+                box-shadow: 0 4px 15px rgba(107, 91, 149, 0.3);
+            }
+        }
+
+        /* 过渡动画 */
+        .fade-transition {
+            opacity: 1;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .fade-transition.fade-out {
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50">
+    <!-- 开场动画 -->
+    <div id="openingAnimation" class="opening-animation">
+        <div class="characters-container">
+            <!-- 迪士尼角色将通过JavaScript动态生成 -->
+            <div class="center-labubu">🧸</div>
+        </div>
+    </div>
+
+    <!-- 法律条款界面 -->
+    <div id="termsContainer" class="terms-container">
+        <div class="terms-content">
+            <div class="terms-header">
+                <div class="flex items-center justify-center gap-3 mb-4">
+                    <div class="text-6xl">🧸</div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-800">Labubu基金会</h1>
+                        <p class="text-sm text-slate-600">VIP股东专享服务条款</p>
+                    </div>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-1">
+                    <div id="scrollProgress"
+                        class="bg-gradient-to-r from-purple-500 to-yellow-500 h-1 rounded-full transition-all duration-300"
+                        style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div id="termsBody" class="terms-body">
+                <section class="mb-8">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        🎯 服务声明
+                    </h2>
+                    <p class="mb-4">
+                        欢迎使用<span class="highlight-text">Labubu基金会VIP股东专享抽奖系统</span>！本系统专为基金会股东设计，旨在为投资者提供独特的回馈体验。
+                    </p>
+                    <p class="mb-4">
+                        通过参与本系统，您确认已充分了解并同意遵守以下服务条款。请仔细阅读以下内容，确保您完全理解所有条款和条件。
+                    </p>
+                </section>
+
+                <section class="mb-8">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        💎 股东权益说明
+                    </h2>
+                    <div class="important-section">
+                        <h3 class="font-semibold mb-2">🌟 本活动是基金会对投资者的特别回馈</h3>
+                        <p class="mb-3">
+                            作为<span class="highlight-text">Labubu基金会</span>的尊贵股东，您享有以下专属权益：
+                        </p>
+                        <ul class="list-disc list-inside space-y-2 text-sm">
+                            <li><strong>专属抽奖权限</strong>：仅限认证股东参与的高级奖品池</li>
+                            <li><strong>稀有奖品机会</strong>：包含限量版Labubu、迪士尼联名商品等珍贵奖品</li>
+                            <li><strong>货币奖励</strong>：直接发放的1U币、3U币、5U币等现金奖励</li>
+                            <li><strong>积分兑换系统</strong>：累积积分兑换更多专属商品</li>
+                            <li><strong>个人成就系统</strong>：专属勋章和等级认证</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="mb-8">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        🎪 活动规则
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+                            <h4 class="font-semibold text-blue-800 mb-2">抽奖规则</h4>
+                            <ul class="text-sm text-blue-700 space-y-1">
+                                <li>• 每位股东享有每日抽奖机会，具体次数由系统设定</li>
+                                <li>• 奖品发放基于随机算法，确保公平公正</li>
+                                <li>• 稀有度等级：普通级、稀有级、史诗级、传说级、神话级</li>
+                                <li>• 中奖记录实时保存，支持导出和查询</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
+                            <h4 class="font-semibold text-green-800 mb-2">奖品发放</h4>
+                            <ul class="text-sm text-green-700 space-y-1">
+                                <li>• 虚拟奖品即时到账，实体奖品需要联系客服领取</li>
+                                <li>• 货币奖励将按照基金会财务流程处理</li>
+                                <li>• 奖品不可转让，仅限中奖股东本人享用</li>
+                                <li>• 特殊奖品可能需要额外的身份验证</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="mb-8">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        ⚖️ 免责声明
+                    </h2>
+                    <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                        <ul class="text-sm text-yellow-800 space-y-2">
+                            <li>• 本系统仅供娱乐和股东回馈使用，不构成任何投资建议</li>
+                            <li>• 系统可能因技术维护、升级等原因暂时中断服务</li>
+                            <li>• 基金会保留随时调整活动规则和奖品设置的权利</li>
+                            <li>• 参与者应合理安排时间，避免过度沉迷</li>
+                            <li>• 如发现系统漏洞或不当使用，基金会有权取消相关奖励</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="mb-8">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        🔒 隐私保护
+                    </h2>
+                    <p class="mb-4">
+                        我们严格保护您的个人信息和参与数据：
+                    </p>
+                    <ul class="list-disc list-inside space-y-2 text-sm">
+                        <li>所有数据仅用于系统功能实现和服务优化</li>
+                        <li>不会向第三方泄露您的个人信息</li>
+                        <li>中奖记录和积分信息安全存储</li>
+                        <li>您可以随时要求删除个人数据</li>
+                    </ul>
+                </section>
+
+                <section class="mb-8">
+                    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                        📞 联系我们
+                    </h2>
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <p class="mb-2">如有任何疑问或需要帮助，请联系：</p>
+                        <ul class="text-sm space-y-1">
+                            <li><strong>客服邮箱：</strong> vip@labubu-fund.com</li>
+                            <li><strong>客服时间：</strong> 工作日 9:00-18:00</li>
+                            <li><strong>技术支持：</strong> tech@labubu-fund.com</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <div class="important-section">
+                    <h2 class="text-xl font-bold mb-4 text-center flex items-center justify-center gap-2">
+                        ⚡ 重要声明
+                    </h2>
+                    <div class="text-center space-y-3">
+                        <p class="text-lg font-semibold">
+                            🎊 <span class="highlight-text">本活动是为了回馈广大投资者</span> 🎊
+                        </p>
+                        <p class="text-base">
+                            感谢您对Labubu基金会的信任与支持！
+                        </p>
+                        <div class="mt-6 p-4 bg-red-50 border-2 border-red-200 rounded-lg">
+                            <p class="text-lg font-bold text-red-800">
+                                🏛️ 本活动最终解释权归Labubu基金会所有 🏛️
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center text-xs text-slate-500 mt-8 pt-8 border-t border-slate-200">
+                    <p>© 2024 Labubu基金会 版权所有</p>
+                    <p>生效日期：2024年8月14日</p>
+                </div>
+            </div>
+
+            <div class="terms-footer">
+                <button id="agreeButton" class="agree-button" disabled>
+                    请先阅读完整条款内容
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 安全检查
+        if (!window._secureConfig || !window._secureConfig.validate()) {
+            console.log('🎵 欢迎页面');
+        }
+
+        // 迪士尼角色数组
+        const disneyCharacters = [
+            '🐭', '🐰', '🦆', '🐶', '🐱', '🐻', '🦊', '🐷',
+            '🎪', '🎠', '🎡', '🎢', '🎭', '🎨', '🎪', '⭐',
+            '✨', '🌟', '💫', '🎈', '🎁', '🎀', '🎊', '🎉'
+        ];
+
+        // 创建开场动画
+        function createOpeningAnimation() {
+            const container = document.querySelector('.characters-container');
+
+            // 创建迪士尼角色
+            disneyCharacters.forEach((char, index) => {
+                const element = document.createElement('div');
+                element.className = 'disney-character';
+                element.textContent = char;
+
+                // 随机位置（从边缘开始）
+                const side = Math.floor(Math.random() * 4);
+                switch (side) {
+                    case 0: // 顶部
+                        element.style.top = '0px';
+                        element.style.left = Math.random() * 100 + '%';
+                        break;
+                    case 1: // 右侧
+                        element.style.top = Math.random() * 100 + '%';
+                        element.style.right = '0px';
+                        break;
+                    case 2: // 底部
+                        element.style.bottom = '0px';
+                        element.style.left = Math.random() * 100 + '%';
+                        break;
+                    case 3: // 左侧
+                        element.style.top = Math.random() * 100 + '%';
+                        element.style.left = '0px';
+                        break;
+                }
+
+                // 延迟显示，创造波浪效果
+                element.style.animationDelay = (index * 0.1) + 's';
+
+                container.appendChild(element);
+            });
+
+            // 创建星星粒子
+            for (let i = 0; i < 20; i++) {
+                const star = document.createElement('div');
+                star.className = 'star-particle';
+                star.textContent = '⭐';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(star);
+            }
+        }
+
+        // 显示法律条款
+        function showTerms() {
+            const openingAnimation = document.getElementById('openingAnimation');
+            const termsContainer = document.getElementById('termsContainer');
+
+            setTimeout(() => {
+                openingAnimation.classList.add('hidden');
+                setTimeout(() => {
+                    termsContainer.classList.add('show');
+                    document.body.style.overflow = 'hidden';
+                }, 500);
+            }, 4500); // 动画播放4.5秒后显示条款
+        }
+
+        // 监听滚动进度
+        function initScrollTracking() {
+            const termsBody = document.getElementById('termsBody');
+            const scrollProgress = document.getElementById('scrollProgress');
+            const agreeButton = document.getElementById('agreeButton');
+
+            termsBody.addEventListener('scroll', () => {
+                const scrollTop = termsBody.scrollTop;
+                const scrollHeight = termsBody.scrollHeight - termsBody.clientHeight;
+                const scrollPercentage = (scrollTop / scrollHeight) * 100;
+
+                scrollProgress.style.width = scrollPercentage + '%';
+
+                // 滚动到90%以上才能点击同意
+                if (scrollPercentage >= 90) {
+                    agreeButton.disabled = false;
+                    agreeButton.classList.add('enabled');
+                    agreeButton.textContent = '我已阅读并同意以上条款，进入VIP股东专享系统';
+                }
+            });
+
+            // 同意按钮点击事件
+            agreeButton.addEventListener('click', () => {
+                if (!agreeButton.disabled) {
+                    // 保存同意状态
+                    localStorage.setItem('terms_agreed', Date.now().toString());
+
+                    // 淡出效果
+                    document.body.classList.add('fade-transition');
+                    setTimeout(() => {
+                        document.body.classList.add('fade-out');
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1000);
+                    }, 100);
+                }
+            });
+        }
+
+        // 检查是否已经同意过条款
+        function checkTermsAgreement() {
+            const agreed = localStorage.getItem('terms_agreed');
+            if (agreed) {
+                const agreeTime = parseInt(agreed);
+                const now = Date.now();
+                const dayInMs = 24 * 60 * 60 * 1000;
+
+                // 条款同意有效期7天
+                if (now - agreeTime < 7 * dayInMs) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+            }
+        }
+
+        // 优化性能
+        function optimizePerformance() {
+            // 预加载主页面资源
+            const link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = 'index.html';
+            document.head.appendChild(link);
+
+            // 防止内存泄漏
+            window.addEventListener('beforeunload', () => {
+                // 清理动画元素
+                document.querySelectorAll('.disney-character, .star-particle').forEach(el => {
+                    el.remove();
+                });
+            });
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            checkTermsAgreement();
+            createOpeningAnimation();
+            showTerms();
+            initScrollTracking();
+            optimizePerformance();
+        });
+
+        // 禁用右键和选择
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('selectstart', e => e.preventDefault());
+    </script>
+</body>
+
+</html>
