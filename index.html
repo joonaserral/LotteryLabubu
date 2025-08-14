@@ -1,14 +1,412 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 
 <head>
-    <meta charset="utf-8">
-    <title>我的网站</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Labubu 幸运抽奖</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --labu: #6b5b95;
+            --labu2: #ffcc00;
+        }
+
+        body {
+            font-family: 'Zen Maru Gothic', system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans SC', 'PingFang SC', 'Microsoft Yahei', sans-serif;
+        }
+
+        .labu-gradient {
+            background-image: linear-gradient(135deg, rgba(107, 91, 149, .12), rgba(255, 204, 0, .12));
+        }
+
+        .spin {
+            animation: spin 1.2s cubic-bezier(.2, .7, .2, 1) 1;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(-6deg) scale(.98);
+            }
+
+            50% {
+                transform: rotate(6deg) scale(1.02);
+            }
+
+            to {
+                transform: rotate(0) scale(1);
+            }
+        }
+    </style>
 </head>
 
-<body>
-    <h1>欢迎来到我的网站！</h1>
-    <p>这是用 GitHub Pages 搭建的。</p>
+<body class="bg-slate-50 text-slate-900">
+    <!-- 顶部栏 -->
+    <header class="sticky top-0 z-10 backdrop-blur bg-white/60 border-b border-slate-200">
+        <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-[var(--labu)] grid place-content-center text-white text-xl">🦊</div>
+                <h1 class="font-bold text-lg">Labubu 幸运抽奖</h1>
+            </div>
+            <nav class="text-sm flex items-center gap-3">
+                <a href="#draw" class="hover:underline">抽奖</a>
+                <a href="#history" class="hover:underline">记录</a>
+                <a href="#settings" class="hover:underline">设置</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero -->
+    <section class="labu-gradient">
+        <div class="max-w-5xl mx-auto px-4 py-10 md:py-16 grid md:grid-cols-2 gap-8 items-center">
+            <div>
+                <h2 class="text-3xl md:text-4xl font-extrabold leading-tight">抽一抽，Labubu 陪你欧！</h2>
+                <p class="mt-3 text-slate-700">内置抵扣券、实体礼品、折扣券三类奖项。支持库存与权重，自动生成兑换码；所有结果将保存在本地并按时间标记。</p>
+                <div class="mt-5 flex flex-wrap gap-3">
+                    <a href="#draw"
+                        class="px-4 py-2 rounded-xl bg-[var(--labu)] text-white font-medium shadow hover:opacity-90">开始抽奖</a>
+                    <button id="exportCsvBtn"
+                        class="px-4 py-2 rounded-xl bg-slate-900 text-white font-medium shadow hover:opacity-90">导出CSV</button>
+                </div>
+            </div>
+            <div class="relative">
+                <div class="aspect-square rounded-3xl bg-white shadow-lg p-6 border border-slate-200">
+                    <div class="h-full w-full grid place-content-center">
+                        <div class="text-7xl md:text-8xl select-none">🧸</div>
+                        <div class="text-center mt-4 text-sm text-slate-600">Labubu 主题（示意）</div>
+                    </div>
+                </div>
+                <div class="absolute -z-10 inset-0 blur-3xl opacity-30"
+                    style="background: radial-gradient(600px 200px at 20% 30%, var(--labu), transparent), radial-gradient(500px 200px at 80% 70%, var(--labu2), transparent);">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 抽奖卡片 -->
+    <main id="draw" class="max-w-5xl mx-auto px-4 py-10">
+        <div class="grid md:grid-cols-5 gap-6 items-start">
+            <section class="md:col-span-3">
+                <div class="rounded-3xl bg-white border border-slate-200 shadow">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                        <h3 class="font-semibold">抽奖面板</h3>
+                        <div class="text-xs text-slate-500">本地时间：<span id="now"></span></div>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid gap-4">
+                            <div class="rounded-2xl border border-dashed border-slate-300 p-6 text-center">
+                                <div class="text-sm text-slate-600">点击按钮开始抽奖</div>
+                                <div id="resultDisplay" class="text-3xl font-extrabold mt-2">—</div>
+                                <div id="resultMeta" class="text-xs text-slate-500 mt-1">—</div>
+                            </div>
+                            <div class="flex gap-3 flex-wrap">
+                                <button id="drawBtn"
+                                    class="px-5 py-3 rounded-2xl bg-[var(--labu)] text-white font-semibold shadow active:scale-[.98]">开始抽奖</button>
+                                <button id="resetBtn"
+                                    class="px-5 py-3 rounded-2xl bg-slate-100 text-slate-800 font-medium border border-slate-200">重置（清空记录）</button>
+                            </div>
+                            <div class="text-xs text-slate-500">说明：抽奖会根据 <a href="#settings" class="underline">设置</a>
+                                的奖池权重与库存进行。实体礼品会扣减库存；券码会自动生成并显示。</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 奖池概览 -->
+            <aside class="md:col-span-2">
+                <div class="rounded-3xl bg-white border border-slate-200 shadow overflow-hidden">
+                    <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                        <h3 class="font-semibold">当前奖池</h3>
+                        <button id="restoreDefaultBtn"
+                            class="text-xs px-2 py-1 rounded-lg bg-slate-100 border border-slate-200">恢复默认</button>
+                    </div>
+                    <div class="p-5">
+                        <ul id="poolList" class="text-sm grid gap-2"></ul>
+                    </div>
+                </div>
+            </aside>
+        </div>
+
+        <!-- 历史记录 -->
+        <section id="history" class="mt-10">
+            <div class="rounded-3xl bg-white border border-slate-200 shadow overflow-hidden">
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="font-semibold">抽奖结果（自动标记时间）</h3>
+                    <div class="flex gap-2">
+                        <button id="exportJsonBtn"
+                            class="text-xs px-2 py-1 rounded-lg bg-slate-100 border border-slate-200">导出 JSON</button>
+                        <button id="clearHistoryBtn"
+                            class="text-xs px-2 py-1 rounded-lg bg-slate-100 border border-slate-200">仅清空记录</button>
+                    </div>
+                </div>
+                <div class="p-5 overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="text-left text-slate-500">
+                            <tr>
+                                <th class="py-2 pr-4">时间</th>
+                                <th class="py-2 pr-4">奖品</th>
+                                <th class="py-2 pr-4">类型</th>
+                                <th class="py-2 pr-4">券码/备注</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody" class="align-top"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 设置 -->
+        <section id="settings" class="mt-10">
+            <div class="rounded-3xl bg-white border border-slate-200 shadow overflow-hidden">
+                <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+                    <h3 class="font-semibold">奖池设置</h3>
+                    <div class="text-xs text-slate-500">支持编辑并保存到本地浏览器</div>
+                </div>
+                <div class="p-5 grid gap-4">
+                    <div class="text-sm text-slate-600">每行一个奖品，字段使用逗号分隔：<code>name,type,weight,quantity</code><br />type
+                        仅支持：<b>抵扣券</b>｜<b>实体</b>｜<b>折扣券</b>；quantity 留空或 -1 表示不限量。</div>
+                    <textarea id="poolEditor" rows="8"
+                        class="w-full rounded-xl border border-slate-300 p-3 font-mono text-xs"></textarea>
+                    <div class="flex gap-3">
+                        <button id="savePoolBtn"
+                            class="px-4 py-2 rounded-xl bg-[var(--labu)] text-white font-medium">保存奖池</button>
+                        <button id="recalcBtn"
+                            class="px-4 py-2 rounded-xl bg-slate-100 border border-slate-200">重新载入</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="max-w-5xl mx-auto px-4 py-10 text-center text-xs text-slate-500">
+        <div>© <span id="year"></span> Labubu 抽奖演示 · 纯前端静态页面（适配 GitHub Pages）</div>
+    </footer>
+
+    <script>
+        // —— 本地存储键 ——
+        const LS_KEYS = {
+            HISTORY: 'labubu_lottery_history',
+            POOL: 'labubu_lottery_pool'
+        };
+
+        // —— 默认奖池（可编辑）——
+        const DEFAULT_POOL = [
+            { name: '¥20 抵扣券', type: '抵扣券', weight: 25, quantity: -1 },
+            { name: '¥50 抵扣券', type: '抵扣券', weight: 15, quantity: -1 },
+            { name: '9折优惠券', type: '折扣券', weight: 18, quantity: -1 },
+            { name: '95折优惠券', type: '折扣券', weight: 22, quantity: -1 },
+            { name: 'Labubu 限量手办（实体）', type: '实体', weight: 3, quantity: 5 },
+            { name: 'Labubu 主题贴纸包（实体）', type: '实体', weight: 7, quantity: 50 },
+            { name: '再接再厉', type: '折扣券', weight: 10, quantity: -1, note: '未中奖提示，可自定义' }
+        ];
+
+        // —— 工具函数 ——
+        const $ = (sel) => document.querySelector(sel);
+        const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+        const nowStr = () => new Date().toLocaleString();
+        const uid = (n = 8) => Math.random().toString(36).slice(2, 2 + n).toUpperCase();
+
+        function loadHistory() {
+            try { return JSON.parse(localStorage.getItem(LS_KEYS.HISTORY)) || []; } catch { return []; }
+        }
+        function saveHistory(arr) { localStorage.setItem(LS_KEYS.HISTORY, JSON.stringify(arr)); }
+        function loadPool() {
+            try {
+                const raw = localStorage.getItem(LS_KEYS.POOL);
+                return raw ? JSON.parse(raw) : structuredClone(DEFAULT_POOL);
+            } catch { return structuredClone(DEFAULT_POOL); }
+        }
+        function savePool(pool) { localStorage.setItem(LS_KEYS.POOL, JSON.stringify(pool)); }
+
+        function poolToText(pool) {
+            return pool.map(p => [p.name, p.type, p.weight, (p.quantity ?? -1)].join(',')).join('\n');
+        }
+        function textToPool(txt) {
+            return txt.split(/\n+/).map(l => l.trim()).filter(Boolean).map((line, i) => {
+                const [name, type, weightStr, qtyStr] = line.split(',').map(s => s?.trim());
+                const weight = Number(weightStr);
+                const quantity = (qtyStr === undefined || qtyStr === '') ? -1 : Number(qtyStr);
+                if (!name || !['抵扣券', '实体', '折扣券'].includes(type) || !Number.isFinite(weight)) {
+                    throw new Error(`第 ${i + 1} 行格式不正确`);
+                }
+                return { name, type, weight, quantity };
+            });
+        }
+
+        function renderPoolList(pool) {
+            const ul = $('#poolList');
+            ul.innerHTML = '';
+            const totalW = pool.reduce((s, p) => s + Math.max(0, p.weight || 0), 0) || 1;
+            pool.forEach(p => {
+                const left = p.quantity === -1 ? '∞' : p.quantity;
+                const w = p.weight || 0;
+                const pct = ((w / totalW) * 100).toFixed(1);
+                const color = p.type === '实体' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : (p.type === '抵扣券' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-amber-50 text-amber-700 border-amber-200');
+                const li = document.createElement('li');
+                li.className = `border rounded-xl p-3 flex items-center justify-between ${color}`;
+                li.innerHTML = `<div class="font-medium">${p.name} <span class="ml-2 text-xs px-2 py-0.5 rounded-lg bg-white/60 border">${p.type}</span></div>
+                        <div class="text-xs">权重 ${w}（≈${pct}%） · 剩余 <b>${left}</b></div>`;
+                ul.appendChild(li);
+            });
+        }
+
+        function renderHistory() {
+            const tb = $('#historyBody');
+            tb.innerHTML = '';
+            const hist = loadHistory();
+            if (hist.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td class="py-3 text-slate-400" colspan="4">暂无记录</td>`;
+                tb.appendChild(tr);
+                return;
+            }
+            hist.slice().reverse().forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-t';
+                tr.innerHTML = `<td class="py-3 pr-4 whitespace-nowrap">${r.time}</td>
+                        <td class="py-3 pr-4">${r.prize}</td>
+                        <td class="py-3 pr-4">${r.type}</td>
+                        <td class="py-3 pr-4 text-slate-600 break-all">${r.code || r.note || ''}</td>`;
+                tb.appendChild(tr);
+            });
+        }
+
+        function weightedPick(pool) {
+            const candidates = pool.filter(p => (p.quantity === -1 || p.quantity > 0) && (p.weight || 0) > 0);
+            const sum = candidates.reduce((s, p) => s + p.weight, 0);
+            if (sum <= 0 || candidates.length === 0) return null;
+            let r = Math.random() * sum;
+            for (const item of candidates) {
+                if ((r -= item.weight) <= 0) return item;
+            }
+            return candidates[candidates.length - 1];
+        }
+
+        function onDraw() {
+            const btn = $('#drawBtn');
+            btn.disabled = true; btn.classList.add('opacity-60');
+            const pool = loadPool();
+            const picked = weightedPick(pool);
+            const display = $('#resultDisplay');
+            const meta = $('#resultMeta');
+
+            if (!picked) {
+                display.textContent = '奖池为空或库存不足';
+                meta.textContent = '请在“奖池设置”中添加奖品';
+                btn.disabled = false; btn.classList.remove('opacity-60');
+                return;
+            }
+
+            // 动效
+            display.parentElement.classList.add('spin');
+            setTimeout(() => display.parentElement.classList.remove('spin'), 900);
+
+            // 生成券码（仅券类）
+            let code = '';
+            if (picked.type === '抵扣券' || picked.type === '折扣券') {
+                code = `${picked.type === '抵扣券' ? 'DK' : 'ZK'}-${uid(4)}-${uid(4)}`;
+            }
+
+            // 扣减库存（实体/有限量）
+            if (picked.quantity > 0) { picked.quantity -= 1; savePool(pool); refreshPoolEditor(); renderPoolList(pool); }
+
+            const record = {
+                time: nowStr(),
+                prize: picked.name,
+                type: picked.type,
+                code: code || undefined,
+                note: picked.note || ''
+            };
+
+            const hist = loadHistory();
+            hist.push(record); saveHistory(hist);
+
+            display.textContent = picked.name;
+            meta.textContent = `${record.type}${record.code ? ' · 券码：' + record.code : ''}`;
+            renderHistory();
+            setTimeout(() => { btn.disabled = false; btn.classList.remove('opacity-60'); }, 400);
+        }
+
+        function refreshNow() { $('#now').textContent = nowStr(); }
+
+        function refreshPoolEditor() {
+            const pool = loadPool();
+            $('#poolEditor').value = poolToText(pool);
+        }
+
+        function exportJSON() {
+            const data = JSON.stringify(loadHistory(), null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `labubu_lottery_${Date.now()}.json`;
+            a.click();
+        }
+
+        function exportCSV() {
+            const rows = [['time', 'prize', 'type', 'code_or_note']].concat(
+                loadHistory().map(r => [r.time, r.prize, r.type, r.code || r.note || ''])
+            );
+            const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+            const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `labubu_lottery_${Date.now()}.csv`;
+            a.click();
+        }
+
+        function clearHistory() { saveHistory([]); renderHistory(); }
+
+        function resetAll() {
+            if (!confirm('确认清空记录并恢复默认奖池？')) return;
+            localStorage.removeItem(LS_KEYS.HISTORY);
+            localStorage.removeItem(LS_KEYS.POOL);
+            $('#resultDisplay').textContent = '—';
+            $('#resultMeta').textContent = '—';
+            init();
+        }
+
+        // —— 事件绑定 ——
+        function bind() {
+            $('#drawBtn').addEventListener('click', onDraw);
+            $('#resetBtn').addEventListener('click', resetAll);
+            $('#clearHistoryBtn').addEventListener('click', clearHistory);
+            $('#exportJsonBtn').addEventListener('click', exportJSON);
+            $('#exportCsvBtn').addEventListener('click', exportCSV);
+            $('#savePoolBtn').addEventListener('click', () => {
+                try {
+                    const next = textToPool($('#poolEditor').value);
+                    savePool(next);
+                    renderPoolList(next);
+                    alert('已保存到本地（浏览器 LocalStorage）');
+                } catch (e) { alert(e.message); }
+            });
+            $('#recalcBtn').addEventListener('click', refreshPoolEditor);
+            $('#restoreDefaultBtn').addEventListener('click', () => {
+                if (confirm('恢复默认奖池？当前设置将被覆盖。')) {
+                    savePool(structuredClone(DEFAULT_POOL));
+                    refreshPoolEditor();
+                    renderPoolList(loadPool());
+                }
+            });
+        }
+
+        function init() {
+            $('#year').textContent = new Date().getFullYear();
+            refreshNow(); setInterval(refreshNow, 1000);
+            const pool = loadPool();
+            renderPoolList(pool);
+            renderHistory();
+            refreshPoolEditor();
+        }
+
+        bind();
+        init();
+    </script>
 </body>
 
 </html>
