@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务中心 - Labubu 幸运抽奖 🧸</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧸</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --labu: #6b5b95;
+            --labu2: #ffcc00;
+        }
+
+        .labu-gradient {
+            background-image: linear-gradient(135deg, rgba(107, 91, 149, .15), rgba(255, 204, 0, .15));
+        }
+
+        .sparkle {
+            animation: sparkle 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes sparkle {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            100% {
+                transform: scale(1.1) rotate(5deg);
+            }
+        }
+
+        /* 自定义鼠标样式 */
+        * {
+            cursor: none !important;
+        }
+
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff69b4"><path d="M8 2C8 2 8.5 3 10.5 3C12.5 3 13 2 13 2C14 2 15 3 15 4C15 5 14 6 13 6C12 6 11 7 11 8C11 9 12 10 13 10C14 10 15 9 15 8C15 7 16 6 17 6C18 6 19 7 19 8C19 9 18 10 17 10C16 10 15 11 15 12C15 13 16 14 17 14C18 14 19 13 19 12C19 11 20 10 21 10C22 10 23 11 23 12C23 13 22 14 21 14C20 14 19 15 19 16C19 17 18 18 17 18C16 18 15 17 15 16C15 15 14 14 13 14C12 14 11 15 11 16C11 17 10 18 9 18C8 18 7 17 7 16C7 15 8 14 9 14C10 14 11 13 11 12C11 11 10 10 9 10C8 10 7 11 7 12C7 13 6 14 5 14C4 14 3 13 3 12C3 11 4 10 5 10C6 10 7 9 7 8C7 7 6 6 5 6C4 6 3 7 3 8C3 9 2 10 1 10C0 10 -1 9 -1 8C-1 7 0 6 1 6C2 6 3 5 3 4C3 3 4 2 5 2C6 2 7 3 7 4C7 5 8 6 9 6C10 6 11 5 11 4C11 3 10 2 9 2C8.5 2 8 2 8 2Z"/></svg>') no-repeat center;
+            background-size: contain;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .custom-cursor.clicking {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .cursor-trail {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, rgba(255, 105, 180, 0.8) 0%, rgba(255, 105, 180, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            animation: cursorTrailFade 0.5s ease-out forwards;
+        }
+
+        @keyframes cursorTrailFade {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+        }
+
+        /* 任务卡片动画 */
+        .task-card {
+            transition: all 0.3s ease;
+        }
+
+        .task-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-completed {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
+            border-color: #22c55e;
+        }
+
+        .task-progress {
+            background: linear-gradient(90deg, var(--labu) 0%, var(--labu2) 100%);
+            transition: width 0.5s ease;
+        }
+
+        /* 奖励动画 */
+        .reward-bounce {
+            animation: rewardBounce 0.6s ease-out;
+        }
+
+        @keyframes rewardBounce {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* 签到打卡动画 */
+        .checkin-effect {
+            animation: checkinPulse 1s ease-out;
+        }
+
+        @keyframes checkinPulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+                box-shadow: 0 0 20px rgba(107, 91, 149, 0.5);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* 每日挑战进度环 */
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transition: stroke-dashoffset 0.5s ease-in-out;
+        }
+
+        /* 按钮增强效果 */
+        .enhanced-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .enhanced-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .enhanced-btn:hover::before {
+            left: 100%;
+        }
+
+        .enhanced-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(107, 91, 149, 0.3);
+        }
+
+        /* 勋章展示 */
+        .badge-glow {
+            animation: badgeGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes badgeGlow {
+            0% {
+                box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            }
+        }
+
+        /* 特效粒子 */
+        .magic-particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #ffd700 0%, #ff69b4 50%, transparent 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9997;
+            animation: magicParticle 2s ease-out forwards;
+        }
+
+        @keyframes magicParticle {
+            0% {
+                opacity: 1;
+                transform: scale(0) rotate(0deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1) rotate(180deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.2) rotate(360deg) translateY(-50px);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+    <!-- 自定义鼠标光标 -->
+    <div class="custom-cursor"></div>
+
+    <!-- 顶部导航 -->
+    <header class="sticky top-0 z-30 backdrop-blur bg-white/90 border-b border-slate-200 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-[var(--labu)] grid place-content-center text-white text-xl sparkle">
+                        📋</div>
+                    <div>
+                        <h1 class="font-bold text-lg">任务中心</h1>
+                        <p class="text-xs text-slate-500">完成任务，赢取奖励 ✨</p>
+                    </div>
+                </div>
+                <nav class="flex items-center gap-6">
+                    <a href="index.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🎯 抽奖</a>
+                    <a href="shop.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🛒 商城</a>
+                    <a href="user-center.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">👤
+                        个人中心</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- 顶部统计卡片 -->
+        <div class="grid md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div class="text-3xl mb-2">🎯</div>
+                <div class="text-2xl font-bold text-[var(--labu)]" id="todayCompleted">5</div>
+                <div class="text-sm text-slate-600">今日完成</div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div class="text-3xl mb-2">🔥</div>
+                <div class="text-2xl font-bold text-orange-500" id="streakDays">7</div>
+                <div class="text-sm text-slate-600">连续天数</div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div class="text-3xl mb-2">💰</div>
+                <div class="text-2xl font-bold text-yellow-500" id="totalCoins">2,350</div>
+                <div class="text-sm text-slate-600">总积分</div>
+            </div>
+
+            <div class="bg-white rounded-2xl p-6 text-center shadow-sm">
+                <div class="text-3xl mb-2">🏅</div>
+                <div class="text-2xl font-bold text-purple-500" id="totalBadges">12</div>
+                <div class="text-sm text-slate-600">获得徽章</div>
+            </div>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- 左侧 - 每日签到 -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-3xl p-6 shadow-sm mb-6">
+                    <h3 class="font-semibold mb-4 flex items-center gap-2">
+                        📅 每日签到
+                    </h3>
+
+                    <!-- 签到主区域 -->
+                    <div class="text-center mb-6">
+                        <div class="relative inline-block">
+                            <svg class="progress-ring w-32 h-32" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="45" stroke="#e2e8f0" stroke-width="8" fill="none" />
+                                <circle id="progressCircle" class="progress-ring-circle" cx="50" cy="50" r="45"
+                                    stroke="var(--labu)" stroke-width="8" fill="none" />
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <div class="text-4xl mb-1" id="checkinIcon">📅</div>
+                                <div class="text-sm font-medium" id="checkinStatus">今日未签到</div>
+                            </div>
+                        </div>
+
+                        <button id="checkinBtn"
+                            class="enhanced-btn mt-4 px-6 py-3 bg-[var(--labu)] text-white rounded-xl font-medium">
+                            立即签到 ✨
+                        </button>
+                    </div>
+
+                    <!-- 签到奖励预览 -->
+                    <div class="space-y-2">
+                        <div class="text-sm font-medium text-slate-700 mb-2">签到奖励</div>
+                        <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                            <span class="text-sm">第1天</span>
+                            <span class="text-sm">🪙 10积分</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                            <span class="text-sm">第3天</span>
+                            <span class="text-sm">🎁 神秘盲盒</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                            <span class="text-sm">第7天</span>
+                            <span class="text-sm">🎯 抽奖次数+3</span>
+                        </div>
+                        <div class="flex justify-between items-center p-2 bg-slate-50 rounded-lg">
+                            <span class="text-sm">第15天</span>
+                            <span class="text-sm">💎 稀有Labubu</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 勋章展示 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm">
+                    <h3 class="font-semibold mb-4 flex items-center gap-2">
+                        🏆 本周勋章
+                    </h3>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="badge-glow bg-yellow-100 rounded-xl p-3 text-center border-2 border-yellow-300">
+                            <div class="text-2xl mb-1">🥇</div>
+                            <div class="text-xs font-medium">签到达人</div>
+                        </div>
+                        <div class="bg-slate-100 rounded-xl p-3 text-center border-2 border-slate-300">
+                            <div class="text-2xl mb-1">🥈</div>
+                            <div class="text-xs font-medium">任务新手</div>
+                        </div>
+                        <div class="bg-slate-100 rounded-xl p-3 text-center border-2 border-slate-300">
+                            <div class="text-2xl mb-1">🥉</div>
+                            <div class="text-xs font-medium">评论家</div>
+                        </div>
+                        <div class="bg-slate-100 rounded-xl p-3 text-center border-2 border-slate-300">
+                            <div class="text-2xl mb-1">🌟</div>
+                            <div class="text-xs font-medium">分享达人</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧 - 任务列表 -->
+            <div class="lg:col-span-2">
+                <!-- 每日任务 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold flex items-center gap-2">
+                            🌅 每日任务
+                        </h3>
+                        <span class="text-sm text-slate-500" id="dailyProgress">3/5 已完成</span>
+                    </div>
+
+                    <div class="space-y-4" id="dailyTasks">
+                        <!-- 每日任务将通过JavaScript生成 -->
+                    </div>
+                </div>
+
+                <!-- 每周任务 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm mb-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold flex items-center gap-2">
+                            📊 每周任务
+                        </h3>
+                        <span class="text-sm text-slate-500" id="weeklyProgress">2/3 已完成</span>
+                    </div>
+
+                    <div class="space-y-4" id="weeklyTasks">
+                        <!-- 每周任务将通过JavaScript生成 -->
+                    </div>
+                </div>
+
+                <!-- 成就任务 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold flex items-center gap-2">
+                            🏆 成就任务
+                        </h3>
+                        <span class="text-sm text-slate-500" id="achievementProgress">5/8 已完成</span>
+                    </div>
+
+                    <div class="space-y-4" id="achievementTasks">
+                        <!-- 成就任务将通过JavaScript生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 任务完成弹窗 -->
+    <div id="taskCompleteModal"
+        class="fixed inset-0 bg-black/50 backdrop-blur-sm hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-3xl p-8 mx-4 max-w-md w-full text-center">
+            <div class="text-6xl mb-4">🎉</div>
+            <h3 class="text-xl font-bold mb-2">任务完成！</h3>
+            <p class="text-slate-600 mb-4" id="rewardText">恭喜获得奖励</p>
+            <div class="flex justify-center gap-3">
+                <button id="claimReward"
+                    class="enhanced-btn px-6 py-2 bg-[var(--labu)] text-white rounded-xl font-medium">
+                    领取奖励
+                </button>
+                <button id="closeModal" class="enhanced-btn px-6 py-2 bg-slate-100 rounded-xl font-medium">
+                    关闭
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 工具函数
+        const $ = (selector) => document.querySelector(selector);
+        const $$ = (selector) => document.querySelectorAll(selector);
+
+        // 任务数据
+        const dailyTasks = [
+            { id: 1, name: '完成一次抽奖', icon: '🎯', progress: 1, target: 1, reward: '20积分', completed: true },
+            { id: 2, name: '访问商城页面', icon: '🛒', progress: 1, target: 1, reward: '10积分', completed: true },
+            { id: 3, name: '发表一条留言', icon: '💬', progress: 1, target: 1, reward: '15积分', completed: true },
+            { id: 4, name: '分享给朋友', icon: '📤', progress: 0, target: 1, reward: '25积分', completed: false },
+            { id: 5, name: '抽奖3次', icon: '🎲', progress: 2, target: 3, reward: '30积分', completed: false }
+        ];
+
+        const weeklyTasks = [
+            { id: 6, name: '累计抽奖20次', icon: '🎯', progress: 18, target: 20, reward: '100积分', completed: false },
+            { id: 7, name: '获得5个不同奖品', icon: '🎁', progress: 5, target: 5, reward: '150积分', completed: true },
+            { id: 8, name: '连续签到7天', icon: '📅', progress: 7, target: 7, reward: '200积分 + 抽奖次数', completed: true }
+        ];
+
+        const achievementTasks = [
+            { id: 9, name: '收集10种Labubu', icon: '🧸', progress: 8, target: 10, reward: '特殊徽章', completed: false },
+            { id: 10, name: '总抽奖次数达100', icon: '💯', progress: 100, target: 100, reward: '传说Labubu', completed: true },
+            { id: 11, name: '获得传说级奖品', icon: '🌟', progress: 1, target: 1, reward: '专属头像', completed: true },
+            { id: 12, name: '留言获得100个赞', icon: '👍', progress: 87, target: 100, reward: '社交达人勋章', completed: false },
+            { id: 13, name: '连续签到30天', icon: '🔥', progress: 23, target: 30, reward: '月度奖励包', completed: false },
+            { id: 14, name: '商城消费满500元', icon: '💰', progress: 350, target: 500, reward: 'VIP会员', completed: false },
+            { id: 15, name: '邀请10位好友', icon: '👥', progress: 6, target: 10, reward: '邀请大使称号', completed: false },
+            { id: 16, name: '完成所有每日任务30天', icon: '📋', progress: 30, target: 30, reward: '完美主义者', completed: true }
+        ];
+
+        let userData = {
+            todayCompleted: 5,
+            streakDays: 7,
+            totalCoins: 2350,
+            totalBadges: 12,
+            checkedInToday: false
+        };
+
+        // 初始化
+        function init() {
+            renderStatistics();
+            renderTasks();
+            updateSigninStatus();
+            initEventListeners();
+            initCustomCursor();
+        }
+
+        // 渲染统计数据
+        function renderStatistics() {
+            $('#todayCompleted').textContent = userData.todayCompleted;
+            $('#streakDays').textContent = userData.streakDays;
+            $('#totalCoins').textContent = userData.totalCoins.toLocaleString();
+            $('#totalBadges').textContent = userData.totalBadges;
+        }
+
+        // 渲染任务列表
+        function renderTasks() {
+            renderTaskGroup(dailyTasks, '#dailyTasks', '#dailyProgress');
+            renderTaskGroup(weeklyTasks, '#weeklyTasks', '#weeklyProgress');
+            renderTaskGroup(achievementTasks, '#achievementTasks', '#achievementProgress');
+        }
+
+        // 渲染任务组
+        function renderTaskGroup(tasks, containerId, progressId) {
+            const container = $(containerId);
+            const completedCount = tasks.filter(t => t.completed).length;
+
+            $(progressId).textContent = `${completedCount}/${tasks.length} 已完成`;
+
+            container.innerHTML = tasks.map(task => createTaskCard(task)).join('');
+        }
+
+        // 创建任务卡片
+        function createTaskCard(task) {
+            const progressPercent = (task.progress / task.target) * 100;
+            const canClaim = task.progress >= task.target && !task.completed;
+
+            return `
+                <div class="task-card ${task.completed ? 'task-completed' : ''} border border-slate-200 rounded-2xl p-4">
+                    <div class="flex items-center gap-4">
+                        <div class="text-3xl">${task.icon}</div>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <h4 class="font-medium">${task.name}</h4>
+                                <div class="text-sm text-slate-500">
+                                    ${task.progress}/${task.target}
+                                </div>
+                            </div>
+                            
+                            <!-- 进度条 -->
+                            <div class="w-full bg-slate-200 rounded-full h-2 mb-2">
+                                <div class="task-progress h-2 rounded-full" style="width: ${Math.min(progressPercent, 100)}%"></div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-slate-600">奖励: ${task.reward}</span>
+                                <button class="enhanced-btn px-4 py-2 rounded-lg text-sm font-medium
+                                              ${task.completed ? 'bg-gray-100 text-gray-500' :
+                    canClaim ? 'bg-[var(--labu)] text-white' : 'bg-slate-100 text-slate-600'}"
+                                        onclick="handleTaskAction(${task.id})"
+                                        ${task.completed ? 'disabled' : ''}>
+                                    ${task.completed ? '✅ 已完成' : canClaim ? '🎁 领取奖励' : '📋 去完成'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 处理任务操作
+        function handleTaskAction(taskId) {
+            const allTasks = [...dailyTasks, ...weeklyTasks, ...achievementTasks];
+            const task = allTasks.find(t => t.id === taskId);
+
+            if (!task) return;
+
+            if (task.progress >= task.target && !task.completed) {
+                // 领取奖励
+                claimTaskReward(task);
+            } else {
+                // 跳转到相应页面完成任务
+                redirectToTask(task);
+            }
+        }
+
+        // 领取任务奖励
+        function claimTaskReward(task) {
+            task.completed = true;
+
+            // 显示奖励弹窗
+            $('#rewardText').textContent = `恭喜完成任务"${task.name}"，获得${task.reward}！`;
+            $('#taskCompleteModal').classList.remove('hidden');
+
+            // 更新用户数据
+            userData.todayCompleted++;
+            userData.totalCoins += parseInt(task.reward.match(/\d+/)?.[0] || 0);
+
+            renderStatistics();
+            renderTasks();
+
+            // 创建庆祝效果
+            createCelebrationEffect();
+        }
+
+        // 跳转到任务
+        function redirectToTask(task) {
+            if (task.name.includes('抽奖')) {
+                window.location.href = 'index.html#draw';
+            } else if (task.name.includes('商城')) {
+                window.location.href = 'shop.html';
+            } else if (task.name.includes('留言')) {
+                window.location.href = 'index.html#comments';
+            } else if (task.name.includes('分享')) {
+                showShareDialog();
+            }
+        }
+
+        // 显示分享对话框
+        function showShareDialog() {
+            const shareText = "我在Labubu抽奖系统获得了超棒的奖品！快来一起玩吧！";
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Labubu 抽奖系统',
+                    text: shareText,
+                    url: window.location.origin
+                });
+            } else {
+                // 复制到剪贴板
+                navigator.clipboard.writeText(shareText + ' ' + window.location.origin).then(() => {
+                    showNotification('链接已复制到剪贴板！');
+                });
+            }
+        }
+
+        // 更新签到状态
+        function updateSigninStatus() {
+            const progressCircle = $('#progressCircle');
+            const checkinIcon = $('#checkinIcon');
+            const checkinStatus = $('#checkinStatus');
+            const checkinBtn = $('#checkinBtn');
+
+            if (userData.checkedInToday) {
+                // 已签到状态
+                progressCircle.style.strokeDashoffset = '0';
+                checkinIcon.textContent = '✅';
+                checkinStatus.textContent = '今日已签到';
+                checkinBtn.textContent = '明日再来';
+                checkinBtn.disabled = true;
+                checkinBtn.classList.add('opacity-50');
+            } else {
+                // 未签到状态
+                progressCircle.style.strokeDashoffset = '283';
+                checkinIcon.textContent = '📅';
+                checkinStatus.textContent = '今日未签到';
+                checkinBtn.textContent = '立即签到 ✨';
+                checkinBtn.disabled = false;
+                checkinBtn.classList.remove('opacity-50');
+            }
+        }
+
+        // 执行签到
+        function performCheckin() {
+            if (userData.checkedInToday) return;
+
+            userData.checkedInToday = true;
+            userData.streakDays++;
+            userData.totalCoins += 20;
+
+            // 更新UI
+            updateSigninStatus();
+            renderStatistics();
+
+            // 添加签到效果
+            const checkinBtn = $('#checkinBtn');
+            checkinBtn.classList.add('checkin-effect');
+
+            setTimeout(() => {
+                checkinBtn.classList.remove('checkin-effect');
+            }, 1000);
+
+            // 显示签到奖励
+            showNotification('✅ 签到成功！获得 20 积分');
+
+            // 创建粒子效果
+            createCelebrationEffect();
+        }
+
+        // 显示通知
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl z-50 transform translate-x-full transition-transform duration-300';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // 创建庆祝效果
+        function createCelebrationEffect() {
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'magic-particle';
+                    particle.style.left = (window.innerWidth / 2 + Math.random() * 200 - 100) + 'px';
+                    particle.style.top = (window.innerHeight / 2 + Math.random() * 200 - 100) + 'px';
+                    document.body.appendChild(particle);
+
+                    setTimeout(() => {
+                        if (document.body.contains(particle)) {
+                            document.body.removeChild(particle);
+                        }
+                    }, 2000);
+                }, i * 100);
+            }
+        }
+
+        // 初始化事件监听
+        function initEventListeners() {
+            // 签到按钮
+            $('#checkinBtn').addEventListener('click', performCheckin);
+
+            // 奖励弹窗
+            $('#claimReward').addEventListener('click', () => {
+                $('#taskCompleteModal').classList.add('hidden');
+            });
+
+            $('#closeModal').addEventListener('click', () => {
+                $('#taskCompleteModal').classList.add('hidden');
+            });
+
+            // 点击弹窗外部关闭
+            $('#taskCompleteModal').addEventListener('click', (e) => {
+                if (e.target === $('#taskCompleteModal')) {
+                    $('#taskCompleteModal').classList.add('hidden');
+                }
+            });
+        }
+
+        // 自定义鼠标效果
+        function initCustomCursor() {
+            const cursor = $('.custom-cursor');
+            let mouseX = 0, mouseY = 0;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                cursor.style.left = mouseX + 'px';
+                cursor.style.top = mouseY + 'px';
+
+                createCursorTrail(mouseX, mouseY);
+            });
+
+            document.addEventListener('mousedown', () => {
+                cursor.classList.add('clicking');
+            });
+
+            document.addEventListener('mouseup', () => {
+                cursor.classList.remove('clicking');
+            });
+        }
+
+        function createCursorTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            trail.style.left = (x - 4) + 'px';
+            trail.style.top = (y - 4) + 'px';
+            document.body.appendChild(trail);
+
+            setTimeout(() => {
+                if (document.body.contains(trail)) {
+                    document.body.removeChild(trail);
+                }
+            }, 500);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

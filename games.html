@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏中心 - Labubu 幸运抽奖 🧸</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧸</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --labu: #6b5b95;
+            --labu2: #ffcc00;
+        }
+
+        .labu-gradient {
+            background-image: linear-gradient(135deg, rgba(107, 91, 149, .15), rgba(255, 204, 0, .15));
+        }
+
+        .sparkle {
+            animation: sparkle 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes sparkle {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            100% {
+                transform: scale(1.1) rotate(5deg);
+            }
+        }
+
+        /* 自定义鼠标样式 */
+        * {
+            cursor: none !important;
+        }
+
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff69b4"><path d="M8 2C8 2 8.5 3 10.5 3C12.5 3 13 2 13 2C14 2 15 3 15 4C15 5 14 6 13 6C12 6 11 7 11 8C11 9 12 10 13 10C14 10 15 9 15 8C15 7 16 6 17 6C18 6 19 7 19 8C19 9 18 10 17 10C16 10 15 11 15 12C15 13 16 14 17 14C18 14 19 13 19 12C19 11 20 10 21 10C22 10 23 11 23 12C23 13 22 14 21 14C20 14 19 15 19 16C19 17 18 18 17 18C16 18 15 17 15 16C15 15 14 14 13 14C12 14 11 15 11 16C11 17 10 18 9 18C8 18 7 17 7 16C7 15 8 14 9 14C10 14 11 13 11 12C11 11 10 10 9 10C8 10 7 11 7 12C7 13 6 14 5 14C4 14 3 13 3 12C3 11 4 10 5 10C6 10 7 9 7 8C7 7 6 6 5 6C4 6 3 7 3 8C3 9 2 10 1 10C0 10 -1 9 -1 8C-1 7 0 6 1 6C2 6 3 5 3 4C3 3 4 2 5 2C6 2 7 3 7 4C7 5 8 6 9 6C10 6 11 5 11 4C11 3 10 2 9 2C8.5 2 8 2 8 2Z"/></svg>') no-repeat center;
+            background-size: contain;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .custom-cursor.clicking {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .cursor-trail {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, rgba(255, 105, 180, 0.8) 0%, rgba(255, 105, 180, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            animation: cursorTrailFade 0.5s ease-out forwards;
+        }
+
+        @keyframes cursorTrailFade {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+        }
+
+        /* 游戏卡片动画 */
+        .game-card {
+            transition: all 0.3s ease;
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 按钮增强效果 */
+        .enhanced-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .enhanced-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .enhanced-btn:hover::before {
+            left: 100%;
+        }
+
+        .enhanced-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(107, 91, 149, 0.3);
+        }
+
+        /* 飞机大战游戏样式 */
+        .game-container {
+            position: relative;
+            background: linear-gradient(180deg, #000428 0%, #004e92 100%);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .game-canvas {
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* 记忆游戏卡片 */
+        .memory-card {
+            transition: transform 0.3s ease;
+            perspective: 1000px;
+        }
+
+        .memory-card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* 数字游戏网格 */
+        .number-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            max-width: 300px;
+            margin: 0 auto;
+        }
+
+        .number-tile {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .number-tile:hover {
+            transform: scale(1.05);
+        }
+
+        /* 反应速度游戏 */
+        .reaction-circle {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 20px auto;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .reaction-circle.red {
+            background: #ef4444;
+        }
+
+        .reaction-circle.green {
+            background: #22c55e;
+        }
+
+        .reaction-circle.yellow {
+            background: #eab308;
+        }
+
+        /* 粒子效果 */
+        .magic-particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #ffd700 0%, #ff69b4 50%, transparent 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9997;
+            animation: magicParticle 2s ease-out forwards;
+        }
+
+        @keyframes magicParticle {
+            0% {
+                opacity: 1;
+                transform: scale(0) rotate(0deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1) rotate(180deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.2) rotate(360deg) translateY(-50px);
+            }
+        }
+
+        /* 成就提示 */
+        .achievement-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            text-align: center;
+            animation: achievementPopup 3s ease-out forwards;
+        }
+
+        @keyframes achievementPopup {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+
+            20% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.1);
+            }
+
+            80% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+    <!-- 自定义鼠标光标 -->
+    <div class="custom-cursor"></div>
+
+    <!-- 顶部导航 -->
+    <header class="sticky top-0 z-30 backdrop-blur bg-white/90 border-b border-slate-200 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-[var(--labu)] grid place-content-center text-white text-xl sparkle">
+                        🎮</div>
+                    <div>
+                        <h1 class="font-bold text-lg">游戏中心</h1>
+                        <p class="text-xs text-slate-500">玩游戏赚积分 ✨</p>
+                    </div>
+                </div>
+                <nav class="flex items-center gap-6">
+                    <a href="index.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🎯 抽奖</a>
+                    <a href="shop.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🛒 商城</a>
+                    <a href="user-center.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">👤
+                        个人中心</a>
+                    <a href="tasks.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">📋 任务</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- 用户状态 -->
+        <div class="bg-white rounded-3xl p-6 mb-8 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-6">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-[var(--labu)]" id="userCoins">1,250</div>
+                        <div class="text-sm text-slate-600">游戏积分</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-500" id="gameWins">23</div>
+                        <div class="text-sm text-slate-600">胜利次数</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-purple-500" id="todayPlays">8</div>
+                        <div class="text-sm text-slate-600">今日游戏</div>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <button class="enhanced-btn px-6 py-3 bg-[var(--labu)] text-white rounded-xl font-medium">
+                        🎁 兑换抽奖次数
+                    </button>
+                    <div class="text-xs text-slate-500 mt-1">100积分 = 1次抽奖</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏选择界面 -->
+        <div id="gameSelection" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 数字配对游戏 -->
+            <div class="game-card bg-white rounded-3xl p-6 shadow-sm">
+                <div class="text-center mb-4">
+                    <div class="text-4xl mb-2">🧩</div>
+                    <h3 class="text-lg font-semibold">数字配对</h3>
+                    <p class="text-sm text-slate-600">记忆数字位置，快速配对</p>
+                </div>
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-sm">
+                        <div class="text-green-600">奖励: 20-50积分</div>
+                        <div class="text-slate-500">难度: ⭐⭐</div>
+                    </div>
+                    <div class="text-right text-sm">
+                        <div>最高分: 850</div>
+                        <div class="text-slate-500">今日: 2/5</div>
+                    </div>
+                </div>
+                <button onclick="startGame('memory')"
+                    class="enhanced-btn w-full py-3 bg-[var(--labu)] text-white rounded-xl font-medium">
+                    🎮 开始游戏
+                </button>
+            </div>
+
+            <!-- 反应速度游戏 -->
+            <div class="game-card bg-white rounded-3xl p-6 shadow-sm">
+                <div class="text-center mb-4">
+                    <div class="text-4xl mb-2">⚡</div>
+                    <h3 class="text-lg font-semibold">反应大师</h3>
+                    <p class="text-sm text-slate-600">测试你的反应速度</p>
+                </div>
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-sm">
+                        <div class="text-green-600">奖励: 15-40积分</div>
+                        <div class="text-slate-500">难度: ⭐</div>
+                    </div>
+                    <div class="text-right text-sm">
+                        <div>最快: 0.23s</div>
+                        <div class="text-slate-500">今日: 3/5</div>
+                    </div>
+                </div>
+                <button onclick="startGame('reaction')"
+                    class="enhanced-btn w-full py-3 bg-[var(--labu)] text-white rounded-xl font-medium">
+                    ⚡ 开始游戏
+                </button>
+            </div>
+
+            <!-- 数字滑块游戏 */
+            <div class="game-card bg-white rounded-3xl p-6 shadow-sm">
+                <div class="text-center mb-4">
+                    <div class="text-4xl mb-2">🔢</div>
+                    <h3 class="text-lg font-semibold">数字滑块</h3>
+                    <p class="text-sm text-slate-600">滑动数字，排列顺序</p>
+                </div>
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-sm">
+                        <div class="text-green-600">奖励: 25-60积分</div>
+                        <div class="text-slate-500">难度: ⭐⭐⭐</div>
+                    </div>
+                    <div class="text-right text-sm">
+                        <div>最快: 35步</div>
+                        <div class="text-slate-500">今日: 1/3</div>
+                    </div>
+                </div>
+                <button onclick="startGame('puzzle')" class="enhanced-btn w-full py-3 bg-[var(--labu)] text-white rounded-xl font-medium">
+                    🧮 开始游戏
+                </button>
+            </div>
+
+            <!-- 点击达人游戏 -->
+            <div class="game-card bg-white rounded-3xl p-6 shadow-sm">
+                <div class="text-center mb-4">
+                    <div class="text-4xl mb-2">👆</div>
+                    <h3 class="text-lg font-semibold">点击达人</h3>
+                    <p class="text-sm text-slate-600">快速点击出现的目标</p>
+                </div>
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-sm">
+                        <div class="text-green-600">奖励: 10-30积分</div>
+                        <div class="text-slate-500">难度: ⭐</div>
+                    </div>
+                    <div class="text-right text-sm">
+                        <div>最高: 128分</div>
+                        <div class="text-slate-500">今日: 2/∞</div>
+                    </div>
+                </div>
+                <button onclick="startGame('click')"
+                    class="enhanced-btn w-full py-3 bg-[var(--labu)] text-white rounded-xl font-medium">
+                    👆 开始游戏
+                </button>
+            </div>
+
+            <!-- Labubu 收集游戏 -->
+            <div class="game-card bg-white rounded-3xl p-6 shadow-sm">
+                <div class="text-center mb-4">
+                    <div class="text-4xl mb-2">🧸</div>
+                    <h3 class="text-lg font-semibold">Labubu 收集</h3>
+                    <p class="text-sm text-slate-600">收集掉落的Labubu</p>
+                </div>
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-sm">
+                        <div class="text-green-600">奖励: 30-80积分</div>
+                        <div class="text-slate-500">难度: ⭐⭐</div>
+                    </div>
+                    <div class="text-right text-sm">
+                        <div>最高: 2,340分</div>
+                        <div class="text-slate-500">今日: 0/3</div>
+                    </div>
+                </div>
+                <button onclick="startGame('collect')"
+                    class="enhanced-btn w-full py-3 bg-[var(--labu)] text-white rounded-xl font-medium">
+                    🧸 开始游戏
+                </button>
+            </div>
+
+            <!-- 猜数字游戏 -->
+            <div class="game-card bg-white rounded-3xl p-6 shadow-sm">
+                <div class="text-center mb-4">
+                    <div class="text-4xl mb-2">🎯</div>
+                    <h3 class="text-lg font-semibold">猜数字</h3>
+                    <p class="text-sm text-slate-600">在限定次数内猜中数字</p>
+                </div>
+                <div class="flex justify-between items-center mb-4">
+                    <div class="text-sm">
+                        <div class="text-green-600">奖励: 20-50积分</div>
+                        <div class="text-slate-500">难度: ⭐⭐</div>
+                    </div>
+                    <div class="text-right text-sm">
+                        <div>最快: 3次</div>
+                        <div class="text-slate-500">今日: 1/5</div>
+                    </div>
+                </div>
+                <button onclick="startGame('guess')"
+                    class="enhanced-btn w-full py-3 bg-[var(--labu)] text-white rounded-xl font-medium">
+                    🎯 开始游戏
+                </button>
+            </div>
+        </div>
+
+        <!-- 游戏界面容器 -->
+        <div id="gameContainer" class="hidden">
+            <div class="bg-white rounded-3xl p-6 shadow-sm">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 id="gameTitle" class="text-xl font-semibold">游戏中</h3>
+                    <div class="flex items-center gap-4">
+                        <div class="text-sm">
+                            <span class="text-slate-600">得分: </span>
+                            <span id="gameScore" class="font-bold">0</span>
+                        </div>
+                        <div class="text-sm">
+                            <span class="text-slate-600">时间: </span>
+                            <span id="gameTime" class="font-bold">0s</span>
+                        </div>
+                        <button onclick="exitGame()" class="enhanced-btn px-4 py-2 bg-slate-100 rounded-lg">
+                            🚪 退出游戏
+                        </button>
+                    </div>
+                </div>
+                <div id="gameArea" class="text-center">
+                    <!-- 游戏内容将在这里动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 排行榜 -->
+        <div class="mt-8 bg-white rounded-3xl p-6 shadow-sm">
+            <h3 class="font-semibold mb-4 flex items-center gap-2">
+                🏆 今日排行榜
+            </h3>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-xl border border-yellow-200">
+                    <div class="flex items-center gap-3">
+                        <div class="text-xl">🥇</div>
+                        <div>
+                            <div class="font-medium">Labubu大师</div>
+                            <div class="text-sm text-slate-600">反应速度: 0.18s</div>
+                        </div>
+                    </div>
+                    <div class="text-lg font-bold text-yellow-600">2,850分</div>
+                </div>
+
+                <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="text-xl">🥈</div>
+                        <div>
+                            <div class="font-medium">速度之王</div>
+                            <div class="text-sm text-slate-600">数字配对: 12秒</div>
+                        </div>
+                    </div>
+                    <div class="text-lg font-bold text-slate-600">2,340分</div>
+                </div>
+
+                <div class="flex items-center justify-between p-3 bg-orange-50 rounded-xl border border-orange-200">
+                    <div class="flex items-center gap-3">
+                        <div class="text-xl">🥉</div>
+                        <div>
+                            <div class="font-medium">记忆达人</div>
+                            <div class="text-sm text-slate-600">滑块游戏: 28步</div>
+                        </div>
+                    </div>
+                    <div class="text-lg font-bold text-orange-600">1,980分</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 工具函数
+        const $ = (selector) => document.querySelector(selector);
+        const $$ = (selector) => document.querySelectorAll(selector);
+
+        // 游戏状态
+        let currentGame = null;
+        let gameScore = 0;
+        let gameTime = 0;
+        let gameTimer = null;
+        let userData = {
+            coins: 1250,
+            wins: 23,
+            todayPlays: 8
+        };
+
+        // 初始化
+        function init() {
+            updateUserStats();
+            initCustomCursor();
+        }
+
+        // 更新用户统计
+        function updateUserStats() {
+            $('#userCoins').textContent = userData.coins.toLocaleString();
+            $('#gameWins').textContent = userData.wins;
+            $('#todayPlays').textContent = userData.todayPlays;
+        }
+
+        // 开始游戏
+        function startGame(gameType) {
+            currentGame = gameType;
+            gameScore = 0;
+            gameTime = 0;
+
+            $('#gameSelection').classList.add('hidden');
+            $('#gameContainer').classList.remove('hidden');
+
+            const gameNames = {
+                'memory': '🧩 数字配对',
+                'reaction': '⚡ 反应大师',
+                'puzzle': '🔢 数字滑块',
+                'click': '👆 点击达人',
+                'collect': '🧸 Labubu 收集',
+                'guess': '🎯 猜数字'
+            };
+
+            $('#gameTitle').textContent = gameNames[gameType];
+            $('#gameScore').textContent = '0';
+            $('#gameTime').textContent = '0s';
+
+            // 启动计时器
+            gameTimer = setInterval(() => {
+                gameTime++;
+                $('#gameTime').textContent = gameTime + 's';
+            }, 1000);
+
+            // 根据游戏类型初始化游戏
+            switch (gameType) {
+                case 'memory':
+                    initMemoryGame();
+                    break;
+                case 'reaction':
+                    initReactionGame();
+                    break;
+                case 'puzzle':
+                    initPuzzleGame();
+                    break;
+                case 'click':
+                    initClickGame();
+                    break;
+                case 'collect':
+                    initCollectGame();
+                    break;
+                case 'guess':
+                    initGuessGame();
+                    break;
+            }
+        }
+
+        // 退出游戏
+        function exitGame() {
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+
+            $('#gameContainer').classList.add('hidden');
+            $('#gameSelection').classList.remove('hidden');
+
+            // 如果有分数，计算奖励
+            if (gameScore > 0) {
+                const coins = Math.floor(gameScore / 10);
+                userData.coins += coins;
+                userData.todayPlays++;
+                updateUserStats();
+
+                showReward(coins, gameScore);
+            }
+
+            currentGame = null;
+        }
+
+        // 显示奖励
+        function showReward(coins, score) {
+            const popup = document.createElement('div');
+            popup.className = 'achievement-popup';
+            popup.innerHTML = `
+                <div class="text-4xl mb-2">🎉</div>
+                <div class="text-lg font-bold mb-2">游戏结束！</div>
+                <div class="text-slate-600 mb-2">得分: ${score}分</div>
+                <div class="text-green-600 font-medium">获得 ${coins} 积分!</div>
+            `;
+            document.body.appendChild(popup);
+
+            setTimeout(() => {
+                if (document.body.contains(popup)) {
+                    document.body.removeChild(popup);
+                }
+            }, 3000);
+
+            createCelebrationEffect();
+        }
+
+        // 数字配对游戏
+        function initMemoryGame() {
+            const gameArea = $('#gameArea');
+            const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7, 8];
+            numbers.sort(() => Math.random() - 0.5);
+
+            let flippedCards = [];
+            let matchedPairs = 0;
+
+            gameArea.innerHTML = `
+                <div class="grid grid-cols-4 gap-3 max-w-xs mx-auto">
+                    ${numbers.map((num, index) => `
+                        <div class="memory-card w-16 h-16 bg-slate-200 rounded-lg flex items-center justify-center font-bold text-xl cursor-pointer"
+                             data-number="${num}" data-index="${index}" onclick="flipCard(this)">
+                            ?
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="mt-4 text-sm text-slate-600">找到所有相同数字的配对！</div>
+            `;
+
+            window.flipCard = function (card) {
+                if (flippedCards.length >= 2 || card.classList.contains('flipped')) return;
+
+                card.textContent = card.dataset.number;
+                card.classList.add('flipped');
+                flippedCards.push(card);
+
+                if (flippedCards.length === 2) {
+                    setTimeout(() => {
+                        if (flippedCards[0].dataset.number === flippedCards[1].dataset.number) {
+                            // 匹配成功
+                            flippedCards.forEach(c => {
+                                c.style.backgroundColor = '#22c55e';
+                                c.style.color = 'white';
+                            });
+                            matchedPairs++;
+                            gameScore += 100;
+                            $('#gameScore').textContent = gameScore;
+
+                            if (matchedPairs === 8) {
+                                setTimeout(() => {
+                                    exitGame();
+                                }, 1000);
+                            }
+                        } else {
+                            // 匹配失败
+                            flippedCards.forEach(c => {
+                                c.textContent = '?';
+                                c.classList.remove('flipped');
+                            });
+                        }
+                        flippedCards = [];
+                    }, 1000);
+                }
+            };
+        }
+
+        // 反应速度游戏
+        function initReactionGame() {
+            const gameArea = $('#gameArea');
+            let isWaiting = false;
+            let startTime = 0;
+            let attempts = 0;
+
+            gameArea.innerHTML = `
+                <div class="reaction-circle red" id="reactionCircle">
+                    点击开始
+                </div>
+                <div class="text-sm text-slate-600 mb-4">等待绿色圆圈出现时立即点击！</div>
+                <div class="text-sm">尝试次数: <span id="attempts">0</span>/5</div>
+            `;
+
+            const circle = $('#reactionCircle');
+
+            circle.addEventListener('click', () => {
+                if (isWaiting) {
+                    // 太早点击
+                    circle.textContent = '太早了！';
+                    circle.className = 'reaction-circle red';
+                    isWaiting = false;
+                    attempts++;
+                    $('#attempts').textContent = attempts;
+
+                    if (attempts < 5) {
+                        setTimeout(startReactionTest, 2000);
+                    } else {
+                        setTimeout(exitGame, 2000);
+                    }
+                } else if (circle.classList.contains('green')) {
+                    // 正确点击
+                    const reactionTime = Date.now() - startTime;
+                    const points = Math.max(100 - reactionTime, 10);
+                    gameScore += points;
+                    $('#gameScore').textContent = gameScore;
+
+                    circle.textContent = `${reactionTime}ms！`;
+                    circle.className = 'reaction-circle yellow';
+
+                    attempts++;
+                    $('#attempts').textContent = attempts;
+
+                    if (attempts < 5) {
+                        setTimeout(startReactionTest, 2000);
+                    } else {
+                        setTimeout(exitGame, 2000);
+                    }
+                } else {
+                    // 开始测试
+                    startReactionTest();
+                }
+            });
+
+            function startReactionTest() {
+                circle.textContent = '准备...';
+                circle.className = 'reaction-circle red';
+                isWaiting = true;
+
+                const delay = Math.random() * 4000 + 2000; // 2-6秒随机延迟
+                setTimeout(() => {
+                    if (isWaiting) {
+                        circle.textContent = '点击！';
+                        circle.className = 'reaction-circle green';
+                        startTime = Date.now();
+                    }
+                }, delay);
+            }
+        }
+
+        // 数字滑块游戏
+        function initPuzzleGame() {
+            const gameArea = $('#gameArea');
+            let tiles = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0];
+            let moves = 0;
+
+            // 打乱拼图
+            for (let i = 0; i < 1000; i++) {
+                const emptyIndex = tiles.indexOf(0);
+                const possibleMoves = [];
+
+                if (emptyIndex % 4 > 0) possibleMoves.push(emptyIndex - 1);
+                if (emptyIndex % 4 < 3) possibleMoves.push(emptyIndex + 1);
+                if (emptyIndex > 3) possibleMoves.push(emptyIndex - 4);
+                if (emptyIndex < 12) possibleMoves.push(emptyIndex + 4);
+
+                const randomMove = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
+                [tiles[emptyIndex], tiles[randomMove]] = [tiles[randomMove], tiles[emptyIndex]];
+            }
+
+            renderPuzzle();
+
+            function renderPuzzle() {
+                gameArea.innerHTML = `
+                    <div class="number-grid">
+                        ${tiles.map((num, index) => `
+                            <div class="number-tile ${num === 0 ? 'bg-slate-200' : 'bg-[var(--labu)] text-white'} cursor-pointer"
+                                 onclick="moveTile(${index})">
+                                ${num === 0 ? '' : num}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="mt-4 text-sm text-slate-600">移动次数: ${moves}</div>
+                    <div class="text-xs text-slate-500">点击数字移动到空白处</div>
+                `;
+            }
+
+            window.moveTile = function (index) {
+                const emptyIndex = tiles.indexOf(0);
+
+                // 检查是否可以移动
+                const canMove =
+                    (Math.abs(index - emptyIndex) === 1 && Math.floor(index / 4) === Math.floor(emptyIndex / 4)) ||
+                    Math.abs(index - emptyIndex) === 4;
+
+                if (canMove) {
+                    [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+                    moves++;
+                    gameScore = Math.max(1000 - moves * 10, 100);
+                    $('#gameScore').textContent = gameScore;
+                    renderPuzzle();
+
+                    // 检查是否完成
+                    const isComplete = tiles.slice(0, 15).every((num, index) => num === index + 1);
+                    if (isComplete) {
+                        setTimeout(exitGame, 1000);
+                    }
+                }
+            };
+        }
+
+        // 点击达人游戏
+        function initClickGame() {
+            const gameArea = $('#gameArea');
+            let targets = 0;
+            let hits = 0;
+            let gameActive = true;
+
+            gameArea.innerHTML = `
+                <div class="relative w-full h-96 bg-slate-100 rounded-lg" id="clickArea">
+                    <div class="absolute inset-0 flex items-center justify-center text-slate-500">
+                        准备开始...
+                    </div>
+                </div>
+                <div class="mt-4 text-sm">
+                    命中: <span id="hits">0</span> / 目标: <span id="targets">0</span>
+                </div>
+            `;
+
+            setTimeout(() => {
+                gameActive = true;
+                spawnTarget();
+            }, 1000);
+
+            function spawnTarget() {
+                if (!gameActive) return;
+
+                const clickArea = $('#clickArea');
+                const target = document.createElement('div');
+                target.className = 'absolute w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white font-bold cursor-pointer';
+                target.textContent = '🎯';
+                target.style.left = Math.random() * (clickArea.offsetWidth - 48) + 'px';
+                target.style.top = Math.random() * (clickArea.offsetHeight - 48) + 'px';
+
+                target.addEventListener('click', () => {
+                    hits++;
+                    gameScore += 50;
+                    $('#hits').textContent = hits;
+                    $('#gameScore').textContent = gameScore;
+                    target.remove();
+                });
+
+                clickArea.appendChild(target);
+                targets++;
+                $('#targets').textContent = targets;
+
+                // 目标在2秒后消失
+                setTimeout(() => {
+                    if (target.parentNode) {
+                        target.remove();
+                    }
+                }, 2000);
+
+                // 继续生成目标
+                if (targets < 20) {
+                    setTimeout(spawnTarget, Math.random() * 1500 + 500);
+                } else {
+                    gameActive = false;
+                    setTimeout(exitGame, 3000);
+                }
+            }
+        }
+
+        // Labubu收集游戏
+        function initCollectGame() {
+            const gameArea = $('#gameArea');
+            let collected = 0;
+            let gameActive = true;
+
+            gameArea.innerHTML = `
+                <div class="relative w-full h-96 bg-gradient-to-b from-blue-200 to-green-200 rounded-lg overflow-hidden" id="collectArea">
+                    <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 w-16 h-16 bg-white rounded-full flex items-center justify-center text-2xl" id="basket">
+                        🧺
+                    </div>
+                </div>
+                <div class="mt-4 text-sm">
+                    已收集: <span id="collected">0</span> 个 Labubu
+                </div>
+                <div class="text-xs text-slate-500">移动鼠标控制篮子，收集掉落的Labubu！</div>
+            `;
+
+            const basket = $('#basket');
+            const collectArea = $('#collectArea');
+
+            // 鼠标控制篮子
+            collectArea.addEventListener('mousemove', (e) => {
+                const rect = collectArea.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                basket.style.left = Math.max(32, Math.min(x - 32, collectArea.offsetWidth - 64)) + 'px';
+            });
+
+            function dropLabubu() {
+                if (!gameActive) return;
+
+                const labubu = document.createElement('div');
+                labubu.className = 'absolute w-10 h-10 flex items-center justify-center text-2xl';
+                labubu.textContent = '🧸';
+                labubu.style.left = Math.random() * (collectArea.offsetWidth - 40) + 'px';
+                labubu.style.top = '0px';
+
+                collectArea.appendChild(labubu);
+
+                const fallInterval = setInterval(() => {
+                    const currentTop = parseInt(labubu.style.top);
+                    labubu.style.top = (currentTop + 5) + 'px';
+
+                    // 检查碰撞
+                    const labubuRect = labubu.getBoundingClientRect();
+                    const basketRect = basket.getBoundingClientRect();
+
+                    if (labubuRect.bottom >= basketRect.top &&
+                        labubuRect.left < basketRect.right &&
+                        labubuRect.right > basketRect.left) {
+                        // 收集成功
+                        collected++;
+                        gameScore += 20;
+                        $('#collected').textContent = collected;
+                        $('#gameScore').textContent = gameScore;
+                        labubu.remove();
+                        clearInterval(fallInterval);
+                    } else if (currentTop > collectArea.offsetHeight) {
+                        // 掉到底部
+                        labubu.remove();
+                        clearInterval(fallInterval);
+                    }
+                }, 50);
+            }
+
+            // 每1秒掉落一个Labubu
+            const dropInterval = setInterval(dropLabubu, 1000);
+
+            // 30秒后结束游戏
+            setTimeout(() => {
+                gameActive = false;
+                clearInterval(dropInterval);
+                setTimeout(exitGame, 2000);
+            }, 30000);
+        }
+
+        // 猜数字游戏
+        function initGuessGame() {
+            const gameArea = $('#gameArea');
+            const targetNumber = Math.floor(Math.random() * 100) + 1;
+            let attempts = 0;
+            let gameWon = false;
+
+            gameArea.innerHTML = `
+                <div class="max-w-sm mx-auto">
+                    <div class="text-lg mb-4">我想了一个1-100之间的数字</div>
+                    <input type="number" id="guessInput" min="1" max="100" 
+                           class="w-full px-4 py-3 rounded-lg border border-slate-300 text-center text-xl font-bold"
+                           placeholder="输入你的猜测...">
+                    <button onclick="makeGuess()" class="enhanced-btn w-full mt-4 py-3 bg-[var(--labu)] text-white rounded-lg font-medium">
+                        🎯 猜一猜
+                    </button>
+                    <div id="guessHistory" class="mt-4 text-sm"></div>
+                    <div class="mt-2 text-xs text-slate-500">
+                        剩余机会: <span id="remaining">7</span>/7
+                    </div>
+                </div>
+            `;
+
+            $('#guessInput').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') makeGuess();
+            });
+
+            window.makeGuess = function () {
+                if (gameWon || attempts >= 7) return;
+
+                const guess = parseInt($('#guessInput').value);
+                if (!guess || guess < 1 || guess > 100) {
+                    alert('请输入1-100之间的数字！');
+                    return;
+                }
+
+                attempts++;
+                const remaining = 7 - attempts;
+                $('#remaining').textContent = remaining;
+
+                let hint = '';
+                let points = 0;
+
+                if (guess === targetNumber) {
+                    hint = '🎉 恭喜！猜对了！';
+                    points = Math.max(200 - attempts * 20, 50);
+                    gameScore += points;
+                    gameWon = true;
+                    setTimeout(exitGame, 2000);
+                } else if (guess < targetNumber) {
+                    hint = '📈 太小了，再大一点！';
+                } else {
+                    hint = '📉 太大了，再小一点！';
+                }
+
+                $('#guessHistory').innerHTML += `
+                    <div class="flex justify-between items-center py-1">
+                        <span>第${attempts}次: ${guess}</span>
+                        <span class="text-xs">${hint}</span>
+                    </div>
+                `;
+
+                $('#gameScore').textContent = gameScore;
+                $('#guessInput').value = '';
+
+                if (remaining === 0 && !gameWon) {
+                    $('#guessHistory').innerHTML += `
+                        <div class="text-red-600 font-medium mt-2">
+                            答案是 ${targetNumber}，下次加油！
+                        </div>
+                    `;
+                    setTimeout(exitGame, 3000);
+                }
+            };
+        }
+
+        // 创建庆祝效果
+        function createCelebrationEffect() {
+            for (let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'magic-particle';
+                    particle.style.left = (window.innerWidth / 2 + Math.random() * 200 - 100) + 'px';
+                    particle.style.top = (window.innerHeight / 2 + Math.random() * 200 - 100) + 'px';
+                    document.body.appendChild(particle);
+
+                    setTimeout(() => {
+                        if (document.body.contains(particle)) {
+                            document.body.removeChild(particle);
+                        }
+                    }, 2000);
+                }, i * 100);
+            }
+        }
+
+        // 自定义鼠标效果
+        function initCustomCursor() {
+            const cursor = $('.custom-cursor');
+            let mouseX = 0, mouseY = 0;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                cursor.style.left = mouseX + 'px';
+                cursor.style.top = mouseY + 'px';
+
+                createCursorTrail(mouseX, mouseY);
+            });
+
+            document.addEventListener('mousedown', () => {
+                cursor.classList.add('clicking');
+            });
+
+            document.addEventListener('mouseup', () => {
+                cursor.classList.remove('clicking');
+            });
+        }
+
+        function createCursorTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            trail.style.left = (x - 4) + 'px';
+            trail.style.top = (y - 4) + 'px';
+            document.body.appendChild(trail);
+
+            setTimeout(() => {
+                if (document.body.contains(trail)) {
+                    document.body.removeChild(trail);
+                }
+            }, 500);
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

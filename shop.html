@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labubu 奇妙商城 🧸 - 迪士尼官方授权</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧸</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --labu: #6b5b95;
+            --labu2: #ffcc00;
+            --disney-blue: #0066cc;
+            --disney-red: #ff0040;
+        }
+
+        .labu-gradient {
+            background-image: linear-gradient(135deg, rgba(107, 91, 149, .15), rgba(255, 204, 0, .15));
+        }
+
+        .disney-gradient {
+            background: linear-gradient(45deg, var(--disney-blue), var(--disney-red));
+        }
+
+        .sparkle {
+            animation: sparkle 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes sparkle {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            100% {
+                transform: scale(1.1) rotate(5deg);
+            }
+        }
+
+        /* 自定义鼠标样式 */
+        * {
+            cursor: none !important;
+        }
+
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff69b4"><path d="M8 2C8 2 8.5 3 10.5 3C12.5 3 13 2 13 2C14 2 15 3 15 4C15 5 14 6 13 6C12 6 11 7 11 8C11 9 12 10 13 10C14 10 15 9 15 8C15 7 16 6 17 6C18 6 19 7 19 8C19 9 18 10 17 10C16 10 15 11 15 12C15 13 16 14 17 14C18 14 19 13 19 12C19 11 20 10 21 10C22 10 23 11 23 12C23 13 22 14 21 14C20 14 19 15 19 16C19 17 18 18 17 18C16 18 15 17 15 16C15 15 14 14 13 14C12 14 11 15 11 16C11 17 10 18 9 18C8 18 7 17 7 16C7 15 8 14 9 14C10 14 11 13 11 12C11 11 10 10 9 10C8 10 7 11 7 12C7 13 6 14 5 14C4 14 3 13 3 12C3 11 4 10 5 10C6 10 7 9 7 8C7 7 6 6 5 6C4 6 3 7 3 8C3 9 2 10 1 10C0 10 -1 9 -1 8C-1 7 0 6 1 6C2 6 3 5 3 4C3 3 4 2 5 2C6 2 7 3 7 4C7 5 8 6 9 6C10 6 11 5 11 4C11 3 10 2 9 2C8.5 2 8 2 8 2Z"/></svg>') no-repeat center;
+            background-size: contain;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .custom-cursor.clicking {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .cursor-trail {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, rgba(255, 105, 180, 0.8) 0%, rgba(255, 105, 180, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            animation: cursorTrailFade 0.5s ease-out forwards;
+        }
+
+        @keyframes cursorTrailFade {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+        }
+
+        /* 商品卡片动画 */
+        .product-card {
+            transition: all 0.3s ease;
+            transform: translateY(0);
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .product-image {
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        /* 价格标签动画 */
+        .price-tag {
+            background: linear-gradient(45deg, #ff6b6b, #ff8787);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* 分类标签 */
+        .category-tag {
+            background: linear-gradient(45deg, var(--labu), var(--labu2));
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* 星级评价 */
+        .stars {
+            color: #ffd700;
+        }
+
+        /* 购物车按钮 */
+        .cart-btn {
+            background: linear-gradient(45deg, var(--disney-blue), var(--disney-red));
+            transition: all 0.3s ease;
+        }
+
+        .cart-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 102, 204, 0.3);
+        }
+
+        /* 搜索框动画 */
+        .search-box {
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(107, 91, 149, 0.2);
+        }
+
+        /* 轮播图动画 */
+        .carousel-item {
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        /* 特效粒子 */
+        .magic-particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #ffd700 0%, #ff69b4 50%, transparent 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9997;
+            animation: magicParticle 2s ease-out forwards;
+        }
+
+        @keyframes magicParticle {
+            0% {
+                opacity: 1;
+                transform: scale(0) rotate(0deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1) rotate(180deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.2) rotate(360deg) translateY(-50px);
+            }
+        }
+
+        /* 按钮增强效果 */
+        .enhanced-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .enhanced-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .enhanced-btn:hover::before {
+            left: 100%;
+        }
+
+        .enhanced-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(107, 91, 149, 0.3);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+    <!-- 自定义鼠标光标 -->
+    <div class="custom-cursor"></div>
+
+    <!-- 顶部导航 -->
+    <header class="sticky top-0 z-30 backdrop-blur bg-white/90 border-b border-slate-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- Logo -->
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-xl disney-gradient grid place-content-center text-white text-xl sparkle">
+                        🧸
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg">Labubu 奇妙商城</h1>
+                        <p class="text-xs text-slate-500">迪士尼官方授权 ✨</p>
+                    </div>
+                </div>
+
+                <!-- 搜索框 -->
+                <div class="flex-1 max-w-md mx-8">
+                    <div class="relative">
+                        <input type="text" id="searchInput" placeholder="搜索你喜欢的Labubu..."
+                            class="search-box w-full px-4 py-2 pl-10 rounded-full border border-slate-300 focus:border-[var(--labu)] focus:outline-none">
+                        <div class="absolute left-3 top-2.5 text-slate-400">🔍</div>
+                    </div>
+                </div>
+
+                <!-- 导航链接 -->
+                <nav class="flex items-center gap-6">
+                    <a href="index.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🎯 抽奖</a>
+                    <a href="user-center.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">👤
+                        个人中心</a>
+                    <div class="relative">
+                        <button class="text-slate-600 hover:text-[var(--labu)] transition-colors">
+                            🛒 购物车 <span id="cartCount"
+                                class="bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5 ml-1">0</span>
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 轮播横幅 -->
+    <section class="relative overflow-hidden">
+        <div id="carousel" class="flex transition-transform duration-500 ease-in-out">
+            <div class="carousel-item min-w-full h-64 disney-gradient flex items-center justify-center text-white">
+                <div class="text-center">
+                    <h2 class="text-4xl font-bold mb-2">🎪 Labubu 奇妙世界</h2>
+                    <p class="text-xl opacity-90">探索迪士尼官方授权的魅力收藏</p>
+                </div>
+            </div>
+            <div class="carousel-item min-w-full h-64 labu-gradient flex items-center justify-center">
+                <div class="text-center">
+                    <h2 class="text-4xl font-bold mb-2">✨ 限定系列上新</h2>
+                    <p class="text-xl text-slate-700">错过就要等一年的专属款式</p>
+                </div>
+            </div>
+            <div
+                class="carousel-item min-w-full h-64 bg-gradient-to-r from-pink-400 to-purple-500 flex items-center justify-center text-white">
+                <div class="text-center">
+                    <h2 class="text-4xl font-bold mb-2">🎁 新用户专享</h2>
+                    <p class="text-xl opacity-90">注册即送神秘盲盒一个</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 轮播指示器 -->
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
+            <button class="carousel-dot w-3 h-3 rounded-full bg-white/50" data-slide="0"></button>
+            <button class="carousel-dot w-3 h-3 rounded-full bg-white/50" data-slide="1"></button>
+            <button class="carousel-dot w-3 h-3 rounded-full bg-white/50" data-slide="2"></button>
+        </div>
+    </section>
+
+    <!-- 分类导航 -->
+    <section class="py-6 bg-white border-b">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-center gap-8 overflow-x-auto">
+                <button
+                    class="category-btn flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-slate-50 transition-colors"
+                    data-category="all">
+                    <div class="text-3xl">🧸</div>
+                    <span class="text-sm font-medium">全部商品</span>
+                </button>
+                <button
+                    class="category-btn flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-slate-50 transition-colors"
+                    data-category="classic">
+                    <div class="text-3xl">⭐</div>
+                    <span class="text-sm font-medium">经典系列</span>
+                </button>
+                <button
+                    class="category-btn flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-slate-50 transition-colors"
+                    data-category="limited">
+                    <div class="text-3xl">💎</div>
+                    <span class="text-sm font-medium">限定款</span>
+                </button>
+                <button
+                    class="category-btn flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-slate-50 transition-colors"
+                    data-category="blind">
+                    <div class="text-3xl">🎁</div>
+                    <span class="text-sm font-medium">盲盒系列</span>
+                </button>
+                <button
+                    class="category-btn flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-slate-50 transition-colors"
+                    data-category="accessories">
+                    <div class="text-3xl">👜</div>
+                    <span class="text-sm font-medium">周边配件</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 商品展示区 -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- 筛选和排序 -->
+        <div class="flex justify-between items-center mb-6">
+            <div class="flex items-center gap-4">
+                <span class="text-slate-600">共找到 <span id="productCount">24</span> 件商品</span>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-slate-500">价格筛选:</span>
+                    <select id="priceFilter" class="px-3 py-1 border border-slate-300 rounded text-sm">
+                        <option value="all">全部价格</option>
+                        <option value="0-50">￥0-50</option>
+                        <option value="50-100">￥50-100</option>
+                        <option value="100-200">￥100-200</option>
+                        <option value="200+">￥200以上</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-sm text-slate-500">排序:</span>
+                <select id="sortBy" class="px-3 py-1 border border-slate-300 rounded text-sm">
+                    <option value="default">默认排序</option>
+                    <option value="price-low">价格从低到高</option>
+                    <option value="price-high">价格从高到低</option>
+                    <option value="rating">好评优先</option>
+                    <option value="sales">销量优先</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 商品网格 -->
+        <div id="productGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <!-- 商品卡片将通过JavaScript动态生成 -->
+        </div>
+
+        <!-- 加载更多 -->
+        <div class="text-center mt-12">
+            <button id="loadMore" class="enhanced-btn px-8 py-3 bg-[var(--labu)] text-white rounded-full font-medium">
+                加载更多商品 ✨
+            </button>
+        </div>
+    </main>
+
+    <!-- 购物车侧边栏 -->
+    <div id="cartSidebar"
+        class="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-40">
+        <div class="p-6 border-b">
+            <div class="flex items-center justify-between">
+                <h3 class="text-lg font-semibold">🛒 购物车</h3>
+                <button id="closeCart" class="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+        </div>
+        <div id="cartItems" class="flex-1 overflow-y-auto p-6">
+            <div class="text-center text-slate-400 py-8">
+                <div class="text-4xl mb-2">🛒</div>
+                <p>购物车空空如也</p>
+                <p class="text-sm mt-1">快去挑选你喜欢的Labubu吧！</p>
+            </div>
+        </div>
+        <div class="p-6 border-t">
+            <div class="flex justify-between items-center mb-4">
+                <span class="font-semibold">总计:</span>
+                <span id="cartTotal" class="text-xl font-bold text-[var(--labu)]">￥0</span>
+            </div>
+            <button class="cart-btn w-full py-3 text-white rounded-xl font-medium">
+                立即结算 💳
+            </button>
+        </div>
+    </div>
+
+    <!-- 背景遮罩 -->
+    <div id="cartOverlay" class="fixed inset-0 bg-black/50 hidden z-30"></div>
+
+    <script>
+        // 工具函数
+        const $ = (selector) => document.querySelector(selector);
+        const $$ = (selector) => document.querySelectorAll(selector);
+
+        // 商品数据
+        const products = [
+            {
+                id: 1,
+                name: "Labubu 经典款公仔",
+                price: 89,
+                originalPrice: 109,
+                image: "🧸",
+                category: "classic",
+                rating: 4.8,
+                sales: 1234,
+                description: "迪士尼官方授权经典款",
+                inStock: true
+            },
+            {
+                id: 2,
+                name: "Labubu 夏日海滩系列",
+                price: 128,
+                originalPrice: 158,
+                image: "🏖️",
+                category: "limited",
+                rating: 4.9,
+                sales: 856,
+                description: "夏日限定，清爽配色",
+                inStock: true
+            },
+            {
+                id: 3,
+                name: "Labubu 神秘盲盒",
+                price: 45,
+                originalPrice: 55,
+                image: "🎁",
+                category: "blind",
+                rating: 4.7,
+                sales: 2341,
+                description: "12款随机，惊喜满满",
+                inStock: true
+            },
+            {
+                id: 4,
+                name: "Labubu 圣诞特别版",
+                price: 198,
+                originalPrice: 248,
+                image: "🎄",
+                category: "limited",
+                rating: 5.0,
+                sales: 567,
+                description: "圣诞限定，温馨配色",
+                inStock: false
+            },
+            {
+                id: 5,
+                name: "Labubu 粉色梦幻款",
+                price: 156,
+                originalPrice: 186,
+                image: "💖",
+                category: "classic",
+                rating: 4.8,
+                sales: 789,
+                description: "少女心必备粉色款",
+                inStock: true
+            },
+            {
+                id: 6,
+                name: "Labubu 钥匙扣",
+                price: 25,
+                originalPrice: 35,
+                image: "🔑",
+                category: "accessories",
+                rating: 4.6,
+                sales: 3456,
+                description: "精美钥匙扣，随身携带",
+                inStock: true
+            },
+            {
+                id: 7,
+                name: "Labubu 宇宙星空系列",
+                price: 176,
+                originalPrice: 216,
+                image: "🌌",
+                category: "limited",
+                rating: 4.9,
+                sales: 423,
+                description: "星空主题，梦幻配色",
+                inStock: true
+            },
+            {
+                id: 8,
+                name: "Labubu 学院风书包",
+                price: 88,
+                originalPrice: 118,
+                image: "🎒",
+                category: "accessories",
+                rating: 4.7,
+                sales: 654,
+                description: "学院风设计，实用美观",
+                inStock: true
+            },
+            {
+                id: 9,
+                name: "Labubu 彩虹系列",
+                price: 134,
+                originalPrice: 164,
+                image: "🌈",
+                category: "classic",
+                rating: 4.8,
+                sales: 987,
+                description: "彩虹配色，充满活力",
+                inStock: true
+            },
+            {
+                id: 10,
+                name: "Labubu 咖啡主题款",
+                price: 145,
+                originalPrice: 175,
+                image: "☕",
+                category: "limited",
+                rating: 4.7,
+                sales: 345,
+                description: "咖啡主题，温暖色调",
+                inStock: true
+            },
+            {
+                id: 11,
+                name: "Labubu 万圣节系列",
+                price: 166,
+                originalPrice: 196,
+                image: "🎃",
+                category: "limited",
+                rating: 4.9,
+                sales: 234,
+                description: "万圣节限定，神秘配色",
+                inStock: true
+            },
+            {
+                id: 12,
+                name: "Labubu 手机壳",
+                price: 39,
+                originalPrice: 49,
+                image: "📱",
+                category: "accessories",
+                rating: 4.5,
+                sales: 1876,
+                description: "多款手机适配，保护爱机",
+                inStock: true
+            }
+        ];
+
+        let cart = [];
+        let currentCategory = 'all';
+        let currentSlide = 0;
+
+        // 初始化
+        function init() {
+            renderProducts();
+            initCarousel();
+            initEventListeners();
+            initCustomCursor();
+            updateCartUI();
+        }
+
+        // 渲染商品
+        function renderProducts(productsToShow = products) {
+            const grid = $('#productGrid');
+            grid.innerHTML = '';
+
+            productsToShow.forEach(product => {
+                const productCard = createProductCard(product);
+                grid.appendChild(productCard);
+            });
+
+            $('#productCount').textContent = productsToShow.length;
+        }
+
+        // 创建商品卡片
+        function createProductCard(product) {
+            const card = document.createElement('div');
+            card.className = 'product-card bg-white rounded-2xl p-4 shadow-sm border border-slate-200';
+
+            const discount = Math.round((1 - product.price / product.originalPrice) * 100);
+            const stars = '⭐'.repeat(Math.floor(product.rating));
+
+            card.innerHTML = `
+                <div class="relative mb-3">
+                    <div class="product-image text-6xl text-center py-6 bg-slate-50 rounded-xl">
+                        ${product.image}
+                    </div>
+                    ${discount > 0 ? `<div class="absolute top-2 left-2 price-tag text-white text-xs px-2 py-1 rounded-full">
+                        -${discount}%
+                    </div>` : ''}
+                    ${!product.inStock ? '<div class="absolute inset-0 bg-black/50 rounded-xl flex items-center justify-center text-white font-medium">暂时缺货</div>' : ''}
+                </div>
+                
+                <div class="space-y-2">
+                    <div class="category-tag text-center">${getCategoryName(product.category)}</div>
+                    <h3 class="font-medium text-sm leading-tight">${product.name}</h3>
+                    <p class="text-xs text-slate-500">${product.description}</p>
+                    
+                    <div class="flex items-center gap-1 text-xs">
+                        <span class="stars">${stars}</span>
+                        <span class="text-slate-500">(${product.sales})</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-lg font-bold text-[var(--labu)]">￥${product.price}</span>
+                            ${product.originalPrice > product.price ? `<span class="text-xs text-slate-400 line-through ml-1">￥${product.originalPrice}</span>` : ''}
+                        </div>
+                    </div>
+                    
+                    <button class="enhanced-btn w-full py-2 bg-[var(--labu)] text-white rounded-xl text-sm font-medium ${!product.inStock ? 'opacity-50 cursor-not-allowed' : ''}" 
+                            onclick="addToCart(${product.id})" ${!product.inStock ? 'disabled' : ''}>
+                        ${product.inStock ? '🛒 加入购物车' : '暂时缺货'}
+                    </button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // 获取分类名称
+        function getCategoryName(category) {
+            const names = {
+                'classic': '经典',
+                'limited': '限定',
+                'blind': '盲盒',
+                'accessories': '配件'
+            };
+            return names[category] || '商品';
+        }
+
+        // 添加到购物车
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product || !product.inStock) return;
+
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            updateCartUI();
+            showAddToCartEffect();
+        }
+
+        // 更新购物车UI
+        function updateCartUI() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            const totalPrice = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            $('#cartCount').textContent = totalItems;
+            $('#cartTotal').textContent = `￥${totalPrice}`;
+
+            renderCartItems();
+        }
+
+        // 渲染购物车商品
+        function renderCartItems() {
+            const container = $('#cartItems');
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-slate-400 py-8">
+                        <div class="text-4xl mb-2">🛒</div>
+                        <p>购物车空空如也</p>
+                        <p class="text-sm mt-1">快去挑选你喜欢的Labubu吧！</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = cart.map(item => `
+                <div class="flex items-center gap-3 py-3 border-b border-slate-100">
+                    <div class="text-2xl">${item.image}</div>
+                    <div class="flex-1">
+                        <h4 class="text-sm font-medium">${item.name}</h4>
+                        <div class="text-xs text-slate-500">￥${item.price} × ${item.quantity}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="updateCartQuantity(${item.id}, -1)" class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-xs">-</button>
+                        <span class="text-sm">${item.quantity}</span>
+                        <button onclick="updateCartQuantity(${item.id}, 1)" class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-xs">+</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 更新购物车商品数量
+        function updateCartQuantity(productId, change) {
+            const item = cart.find(item => item.id === productId);
+            if (!item) return;
+
+            item.quantity += change;
+            if (item.quantity <= 0) {
+                cart = cart.filter(item => item.id !== productId);
+            }
+
+            updateCartUI();
+        }
+
+        // 显示加入购物车效果
+        function showAddToCartEffect() {
+            // 创建飞入动画效果
+            const effect = document.createElement('div');
+            effect.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg z-50 transform translate-x-full transition-transform duration-300';
+            effect.textContent = '✅ 已添加到购物车';
+            document.body.appendChild(effect);
+
+            setTimeout(() => {
+                effect.style.transform = 'translateX(0)';
+            }, 100);
+
+            setTimeout(() => {
+                effect.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (document.body.contains(effect)) {
+                        document.body.removeChild(effect);
+                    }
+                }, 300);
+            }, 2000);
+        }
+
+        // 初始化轮播图
+        function initCarousel() {
+            const carousel = $('#carousel');
+            const dots = $$('.carousel-dot');
+
+            function updateCarousel() {
+                carousel.style.transform = `translateX(-${currentSlide * 100}%)`;
+                dots.forEach((dot, index) => {
+                    dot.style.backgroundColor = index === currentSlide ? 'white' : 'rgba(255,255,255,0.5)';
+                });
+            }
+
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    currentSlide = index;
+                    updateCarousel();
+                });
+            });
+
+            // 自动轮播
+            setInterval(() => {
+                currentSlide = (currentSlide + 1) % 3;
+                updateCarousel();
+            }, 4000);
+
+            updateCarousel();
+        }
+
+        // 初始化事件监听
+        function initEventListeners() {
+            // 分类筛选
+            $$('.category-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    currentCategory = btn.dataset.category;
+                    filterProducts();
+
+                    // 更新活跃状态
+                    $$('.category-btn').forEach(b => b.classList.remove('bg-[var(--labu)]', 'text-white'));
+                    btn.classList.add('bg-[var(--labu)]', 'text-white');
+                });
+            });
+
+            // 购物车侧边栏
+            $('.text-slate-600').addEventListener('click', () => {
+                $('#cartSidebar').style.transform = 'translateX(0)';
+                $('#cartOverlay').classList.remove('hidden');
+            });
+
+            $('#closeCart').addEventListener('click', closeCart);
+            $('#cartOverlay').addEventListener('click', closeCart);
+
+            // 搜索
+            $('#searchInput').addEventListener('input', filterProducts);
+
+            // 筛选和排序
+            $('#priceFilter').addEventListener('change', filterProducts);
+            $('#sortBy').addEventListener('change', filterProducts);
+        }
+
+        function closeCart() {
+            $('#cartSidebar').style.transform = 'translateX(100%)';
+            $('#cartOverlay').classList.add('hidden');
+        }
+
+        // 筛选商品
+        function filterProducts() {
+            let filtered = products;
+
+            // 分类筛选
+            if (currentCategory !== 'all') {
+                filtered = filtered.filter(p => p.category === currentCategory);
+            }
+
+            // 搜索筛选
+            const searchTerm = $('#searchInput').value.toLowerCase();
+            if (searchTerm) {
+                filtered = filtered.filter(p =>
+                    p.name.toLowerCase().includes(searchTerm) ||
+                    p.description.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            // 价格筛选
+            const priceFilter = $('#priceFilter').value;
+            if (priceFilter !== 'all') {
+                const [min, max] = priceFilter.split('-').map(n => n === '' ? Infinity : parseInt(n));
+                filtered = filtered.filter(p => p.price >= min && (max === Infinity || p.price <= max));
+            }
+
+            // 排序
+            const sortBy = $('#sortBy').value;
+            switch (sortBy) {
+                case 'price-low':
+                    filtered.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price-high':
+                    filtered.sort((a, b) => b.price - a.price);
+                    break;
+                case 'rating':
+                    filtered.sort((a, b) => b.rating - a.rating);
+                    break;
+                case 'sales':
+                    filtered.sort((a, b) => b.sales - a.sales);
+                    break;
+            }
+
+            renderProducts(filtered);
+        }
+
+        // 自定义鼠标效果
+        function initCustomCursor() {
+            const cursor = $('.custom-cursor');
+            let mouseX = 0, mouseY = 0;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                cursor.style.left = mouseX + 'px';
+                cursor.style.top = mouseY + 'px';
+
+                createCursorTrail(mouseX, mouseY);
+            });
+
+            document.addEventListener('mousedown', () => {
+                cursor.classList.add('clicking');
+                createMagicParticles(mouseX, mouseY);
+            });
+
+            document.addEventListener('mouseup', () => {
+                cursor.classList.remove('clicking');
+            });
+        }
+
+        function createCursorTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            trail.style.left = (x - 4) + 'px';
+            trail.style.top = (y - 4) + 'px';
+            document.body.appendChild(trail);
+
+            setTimeout(() => {
+                if (document.body.contains(trail)) {
+                    document.body.removeChild(trail);
+                }
+            }, 500);
+        }
+
+        function createMagicParticles(x, y) {
+            for (let i = 0; i < 6; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'magic-particle';
+                    particle.style.left = (x + Math.random() * 40 - 20) + 'px';
+                    particle.style.top = (y + Math.random() * 40 - 20) + 'px';
+                    document.body.appendChild(particle);
+
+                    setTimeout(() => {
+                        if (document.body.contains(particle)) {
+                            document.body.removeChild(particle);
+                        }
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>

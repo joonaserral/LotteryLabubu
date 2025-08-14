@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - Labubu 幸运抽奖 🧸</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧸</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --labu: #6b5b95;
+            --labu2: #ffcc00;
+        }
+
+        .labu-gradient {
+            background-image: linear-gradient(135deg, rgba(107, 91, 149, .15), rgba(255, 204, 0, .15));
+        }
+
+        .sparkle {
+            animation: sparkle 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes sparkle {
+            0% {
+                transform: scale(1) rotate(0deg);
+            }
+
+            100% {
+                transform: scale(1.1) rotate(5deg);
+            }
+        }
+
+        /* 自定义鼠标样式 */
+        * {
+            cursor: none !important;
+        }
+
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff69b4"><path d="M8 2C8 2 8.5 3 10.5 3C12.5 3 13 2 13 2C14 2 15 3 15 4C15 5 14 6 13 6C12 6 11 7 11 8C11 9 12 10 13 10C14 10 15 9 15 8C15 7 16 6 17 6C18 6 19 7 19 8C19 9 18 10 17 10C16 10 15 11 15 12C15 13 16 14 17 14C18 14 19 13 19 12C19 11 20 10 21 10C22 10 23 11 23 12C23 13 22 14 21 14C20 14 19 15 19 16C19 17 18 18 17 18C16 18 15 17 15 16C15 15 14 14 13 14C12 14 11 15 11 16C11 17 10 18 9 18C8 18 7 17 7 16C7 15 8 14 9 14C10 14 11 13 11 12C11 11 10 10 9 10C8 10 7 11 7 12C7 13 6 14 5 14C4 14 3 13 3 12C3 11 4 10 5 10C6 10 7 9 7 8C7 7 6 6 5 6C4 6 3 7 3 8C3 9 2 10 1 10C0 10 -1 9 -1 8C-1 7 0 6 1 6C2 6 3 5 3 4C3 3 4 2 5 2C6 2 7 3 7 4C7 5 8 6 9 6C10 6 11 5 11 4C11 3 10 2 9 2C8.5 2 8 2 8 2Z"/></svg>') no-repeat center;
+            background-size: contain;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.1s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .custom-cursor.clicking {
+            transform: translate(-50%, -50%) scale(1.2);
+        }
+
+        .cursor-trail {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, rgba(255, 105, 180, 0.8) 0%, rgba(255, 105, 180, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9998;
+            animation: cursorTrailFade 0.5s ease-out forwards;
+        }
+
+        @keyframes cursorTrailFade {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.3);
+            }
+        }
+
+        /* 等级进度条 */
+        .level-progress {
+            background: linear-gradient(90deg, var(--labu) 0%, var(--labu2) 100%);
+            height: 8px;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* 成就徽章 */
+        .achievement-badge {
+            transition: all 0.3s ease;
+        }
+
+        .achievement-badge:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .achievement-unlocked {
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            color: #8b5a00;
+        }
+
+        .achievement-locked {
+            background: #e2e8f0;
+            color: #64748b;
+        }
+
+        /* 统计卡片动画 */
+        .stat-card {
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 签到日历 */
+        .calendar-day {
+            transition: all 0.3s ease;
+        }
+
+        .calendar-day.signed {
+            background: linear-gradient(45deg, var(--labu), var(--labu2));
+            color: white;
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--labu);
+            box-shadow: 0 0 10px rgba(107, 91, 149, 0.3);
+        }
+
+        /* 按钮增强效果 */
+        .enhanced-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .enhanced-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .enhanced-btn:hover::before {
+            left: 100%;
+        }
+
+        .enhanced-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(107, 91, 149, 0.3);
+        }
+
+        /* 收藏品展示 */
+        .collection-item {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .collection-item:hover {
+            transform: scale(1.05);
+        }
+
+        .collection-item.owned {
+            opacity: 1;
+        }
+
+        .collection-item.not-owned {
+            opacity: 0.3;
+            filter: grayscale(100%);
+        }
+
+        /* 粒子效果 */
+        .magic-particle {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: radial-gradient(circle, #ffd700 0%, #ff69b4 50%, transparent 100%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9997;
+            animation: magicParticle 2s ease-out forwards;
+        }
+
+        @keyframes magicParticle {
+            0% {
+                opacity: 1;
+                transform: scale(0) rotate(0deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1) rotate(180deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.2) rotate(360deg) translateY(-50px);
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-900">
+    <!-- 自定义鼠标光标 -->
+    <div class="custom-cursor"></div>
+
+    <!-- 顶部导航 -->
+    <header class="sticky top-0 z-30 backdrop-blur bg-white/90 border-b border-slate-200 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-[var(--labu)] grid place-content-center text-white text-xl sparkle">
+                        🧸</div>
+                    <div>
+                        <h1 class="font-bold text-lg">个人中心</h1>
+                        <p class="text-xs text-slate-500">Labubu 收集家 ✨</p>
+                    </div>
+                </div>
+                <nav class="flex items-center gap-6">
+                    <a href="index.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🎯 抽奖</a>
+                    <a href="shop.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">🛒 商城</a>
+                    <a href="tasks.html" class="text-slate-600 hover:text-[var(--labu)] transition-colors">📋 任务</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-4 py-8">
+        <!-- 用户信息卡片 -->
+        <section class="labu-gradient rounded-3xl p-8 mb-8">
+            <div class="flex items-center gap-6">
+                <div class="w-24 h-24 rounded-2xl bg-white/80 grid place-content-center text-4xl sparkle">
+                    🧸
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-2">
+                        <h2 class="text-2xl font-bold" id="userName">Labubu收集家</h2>
+                        <div class="px-3 py-1 bg-[var(--labu)] text-white rounded-full text-sm font-medium">
+                            Lv.<span id="userLevel">5</span>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 mb-3">已加入 <span id="joinDays">127</span> 天 | 今日活跃度 <span
+                            class="text-[var(--labu)] font-semibold">85%</span></p>
+
+                    <!-- 等级进度条 -->
+                    <div class="mb-4">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>距离下一级还需</span>
+                            <span id="expNeeded">350/1000 EXP</span>
+                        </div>
+                        <div class="w-full bg-white/50 rounded-full h-2">
+                            <div class="level-progress w-1/3"></div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button class="enhanced-btn px-4 py-2 bg-white/80 rounded-xl font-medium">✏️ 编辑资料</button>
+                        <button class="enhanced-btn px-4 py-2 bg-[var(--labu)] text-white rounded-xl font-medium">🎁
+                            每日签到</button>
+                    </div>
+                </div>
+
+                <!-- 今日运势 -->
+                <div class="text-center bg-white/80 rounded-2xl p-4">
+                    <div class="text-3xl mb-2">🔮</div>
+                    <div class="text-sm font-medium mb-1">今日运势</div>
+                    <div class="text-2xl font-bold text-[var(--labu)]" id="luckyRate">87%</div>
+                    <div class="text-xs text-slate-600">抽奖大吉！</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid md:grid-cols-3 gap-6">
+            <!-- 左侧 - 统计信息 -->
+            <div class="md:col-span-1 space-y-6">
+                <!-- 个人统计 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm">
+                    <h3 class="font-semibold mb-4 flex items-center gap-2">
+                        📊 个人统计
+                    </h3>
+                    <div class="space-y-4">
+                        <div class="stat-card flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="text-2xl">🎯</div>
+                                <div>
+                                    <div class="text-sm text-slate-600">总抽奖次数</div>
+                                    <div class="font-semibold" id="totalDraws">156</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="text-2xl">🏆</div>
+                                <div>
+                                    <div class="text-sm text-slate-600">获得奖品</div>
+                                    <div class="font-semibold" id="totalPrizes">89</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="text-2xl">💎</div>
+                                <div>
+                                    <div class="text-sm text-slate-600">稀有度总分</div>
+                                    <div class="font-semibold" id="rarityScore">2,345</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card flex items-center justify-between p-3 bg-slate-50 rounded-xl">
+                            <div class="flex items-center gap-3">
+                                <div class="text-2xl">🔥</div>
+                                <div>
+                                    <div class="text-sm text-slate-600">连续签到</div>
+                                    <div class="font-semibold" id="streakDays">23天</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 快速操作 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm">
+                    <h3 class="font-semibold mb-4 flex items-center gap-2">
+                        ⚡ 快速操作
+                    </h3>
+                    <div class="space-y-3">
+                        <button
+                            class="enhanced-btn w-full p-3 bg-[var(--labu)] text-white rounded-xl flex items-center justify-center gap-2">
+                            🎯 立即抽奖
+                        </button>
+                        <button
+                            class="enhanced-btn w-full p-3 bg-slate-100 rounded-xl flex items-center justify-center gap-2">
+                            🛒 前往商城
+                        </button>
+                        <button
+                            class="enhanced-btn w-full p-3 bg-slate-100 rounded-xl flex items-center justify-center gap-2">
+                            📋 查看任务
+                        </button>
+                        <button
+                            class="enhanced-btn w-full p-3 bg-slate-100 rounded-xl flex items-center justify-center gap-2">
+                            🎮 小游戏
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中间 - 主要内容 -->
+            <div class="md:col-span-2 space-y-6">
+                <!-- 成就系统 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold flex items-center gap-2">
+                            🏅 成就徽章
+                        </h3>
+                        <span class="text-sm text-slate-500" id="achievementCount">8/15 已解锁</span>
+                    </div>
+
+                    <div class="grid grid-cols-5 gap-4" id="achievementGrid">
+                        <!-- 成就徽章将通过JavaScript生成 -->
+                    </div>
+                </div>
+
+                <!-- Labubu收藏册 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-semibold flex items-center gap-2">
+                            📚 Labubu 收藏册
+                        </h3>
+                        <span class="text-sm text-slate-500" id="collectionCount">12/24 已收集</span>
+                    </div>
+
+                    <div class="grid grid-cols-6 gap-4" id="collectionGrid">
+                        <!-- 收藏品将通过JavaScript生成 -->
+                    </div>
+                </div>
+
+                <!-- 最近获得 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm">
+                    <h3 class="font-semibold mb-4 flex items-center gap-2">
+                        ⭐ 最近获得
+                    </h3>
+
+                    <div class="space-y-3" id="recentPrizes">
+                        <!-- 最近奖品将通过JavaScript生成 -->
+                    </div>
+                </div>
+
+                <!-- 每日签到日历 -->
+                <div class="bg-white rounded-3xl p-6 shadow-sm">
+                    <h3 class="font-semibold mb-4 flex items-center gap-2">
+                        📅 签到日历
+                        <span class="text-sm font-normal text-slate-500">本月已签到 <span id="monthlyCheckins">15</span>
+                            天</span>
+                    </h3>
+
+                    <div class="grid grid-cols-7 gap-2 text-center">
+                        <div class="text-xs text-slate-500 p-2">日</div>
+                        <div class="text-xs text-slate-500 p-2">一</div>
+                        <div class="text-xs text-slate-500 p-2">二</div>
+                        <div class="text-xs text-slate-500 p-2">三</div>
+                        <div class="text-xs text-slate-500 p-2">四</div>
+                        <div class="text-xs text-slate-500 p-2">五</div>
+                        <div class="text-xs text-slate-500 p-2">六</div>
+
+                        <div id="calendarGrid" class="col-span-7 grid grid-cols-7 gap-2">
+                            <!-- 日历将通过JavaScript生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 工具函数
+        const $ = (selector) => document.querySelector(selector);
+        const $$ = (selector) => document.querySelectorAll(selector);
+
+        // 用户数据
+        let userData = {
+            name: 'Labubu收集家',
+            level: 5,
+            exp: 350,
+            maxExp: 1000,
+            joinDays: 127,
+            totalDraws: 156,
+            totalPrizes: 89,
+            rarityScore: 2345,
+            streakDays: 23,
+            luckyRate: 87
+        };
+
+        // 成就数据
+        const achievements = [
+            { id: 1, name: '初心者', icon: '🔰', description: '完成第一次抽奖', unlocked: true },
+            { id: 2, name: '幸运儿', icon: '🍀', description: '连续3次抽中奖品', unlocked: true },
+            { id: 3, name: '收集家', icon: '📦', description: '收集10种不同奖品', unlocked: true },
+            { id: 4, name: '坚持者', icon: '💪', description: '连续签到7天', unlocked: true },
+            { id: 5, name: '土豪', icon: '💰', description: '单日抽奖超过20次', unlocked: true },
+            { id: 6, name: '传说', icon: '🌟', description: '抽中传说级奖品', unlocked: true },
+            { id: 7, name: '社交达人', icon: '💬', description: '发表10条留言', unlocked: true },
+            { id: 8, name: '购物狂', icon: '🛒', description: '商城购买满500元', unlocked: true },
+            { id: 9, name: '完美主义', icon: '💎', description: '收集齐全套Labubu', unlocked: false },
+            { id: 10, name: '月度之星', icon: '🌙', description: '月度抽奖次数第一', unlocked: false },
+            { id: 11, name: '分享达人', icon: '📤', description: '分享给10位好友', unlocked: false },
+            { id: 12, name: '评论家', icon: '📝', description: '给商品写50条评价', unlocked: false },
+            { id: 13, name: '游戏高手', icon: '🎮', description: '小游戏获得满分', unlocked: false },
+            { id: 14, name: '慈善家', icon: '❤️', description: '参与慈善抽奖活动', unlocked: false },
+            { id: 15, name: 'Labubu之王', icon: '👑', description: '达成所有成就', unlocked: false }
+        ];
+
+        // 收藏品数据
+        const collections = [
+            { id: 1, name: '经典款', emoji: '🧸', owned: true, rarity: 'common' },
+            { id: 2, name: '粉色梦幻', emoji: '💖', owned: true, rarity: 'common' },
+            { id: 3, name: '蓝色海洋', emoji: '🌊', owned: true, rarity: 'common' },
+            { id: 4, name: '绿色森林', emoji: '🌲', owned: true, rarity: 'common' },
+            { id: 5, name: '彩虹系列', emoji: '🌈', owned: true, rarity: 'rare' },
+            { id: 6, name: '夏日海滩', emoji: '🏖️', owned: true, rarity: 'rare' },
+            { id: 7, name: '宇宙星空', emoji: '🌌', owned: true, rarity: 'rare' },
+            { id: 8, name: '圣诞特别', emoji: '🎄', owned: true, rarity: 'epic' },
+            { id: 9, name: '万圣节', emoji: '🎃', owned: true, rarity: 'epic' },
+            { id: 10, name: '咖啡主题', emoji: '☕', owned: true, rarity: 'epic' },
+            { id: 11, name: '黄金限定', emoji: '🏆', owned: true, rarity: 'legendary' },
+            { id: 12, name: '钻石典藏', emoji: '💎', owned: true, rarity: 'legendary' },
+            { id: 13, name: '独角兽', emoji: '🦄', owned: false, rarity: 'rare' },
+            { id: 14, name: '龙年特别', emoji: '🐉', owned: false, rarity: 'epic' },
+            { id: 15, name: '太空漫游', emoji: '🚀', owned: false, rarity: 'epic' },
+            { id: 16, name: '魔法师', emoji: '🧙', owned: false, rarity: 'rare' },
+            { id: 17, name: '机器人', emoji: '🤖', owned: false, rarity: 'common' },
+            { id: 18, name: '超级英雄', emoji: '🦸', owned: false, rarity: 'epic' },
+            { id: 19, name: '公主系列', emoji: '👸', owned: false, rarity: 'rare' },
+            { id: 20, name: '武士道', emoji: '🥷', owned: false, rarity: 'epic' },
+            { id: 21, name: '天使之翼', emoji: '👼', owned: false, rarity: 'legendary' },
+            { id: 22, name: '恶魔之角', emoji: '😈', owned: false, rarity: 'legendary' },
+            { id: 23, name: '时光旅者', emoji: '⏰', owned: false, rarity: 'legendary' },
+            { id: 24, name: '终极形态', emoji: '🌟', owned: false, rarity: 'mythic' }
+        ];
+
+        // 最近获得奖品
+        const recentPrizes = [
+            { name: '钻石典藏 Labubu', emoji: '💎', rarity: 'legendary', time: '2小时前' },
+            { name: '咖啡主题 Labubu', emoji: '☕', rarity: 'epic', time: '1天前' },
+            { name: '3U币', emoji: '🪙', rarity: 'common', time: '2天前' },
+            { name: '彩虹系列 Labubu', emoji: '🌈', rarity: 'rare', time: '3天前' },
+            { name: '烤肉券', emoji: '🥩', rarity: 'common', time: '4天前' }
+        ];
+
+        // 初始化
+        function init() {
+            renderUserData();
+            renderAchievements();
+            renderCollection();
+            renderRecentPrizes();
+            renderCalendar();
+            initEventListeners();
+            initCustomCursor();
+        }
+
+        // 渲染用户数据
+        function renderUserData() {
+            $('#userName').textContent = userData.name;
+            $('#userLevel').textContent = userData.level;
+            $('#joinDays').textContent = userData.joinDays;
+            $('#totalDraws').textContent = userData.totalDraws;
+            $('#totalPrizes').textContent = userData.totalPrizes;
+            $('#rarityScore').textContent = userData.rarityScore.toLocaleString();
+            $('#streakDays').textContent = userData.streakDays + '天';
+            $('#luckyRate').textContent = userData.luckyRate + '%';
+            $('#expNeeded').textContent = `${userData.exp}/${userData.maxExp} EXP`;
+
+            // 更新进度条
+            const progressBar = $('.level-progress');
+            progressBar.style.width = (userData.exp / userData.maxExp * 100) + '%';
+        }
+
+        // 渲染成就
+        function renderAchievements() {
+            const grid = $('#achievementGrid');
+            const unlockedCount = achievements.filter(a => a.unlocked).length;
+
+            $('#achievementCount').textContent = `${unlockedCount}/${achievements.length} 已解锁`;
+
+            grid.innerHTML = achievements.map(achievement => `
+                <div class="achievement-badge ${achievement.unlocked ? 'achievement-unlocked' : 'achievement-locked'} 
+                           w-16 h-16 rounded-2xl flex flex-col items-center justify-center text-center p-2"
+                     title="${achievement.name}: ${achievement.description}">
+                    <div class="text-2xl">${achievement.icon}</div>
+                    <div class="text-xs font-medium mt-1">${achievement.name}</div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染收藏册
+        function renderCollection() {
+            const grid = $('#collectionGrid');
+            const ownedCount = collections.filter(c => c.owned).length;
+
+            $('#collectionCount').textContent = `${ownedCount}/${collections.length} 已收集`;
+
+            grid.innerHTML = collections.map(item => `
+                <div class="collection-item ${item.owned ? 'owned' : 'not-owned'} 
+                           bg-slate-50 rounded-xl p-3 text-center border ${getRarityBorder(item.rarity)}"
+                     title="${item.name} - ${getRarityName(item.rarity)}">
+                    <div class="text-3xl mb-1">${item.emoji}</div>
+                    <div class="text-xs font-medium">${item.name}</div>
+                    <div class="text-xs text-slate-500 mt-1">${getRarityName(item.rarity)}</div>
+                </div>
+            `).join('');
+        }
+
+        // 获取稀有度名称
+        function getRarityName(rarity) {
+            const names = {
+                'common': '普通',
+                'rare': '稀有',
+                'epic': '史诗',
+                'legendary': '传说',
+                'mythic': '神话'
+            };
+            return names[rarity] || '未知';
+        }
+
+        // 获取稀有度边框
+        function getRarityBorder(rarity) {
+            const borders = {
+                'common': 'border-slate-300',
+                'rare': 'border-blue-400',
+                'epic': 'border-purple-400',
+                'legendary': 'border-yellow-400',
+                'mythic': 'border-red-400'
+            };
+            return borders[rarity] || 'border-slate-300';
+        }
+
+        // 渲染最近奖品
+        function renderRecentPrizes() {
+            const container = $('#recentPrizes');
+
+            container.innerHTML = recentPrizes.map(prize => `
+                <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                    <div class="text-2xl">${prize.emoji}</div>
+                    <div class="flex-1">
+                        <div class="font-medium">${prize.name}</div>
+                        <div class="text-sm text-slate-500">${getRarityName(prize.rarity)} • ${prize.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染签到日历
+        function renderCalendar() {
+            const grid = $('#calendarGrid');
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = today.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const firstDay = new Date(year, month, 1).getDay();
+
+            let html = '';
+
+            // 填充空白日期
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div></div>';
+            }
+
+            // 填充实际日期
+            for (let day = 1; day <= daysInMonth; day++) {
+                const isToday = day === today.getDate();
+                const isSigned = Math.random() > 0.4; // 模拟签到状态
+
+                html += `
+                    <div class="calendar-day w-8 h-8 rounded-lg flex items-center justify-center text-sm font-medium
+                               ${isToday ? 'today' : ''} ${isSigned ? 'signed' : 'bg-slate-100'}">
+                        ${day}
+                    </div>
+                `;
+            }
+
+            grid.innerHTML = html;
+
+            // 更新签到统计
+            const signedDays = $$('.calendar-day.signed').length;
+            $('#monthlyCheckins').textContent = signedDays;
+        }
+
+        // 初始化事件监听
+        function initEventListeners() {
+            // 快速操作按钮
+            $$('.enhanced-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.textContent.includes('立即抽奖')) {
+                        window.location.href = 'index.html#draw';
+                    } else if (btn.textContent.includes('前往商城')) {
+                        window.location.href = 'shop.html';
+                    } else if (btn.textContent.includes('查看任务')) {
+                        window.location.href = 'tasks.html';
+                    } else if (btn.textContent.includes('小游戏')) {
+                        window.location.href = 'games.html';
+                    } else if (btn.textContent.includes('每日签到')) {
+                        performDailyCheckin();
+                    }
+                });
+            });
+
+            // 成就悬浮效果
+            $$('.achievement-badge').forEach(badge => {
+                badge.addEventListener('mouseenter', () => {
+                    createMagicParticles(badge.getBoundingClientRect().left + 32, badge.getBoundingClientRect().top + 32);
+                });
+            });
+        }
+
+        // 执行每日签到
+        function performDailyCheckin() {
+            // 创建签到成功提示
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl z-50 transform translate-x-full transition-transform duration-300';
+            notification.innerHTML = '✅ 签到成功！获得 10 EXP';
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+
+            // 更新用户经验
+            userData.exp += 10;
+            if (userData.exp >= userData.maxExp) {
+                userData.level++;
+                userData.exp = userData.exp - userData.maxExp;
+                userData.maxExp = Math.floor(userData.maxExp * 1.2);
+
+                // 升级提示
+                setTimeout(() => {
+                    const levelUp = document.createElement('div');
+                    levelUp.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
+                    levelUp.innerHTML = `
+                        <div class="bg-white rounded-3xl p-8 text-center animate-bounce">
+                            <div class="text-6xl mb-4">🎉</div>
+                            <div class="text-2xl font-bold text-[var(--labu)] mb-2">恭喜升级！</div>
+                            <div class="text-lg">您现在是 Lv.${userData.level} 了！</div>
+                        </div>
+                    `;
+                    document.body.appendChild(levelUp);
+
+                    setTimeout(() => {
+                        if (document.body.contains(levelUp)) {
+                            document.body.removeChild(levelUp);
+                        }
+                    }, 3000);
+                }, 1000);
+            }
+
+            renderUserData();
+        }
+
+        // 自定义鼠标效果
+        function initCustomCursor() {
+            const cursor = $('.custom-cursor');
+            let mouseX = 0, mouseY = 0;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+                cursor.style.left = mouseX + 'px';
+                cursor.style.top = mouseY + 'px';
+
+                createCursorTrail(mouseX, mouseY);
+            });
+
+            document.addEventListener('mousedown', () => {
+                cursor.classList.add('clicking');
+            });
+
+            document.addEventListener('mouseup', () => {
+                cursor.classList.remove('clicking');
+            });
+        }
+
+        function createCursorTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.className = 'cursor-trail';
+            trail.style.left = (x - 4) + 'px';
+            trail.style.top = (y - 4) + 'px';
+            document.body.appendChild(trail);
+
+            setTimeout(() => {
+                if (document.body.contains(trail)) {
+                    document.body.removeChild(trail);
+                }
+            }, 500);
+        }
+
+        function createMagicParticles(x, y) {
+            for (let i = 0; i < 6; i++) {
+                setTimeout(() => {
+                    const particle = document.createElement('div');
+                    particle.className = 'magic-particle';
+                    particle.style.left = (x + Math.random() * 40 - 20) + 'px';
+                    particle.style.top = (y + Math.random() * 40 - 20) + 'px';
+                    document.body.appendChild(particle);
+
+                    setTimeout(() => {
+                        if (document.body.contains(particle)) {
+                            document.body.removeChild(particle);
+                        }
+                    }, 2000);
+                }, i * 50);
+            }
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>
