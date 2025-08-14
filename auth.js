@@ -121,21 +121,55 @@
         // 显示VIP标识
         const vipBadge = document.createElement('div');
         vipBadge.className = 'vip-badge';
+
+        // 响应式样式，避免挡住导航按钮
+        const isMobile = window.innerWidth <= 768;
+
         vipBadge.style.cssText = `
             position: fixed;
-            top: 10px;
-            right: 10px;
+            ${isMobile ? 'top: 70px; right: 10px;' : 'top: 10px; right: 10px;'}
             background: linear-gradient(45deg, #FFD700, #FFA500);
             color: #8B4513;
-            padding: 8px 16px;
+            padding: ${isMobile ? '6px 12px' : '8px 16px'};
             border-radius: 20px;
-            font-size: 12px;
+            font-size: ${isMobile ? '11px' : '12px'};
             font-weight: bold;
-            z-index: 10000;
+            z-index: 999;
             box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+            transition: all 0.3s ease;
+            max-width: ${isMobile ? '140px' : 'none'};
+            text-align: center;
         `;
         vipBadge.textContent = '👑 股东身份已认证';
         document.body.appendChild(vipBadge);
+
+        // 监听窗口大小变化，动态调整位置
+        const adjustBadgePosition = () => {
+            const isMobileView = window.innerWidth <= 768;
+            if (isMobileView) {
+                vipBadge.style.top = '70px';
+                vipBadge.style.right = '10px';
+                vipBadge.style.padding = '6px 12px';
+                vipBadge.style.fontSize = '11px';
+                vipBadge.style.maxWidth = '140px';
+            } else {
+                vipBadge.style.top = '10px';
+                vipBadge.style.right = '10px';
+                vipBadge.style.padding = '8px 16px';
+                vipBadge.style.fontSize = '12px';
+                vipBadge.style.maxWidth = 'none';
+            }
+        };
+
+        window.addEventListener('resize', adjustBadgePosition);
+
+        // 5秒后自动隐藏（可选）
+        setTimeout(() => {
+            if (vipBadge && vipBadge.parentNode) {
+                vipBadge.style.opacity = '0.8';
+                vipBadge.style.transform = 'scale(0.9)';
+            }
+        }, 5000);
     };
 
     // 防复制保护

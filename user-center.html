@@ -8,6 +8,12 @@
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧸</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     <style>
         :root {
             --labu: #6b5b95;
@@ -235,8 +241,15 @@
         <!-- 用户信息卡片 -->
         <section class="labu-gradient rounded-3xl p-8 mb-8">
             <div class="flex items-center gap-6">
-                <div class="w-24 h-24 rounded-2xl bg-white/80 grid place-content-center text-4xl sparkle">
-                    🧸
+                <div class="relative group cursor-pointer" id="avatarContainer">
+                    <div class="w-24 h-24 rounded-2xl bg-white/80 grid place-content-center text-4xl sparkle overflow-hidden"
+                        id="userAvatar">
+                        🧸
+                    </div>
+                    <div
+                        class="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span class="text-white text-xs">点击编辑</span>
+                    </div>
                 </div>
                 <div class="flex-1">
                     <div class="flex items-center gap-3 mb-2">
@@ -260,9 +273,20 @@
                     </div>
 
                     <div class="flex gap-4">
-                        <button class="enhanced-btn px-4 py-2 bg-white/80 rounded-xl font-medium">✏️ 编辑资料</button>
-                        <button class="enhanced-btn px-4 py-2 bg-[var(--labu)] text-white rounded-xl font-medium">🎁
+                        <button id="editProfileBtn" class="enhanced-btn px-4 py-2 bg-white/80 rounded-xl font-medium">✏️
+                            编辑资料</button>
+                        <button id="dailyCheckinBtn"
+                            class="enhanced-btn px-4 py-2 bg-[var(--labu)] text-white rounded-xl font-medium">🎁
                             每日签到</button>
+                        <button id="logoutBtn"
+                            class="enhanced-btn px-4 py-2 bg-red-500 text-white rounded-xl font-medium hidden">🚪
+                            退出登录</button>
+                    </div>
+
+                    <!-- 用户状态指示器 -->
+                    <div class="flex items-center gap-2 mt-2">
+                        <div id="userStatus" class="w-3 h-3 bg-gray-400 rounded-full"></div>
+                        <span id="userStatusText" class="text-sm text-gray-600">未登录</span>
                     </div>
                 </div>
 
@@ -420,14 +444,174 @@
         </div>
     </div>
 
+    <!-- 登录/注册模态框 -->
+    <div id="authModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full mx-4 overflow-hidden">
+            <div class="p-6 border-b border-slate-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-slate-800" id="authModalTitle">登录账户</h3>
+                    <button id="closeAuthModal" class="text-slate-400 hover:text-slate-600 text-2xl">×</button>
+                </div>
+            </div>
+
+            <div class="p-6">
+                <!-- 登录表单 -->
+                <form id="loginForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">邮箱地址</label>
+                        <input type="email" id="loginEmail" required
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">密码</label>
+                        <input type="password" id="loginPassword" required
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
+                    </div>
+                    <button type="submit"
+                        class="w-full py-3 bg-[var(--labu)] text-white rounded-xl font-medium hover:bg-opacity-90 transition-colors">
+                        登录
+                    </button>
+                </form>
+
+                <!-- 注册表单 -->
+                <form id="registerForm" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">用户名</label>
+                        <input type="text" id="registerName" required
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">邮箱地址</label>
+                        <input type="email" id="registerEmail" required
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">密码</label>
+                        <input type="password" id="registerPassword" required minlength="6"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
+                    </div>
+                    <button type="submit"
+                        class="w-full py-3 bg-[var(--labu)] text-white rounded-xl font-medium hover:bg-opacity-90 transition-colors">
+                        注册
+                    </button>
+                </form>
+
+                <div class="mt-4 text-center">
+                    <button id="switchAuthMode" class="text-[var(--labu)] hover:underline">
+                        还没有账户？立即注册
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑资料模态框 -->
+    <div id="editProfileModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b border-slate-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold text-slate-800">编辑个人资料</h3>
+                    <button id="closeProfileModal" class="text-slate-400 hover:text-slate-600 text-2xl">×</button>
+                </div>
+            </div>
+
+            <form id="profileForm" class="p-6 space-y-6">
+                <!-- 头像上传 -->
+                <div class="text-center">
+                    <div class="relative inline-block">
+                        <div id="avatarPreview"
+                            class="w-24 h-24 rounded-2xl bg-slate-100 grid place-content-center text-4xl mx-auto mb-4 overflow-hidden cursor-pointer">
+                            🧸
+                        </div>
+                        <input type="file" id="avatarUpload" accept="image/*" class="hidden">
+                        <button type="button" id="uploadAvatarBtn"
+                            class="absolute -bottom-1 -right-1 w-8 h-8 bg-[var(--labu)] text-white rounded-full flex items-center justify-center text-sm">
+                            📷
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-500">点击上传头像（最大2MB）</p>
+                </div>
+
+                <!-- 基本信息 -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">用户名</label>
+                        <input type="text" id="profileName" required
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">个人简介</label>
+                        <textarea id="profileBio" rows="3" placeholder="写点什么介绍一下自己..."
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors resize-none"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">个性签名</label>
+                        <input type="text" id="profileSignature" placeholder="例如：Labubu收集家 🧸"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700 mb-2">生日</label>
+                        <input type="date" id="profileBirthday"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:border-[var(--labu)] focus:outline-none transition-colors">
+                    </div>
+                </div>
+
+                <!-- 按钮组 -->
+                <div class="flex gap-3 pt-4">
+                    <button type="button" id="cancelProfile"
+                        class="flex-1 py-3 px-4 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition-colors">
+                        取消
+                    </button>
+                    <button type="submit"
+                        class="flex-1 py-3 px-4 bg-[var(--labu)] text-white rounded-xl hover:bg-opacity-90 transition-colors font-medium">
+                        保存
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         // 工具函数
         const $ = (selector) => document.querySelector(selector);
         const $$ = (selector) => document.querySelectorAll(selector);
 
-        // 用户数据
+        // Firebase配置
+        const firebaseConfig = {
+            apiKey: "AIzaSyAPUti6enwvI57jiOqE3kC9SMBG4GL2FfE",
+            authDomain: "labubu-lottery.firebaseapp.com",
+            projectId: "llabubu- lottery - b8cfd",
+            storageBucket: "labubu-lottery.appspot.com",
+            messagingSenderId: "1040839447881",
+            appId: "1:1040839447881:web:a25f503a3182e9b020b698"
+        };
+
+        // 初始化Firebase
+        let app, auth, db, storage;
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            storage = firebase.storage();
+        } catch (error) {
+            console.warn('Firebase初始化失败，使用本地模式:', error);
+        }
+
+        // 当前用户
+        let currentUser = null;
+        let isLoggedIn = false;
+
+        // 默认用户数据
         let userData = {
+            uid: null,
             name: 'Labubu收集家',
+            avatar: null,
+            bio: '',
+            signature: 'Labubu收集家 🧸',
+            birthday: null,
             level: 5,
             exp: 350,
             maxExp: 1000,
@@ -436,7 +620,9 @@
             totalPrizes: 89,
             rarityScore: 2345,
             streakDays: 23,
-            luckyRate: 87
+            luckyRate: 87,
+            createdAt: new Date(),
+            updatedAt: new Date()
         };
 
         // 成就数据
@@ -495,6 +681,444 @@
             { name: '烤肉券', emoji: '🥩', rarity: 'common', time: '4天前' }
         ];
 
+        // 用户认证和数据管理类
+        class UserManager {
+            constructor() {
+                this.authModal = $('#authModal');
+                this.editProfileModal = $('#editProfileModal');
+                this.isLoginMode = true;
+                this.initAuthListeners();
+                this.initProfileListeners();
+                this.setupAuthStateListener();
+            }
+
+            // 设置认证状态监听
+            setupAuthStateListener() {
+                if (auth) {
+                    auth.onAuthStateChanged((user) => {
+                        currentUser = user;
+                        isLoggedIn = !!user;
+                        this.updateUIForAuthState(user);
+
+                        if (user) {
+                            this.loadUserData(user.uid);
+                        } else {
+                            this.loadLocalData();
+                        }
+                    });
+                } else {
+                    // 如果Firebase不可用，使用本地数据
+                    this.loadLocalData();
+                    this.showAuthModal();
+                }
+            }
+
+            // 更新UI以反映认证状态
+            updateUIForAuthState(user) {
+                const statusIndicator = $('#userStatus');
+                const statusText = $('#userStatusText');
+                const logoutBtn = $('#logoutBtn');
+                const editBtn = $('#editProfileBtn');
+
+                if (user) {
+                    statusIndicator.className = 'w-3 h-3 bg-green-400 rounded-full';
+                    statusText.textContent = '已登录';
+                    logoutBtn.classList.remove('hidden');
+                    editBtn.textContent = '✏️ 编辑资料';
+                } else {
+                    statusIndicator.className = 'w-3 h-3 bg-gray-400 rounded-full';
+                    statusText.textContent = '未登录';
+                    logoutBtn.classList.add('hidden');
+                    editBtn.textContent = '🔑 登录账户';
+                }
+            }
+
+            // 显示认证模态框
+            showAuthModal() {
+                this.authModal.classList.remove('hidden');
+                this.switchToLogin();
+            }
+
+            // 隐藏认证模态框
+            hideAuthModal() {
+                this.authModal.classList.add('hidden');
+            }
+
+            // 切换到登录模式
+            switchToLogin() {
+                this.isLoginMode = true;
+                $('#authModalTitle').textContent = '登录账户';
+                $('#loginForm').classList.remove('hidden');
+                $('#registerForm').classList.add('hidden');
+                $('#switchAuthMode').textContent = '还没有账户？立即注册';
+            }
+
+            // 切换到注册模式
+            switchToRegister() {
+                this.isLoginMode = false;
+                $('#authModalTitle').textContent = '注册账户';
+                $('#loginForm').classList.add('hidden');
+                $('#registerForm').classList.remove('hidden');
+                $('#switchAuthMode').textContent = '已有账户？立即登录';
+            }
+
+            // 登录
+            async login(email, password) {
+                try {
+                    if (!auth) throw new Error('Firebase未初始化');
+
+                    const result = await auth.signInWithEmailAndPassword(email, password);
+                    this.hideAuthModal();
+                    this.showSuccess('登录成功！');
+                    return result.user;
+                } catch (error) {
+                    this.showError('登录失败: ' + error.message);
+                    throw error;
+                }
+            }
+
+            // 注册
+            async register(email, password, displayName) {
+                try {
+                    if (!auth) throw new Error('Firebase未初始化');
+
+                    const result = await auth.createUserWithEmailAndPassword(email, password);
+
+                    // 更新用户显示名
+                    await result.user.updateProfile({
+                        displayName: displayName
+                    });
+
+                    // 创建用户数据
+                    await this.createUserData(result.user.uid, displayName);
+
+                    this.hideAuthModal();
+                    this.showSuccess('注册成功！');
+                    return result.user;
+                } catch (error) {
+                    this.showError('注册失败: ' + error.message);
+                    throw error;
+                }
+            }
+
+            // 退出登录
+            async logout() {
+                try {
+                    if (auth) {
+                        await auth.signOut();
+                    }
+                    this.showSuccess('已退出登录');
+                } catch (error) {
+                    this.showError('退出失败: ' + error.message);
+                }
+            }
+
+            // 创建用户数据
+            async createUserData(uid, displayName) {
+                if (!db) return;
+
+                const newUserData = {
+                    ...userData,
+                    uid: uid,
+                    name: displayName,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                try {
+                    await db.collection('users').doc(uid).set(newUserData);
+                    userData = newUserData;
+                } catch (error) {
+                    console.error('创建用户数据失败:', error);
+                }
+            }
+
+            // 加载用户数据
+            async loadUserData(uid) {
+                if (!db) return this.loadLocalData();
+
+                try {
+                    const doc = await db.collection('users').doc(uid).get();
+
+                    if (doc.exists) {
+                        userData = { ...userData, ...doc.data() };
+                    } else {
+                        // 如果用户数据不存在，创建新的
+                        await this.createUserData(uid, currentUser.displayName || 'Labubu收集家');
+                    }
+
+                    renderUserData();
+                } catch (error) {
+                    console.error('加载用户数据失败:', error);
+                    this.loadLocalData();
+                }
+            }
+
+            // 加载本地数据
+            loadLocalData() {
+                const savedData = localStorage.getItem('userData');
+                if (savedData) {
+                    userData = { ...userData, ...JSON.parse(savedData) };
+                }
+                renderUserData();
+            }
+
+            // 保存用户数据
+            async saveUserData() {
+                userData.updatedAt = new Date();
+
+                // 保存到本地
+                localStorage.setItem('userData', JSON.stringify(userData));
+
+                // 保存到云端
+                if (db && currentUser) {
+                    try {
+                        await db.collection('users').doc(currentUser.uid).update({
+                            ...userData,
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        this.showSuccess('数据保存成功！');
+                    } catch (error) {
+                        console.error('保存到云端失败:', error);
+                        this.showSuccess('数据已保存到本地');
+                    }
+                } else {
+                    this.showSuccess('数据已保存到本地');
+                }
+            }
+
+            // 上传头像
+            async uploadAvatar(file) {
+                if (!storage || !currentUser) {
+                    // 如果没有Firebase，使用Base64存储到本地
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            userData.avatar = e.target.result;
+                            resolve(e.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+
+                try {
+                    const storageRef = storage.ref(`avatars/${currentUser.uid}`);
+                    const snapshot = await storageRef.put(file);
+                    const downloadURL = await snapshot.ref.getDownloadURL();
+
+                    userData.avatar = downloadURL;
+                    return downloadURL;
+                } catch (error) {
+                    console.error('头像上传失败:', error);
+                    throw error;
+                }
+            }
+
+            // 显示成功消息
+            showSuccess(message) {
+                this.showNotification(message, 'success');
+            }
+
+            // 显示错误消息
+            showError(message) {
+                this.showNotification(message, 'error');
+            }
+
+            // 显示通知
+            showNotification(message, type = 'success') {
+                const notification = document.createElement('div');
+                const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+                notification.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-xl z-50 transform translate-x-full transition-transform duration-300`;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(0)';
+                }, 100);
+
+                setTimeout(() => {
+                    notification.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        if (document.body.contains(notification)) {
+                            document.body.removeChild(notification);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+
+            // 初始化认证事件监听
+            initAuthListeners() {
+                // 关闭认证模态框
+                $('#closeAuthModal').addEventListener('click', () => {
+                    this.hideAuthModal();
+                });
+
+                // 切换登录/注册模式
+                $('#switchAuthMode').addEventListener('click', () => {
+                    if (this.isLoginMode) {
+                        this.switchToRegister();
+                    } else {
+                        this.switchToLogin();
+                    }
+                });
+
+                // 登录表单提交
+                $('#loginForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = $('#loginEmail').value;
+                    const password = $('#loginPassword').value;
+
+                    try {
+                        await this.login(email, password);
+                    } catch (error) {
+                        console.error('登录失败:', error);
+                    }
+                });
+
+                // 注册表单提交
+                $('#registerForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const name = $('#registerName').value;
+                    const email = $('#registerEmail').value;
+                    const password = $('#registerPassword').value;
+
+                    try {
+                        await this.register(email, password, name);
+                    } catch (error) {
+                        console.error('注册失败:', error);
+                    }
+                });
+
+                // 退出登录
+                $('#logoutBtn').addEventListener('click', () => {
+                    if (confirm('确定要退出登录吗？')) {
+                        this.logout();
+                    }
+                });
+            }
+
+            // 初始化个人资料事件监听
+            initProfileListeners() {
+                // 打开编辑资料模态框
+                $('#editProfileBtn').addEventListener('click', () => {
+                    if (isLoggedIn) {
+                        this.showEditProfileModal();
+                    } else {
+                        this.showAuthModal();
+                    }
+                });
+
+                // 头像点击编辑
+                $('#avatarContainer').addEventListener('click', () => {
+                    if (isLoggedIn) {
+                        this.showEditProfileModal();
+                    } else {
+                        this.showAuthModal();
+                    }
+                });
+
+                // 关闭编辑资料模态框
+                $('#closeProfileModal').addEventListener('click', () => {
+                    this.hideEditProfileModal();
+                });
+
+                $('#cancelProfile').addEventListener('click', () => {
+                    this.hideEditProfileModal();
+                });
+
+                // 头像上传
+                $('#uploadAvatarBtn').addEventListener('click', () => {
+                    $('#avatarUpload').click();
+                });
+
+                $('#avatarPreview').addEventListener('click', () => {
+                    $('#avatarUpload').click();
+                });
+
+                $('#avatarUpload').addEventListener('change', async (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        await this.handleAvatarUpload(file);
+                    }
+                });
+
+                // 个人资料表单提交
+                $('#profileForm').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await this.handleProfileUpdate();
+                });
+            }
+
+            // 显示编辑资料模态框
+            showEditProfileModal() {
+                // 填充当前数据
+                $('#profileName').value = userData.name;
+                $('#profileBio').value = userData.bio || '';
+                $('#profileSignature').value = userData.signature || '';
+                $('#profileBirthday').value = userData.birthday || '';
+
+                // 设置头像预览
+                this.updateAvatarPreview(userData.avatar);
+
+                this.editProfileModal.classList.remove('hidden');
+            }
+
+            // 隐藏编辑资料模态框
+            hideEditProfileModal() {
+                this.editProfileModal.classList.add('hidden');
+            }
+
+            // 处理头像上传
+            async handleAvatarUpload(file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    this.showError('图片大小不能超过2MB');
+                    return;
+                }
+
+                try {
+                    const avatarUrl = await this.uploadAvatar(file);
+                    this.updateAvatarPreview(avatarUrl);
+                    this.showSuccess('头像上传成功！');
+                } catch (error) {
+                    this.showError('头像上传失败: ' + error.message);
+                }
+            }
+
+            // 更新头像预览
+            updateAvatarPreview(avatarUrl) {
+                const preview = $('#avatarPreview');
+                const userAvatar = $('#userAvatar');
+
+                if (avatarUrl) {
+                    const img = `<img src="${avatarUrl}" alt="头像" class="w-full h-full object-cover">`;
+                    preview.innerHTML = img;
+                    userAvatar.innerHTML = img;
+                } else {
+                    preview.innerHTML = '🧸';
+                    userAvatar.innerHTML = '🧸';
+                }
+            }
+
+            // 处理个人资料更新
+            async handleProfileUpdate() {
+                userData.name = $('#profileName').value;
+                userData.bio = $('#profileBio').value;
+                userData.signature = $('#profileSignature').value;
+                userData.birthday = $('#profileBirthday').value;
+
+                try {
+                    await this.saveUserData();
+                    renderUserData();
+                    this.hideEditProfileModal();
+                } catch (error) {
+                    this.showError('保存失败: ' + error.message);
+                }
+            }
+        }
+
+        // 创建用户管理实例
+        const userManager = new UserManager();
+
         // 初始化
         function init() {
             renderUserData();
@@ -521,6 +1145,9 @@
             // 更新进度条
             const progressBar = $('.level-progress');
             progressBar.style.width = (userData.exp / userData.maxExp * 100) + '%';
+
+            // 更新头像显示
+            userManager.updateAvatarPreview(userData.avatar);
         }
 
         // 渲染成就
@@ -606,7 +1233,13 @@
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             const firstDay = new Date(year, month, 1).getDay();
 
+            // 获取签到记录
+            const checkinHistory = JSON.parse(localStorage.getItem('checkinHistory') || '{}');
+            const todayString = today.toDateString();
+            const lastCheckin = localStorage.getItem('lastCheckin');
+
             let html = '';
+            let signedCount = 0;
 
             // 填充空白日期
             for (let i = 0; i < firstDay; i++) {
@@ -615,8 +1248,12 @@
 
             // 填充实际日期
             for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const dateString = date.toDateString();
                 const isToday = day === today.getDate();
-                const isSigned = Math.random() > 0.4; // 模拟签到状态
+                const isSigned = checkinHistory[dateString] || (dateString === lastCheckin);
+
+                if (isSigned) signedCount++;
 
                 html += `
                     <div class="calendar-day w-8 h-8 rounded-lg flex items-center justify-center text-sm font-medium
@@ -629,12 +1266,16 @@
             grid.innerHTML = html;
 
             // 更新签到统计
-            const signedDays = $$('.calendar-day.signed').length;
-            $('#monthlyCheckins').textContent = signedDays;
+            $('#monthlyCheckins').textContent = signedCount;
         }
 
         // 初始化事件监听
         function initEventListeners() {
+            // 每日签到按钮
+            $('#dailyCheckinBtn').addEventListener('click', () => {
+                performDailyCheckin();
+            });
+
             // 快速操作按钮
             $$('.enhanced-btn').forEach(btn => {
                 btn.addEventListener('click', () => {
@@ -646,8 +1287,6 @@
                         window.location.href = 'tasks.html';
                     } else if (btn.textContent.includes('小游戏')) {
                         window.location.href = 'games.html';
-                    } else if (btn.textContent.includes('每日签到')) {
-                        performDailyCheckin();
                     }
                 });
             });
@@ -661,34 +1300,48 @@
         }
 
         // 执行每日签到
-        function performDailyCheckin() {
-            // 创建签到成功提示
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl z-50 transform translate-x-full transition-transform duration-300';
-            notification.innerHTML = '✅ 签到成功！获得 10 EXP';
-            document.body.appendChild(notification);
+        async function performDailyCheckin() {
+            // 检查今日是否已签到
+            const today = new Date().toDateString();
+            const lastCheckin = localStorage.getItem('lastCheckin');
 
-            setTimeout(() => {
-                notification.style.transform = 'translateX(0)';
-            }, 100);
-
-            setTimeout(() => {
-                notification.style.transform = 'translateX(100%)';
-                setTimeout(() => {
-                    if (document.body.contains(notification)) {
-                        document.body.removeChild(notification);
-                    }
-                }, 300);
-            }, 3000);
+            if (lastCheckin === today) {
+                userManager.showError('今日已签到，请明天再来！');
+                return;
+            }
 
             // 更新用户经验
             userData.exp += 10;
+            userData.streakDays += 1;
+
+            let leveledUp = false;
             if (userData.exp >= userData.maxExp) {
                 userData.level++;
                 userData.exp = userData.exp - userData.maxExp;
                 userData.maxExp = Math.floor(userData.maxExp * 1.2);
+                leveledUp = true;
+            }
 
-                // 升级提示
+            // 保存签到记录
+            localStorage.setItem('lastCheckin', today);
+
+            // 保存到签到历史
+            const checkinHistory = JSON.parse(localStorage.getItem('checkinHistory') || '{}');
+            checkinHistory[today] = true;
+            localStorage.setItem('checkinHistory', JSON.stringify(checkinHistory));
+
+            // 保存用户数据
+            try {
+                await userManager.saveUserData();
+            } catch (error) {
+                console.error('保存签到数据失败:', error);
+            }
+
+            // 显示签到成功提示
+            userManager.showSuccess('✅ 签到成功！获得 10 EXP');
+
+            // 如果升级了，显示升级提示
+            if (leveledUp) {
                 setTimeout(() => {
                     const levelUp = document.createElement('div');
                     levelUp.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-50';
@@ -710,6 +1363,7 @@
             }
 
             renderUserData();
+            renderCalendar(); // 重新渲染日历以显示今日签到
         }
 
         // 自定义鼠标效果

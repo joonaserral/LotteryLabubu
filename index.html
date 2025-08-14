@@ -292,12 +292,17 @@
             position: fixed;
             width: 20px;
             height: 20px;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ff69b4"><path d="M8 2C8 2 8.5 3 10.5 3C12.5 3 13 2 13 2C14 2 15 3 15 4C15 5 14 6 13 6C12 6 11 7 11 8C11 9 12 10 13 10C14 10 15 9 15 8C15 7 16 6 17 6C18 6 19 7 19 8C19 9 18 10 17 10C16 10 15 11 15 12C15 13 16 14 17 14C18 14 19 13 19 12C19 11 20 10 21 10C22 10 23 11 23 12C23 13 22 14 21 14C20 14 19 15 19 16C19 17 18 18 17 18C16 18 15 17 15 16C15 15 14 14 13 14C12 14 11 15 11 16C11 17 10 18 9 18C8 18 7 17 7 16C7 15 8 14 9 14C10 14 11 13 11 12C11 11 10 10 9 10C8 10 7 11 7 12C7 13 6 14 5 14C4 14 3 13 3 12C3 11 4 10 5 10C6 10 7 9 7 8C7 7 6 6 5 6C4 6 3 7 3 8C3 9 2 10 1 10C0 10 -1 9 -1 8C-1 7 0 6 1 6C2 6 3 5 3 4C3 3 4 2 5 2C6 2 7 3 7 4C7 5 8 6 9 6C10 6 11 5 11 4C11 3 10 2 9 2C8.5 2 8 2 8 2Z"/></svg>') no-repeat center;
-            background-size: contain;
+            background: radial-gradient(circle, #ff69b4 30%, transparent 70%);
+            border: 2px solid #ff69b4;
+            border-radius: 50%;
             pointer-events: none;
-            z-index: 9999;
+            z-index: 99999 !important;
             transition: transform 0.1s ease;
             transform: translate(-50%, -50%);
+            opacity: 1 !important;
+            display: block !important;
+            visibility: visible !important;
+            box-shadow: 0 0 10px rgba(255, 105, 180, 0.5), 0 0 20px rgba(255, 105, 180, 0.3);
         }
 
         .custom-cursor.clicking {
@@ -995,60 +1000,62 @@
         </div>
     </section>
 
-    <!-- 音乐播放器浮窗 -->
-    <div id="musicPlayer"
-        class="fixed bottom-4 right-4 z-40 music-player rounded-2xl shadow-lg border border-slate-200 p-4 w-80">
-        <div class="flex items-center justify-between mb-3">
-            <div class="flex items-center gap-2">
-                <span class="text-lg">🎵</span>
-                <span class="font-medium text-sm">音乐播放器</span>
-            </div>
-            <button id="togglePlayer" class="text-slate-400 hover:text-slate-600">
-                <span id="playerToggleIcon">🔽</span>
-            </button>
+    <!-- 音乐播放器 -->
+    <div id="musicPlayer" class="fixed bottom-6 right-6 z-40 music-player transition-all duration-300 ease-in-out">
+        <!-- 小按钮状态（默认显示） -->
+        <div id="musicPlayerMini"
+            class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full shadow-lg cursor-pointer flex items-center justify-center hover:scale-110 transition-transform duration-200">
+            <div class="text-white text-xl animate-pulse" id="miniMusicIcon">🎵</div>
         </div>
 
-        <div id="playerContent" class="space-y-3">
+        <!-- 完整播放器（默认隐藏） -->
+        <div id="musicPlayerFull"
+            class="hidden w-80 bg-white/95 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 p-4">
+            <!-- 标题栏 -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">🎵</span>
+                    <span class="font-medium text-sm">音乐播放器</span>
+                </div>
+                <button id="closePlayer" class="text-slate-400 hover:text-slate-600 text-xl">✕</button>
+            </div>
+
             <!-- 当前播放信息 -->
-            <div class="text-center">
-                <div id="currentSong" class="font-medium text-sm text-slate-800">Ready to Play</div>
-                <div id="currentArtist" class="text-xs text-slate-500">选择一首歌开始播放</div>
+            <div class="text-center mb-4">
+                <div id="currentSong" class="font-medium text-sm text-slate-800 truncate">准备播放音乐</div>
+                <div id="currentArtist" class="text-xs text-slate-500 truncate">选择一首歌开始播放</div>
             </div>
 
             <!-- 进度条 -->
-            <div class="space-y-2">
+            <div class="space-y-2 mb-4">
                 <div class="flex justify-between text-xs text-slate-500">
                     <span id="currentTime">0:00</span>
                     <span id="totalTime">0:00</span>
                 </div>
-                <div class="w-full bg-slate-200 rounded-full h-1">
-                    <div id="progressBar" class="music-progress h-1 rounded-full w-0 transition-all"></div>
+                <div class="w-full bg-slate-200 rounded-full h-1.5 cursor-pointer" id="progressContainer">
+                    <div id="progressBar" class="music-progress h-1.5 rounded-full w-0 transition-all"></div>
                 </div>
             </div>
 
             <!-- 控制按钮 -->
-            <div class="flex items-center justify-center gap-4">
-                <button id="prevBtn" class="text-xl hover:scale-110 transition-transform">⏮️</button>
-                <button id="playPauseBtn" class="text-2xl hover:scale-110 transition-transform">▶️</button>
-                <button id="nextBtn" class="text-xl hover:scale-110 transition-transform">⏭️</button>
+            <div class="flex items-center justify-center gap-6 mb-4">
+                <button id="prevBtn" class="text-2xl hover:scale-110 transition-transform duration-200">⏮️</button>
+                <button id="playPauseBtn"
+                    class="text-2xl hover:scale-110 transition-transform duration-200 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full w-12 h-12 flex items-center justify-center shadow-lg">▶️</button>
+                <button id="nextBtn" class="text-2xl hover:scale-110 transition-transform duration-200">⏭️</button>
             </div>
 
-            <!-- 音量控制已移除，简化界面 -->
+            <!-- 音量控制 -->
+            <div class="flex items-center gap-3 mb-4">
+                <span class="text-sm">🔊</span>
+                <input type="range" id="volumeSlider" min="0" max="100" value="50"
+                    class="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer">
+            </div>
 
             <!-- 播放列表 -->
-            <div class="max-h-32 overflow-y-auto space-y-1">
-                <div class="text-xs text-slate-500 mb-2">播放列表</div>
+            <div class="max-h-32 overflow-y-auto">
+                <div class="text-xs text-slate-500 mb-2 font-medium">播放列表</div>
                 <div id="playlist" class="space-y-1"></div>
-            </div>
-        </div>
-
-        <!-- 最小化状态 -->
-        <div id="playerMinimized" class="hidden">
-            <div class="flex items-center gap-2">
-                <button id="miniPlayPause" class="text-lg">▶️</button>
-                <div class="flex-1 text-sm truncate">
-                    <div id="miniSongName" class="font-medium">未播放</div>
-                </div>
             </div>
         </div>
     </div>
@@ -1802,51 +1809,96 @@
             }
         }
 
-        // 微信专用音乐库（包含可播放的音频）
+        // 内置音乐库（包含免费可播放的音频）
         function getWeChatMusicLibrary() {
             return [
                 {
-                    title: "Lucky Draw",
-                    artist: "Labubu系统",
-                    album: "背景音乐",
-                    url: "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcBjiS3ezi",
+                    title: "🎵 Labubu幸运之歌",
+                    artist: "基金会音乐团",
+                    album: "背景音乐合集",
+                    url: "https://archive.org/download/testmp3testfile/mpthreetest.mp3",
                     duration: "3:24",
                     image: "",
                     jamendoUrl: "#"
                 },
                 {
-                    title: "VIP Experience",
-                    artist: "基金会音乐",
+                    title: "🎶 抽奖进行曲",
+                    artist: "系统音乐",
                     album: "专享音乐",
-                    url: "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmEcBjiS2fzY",
+                    url: "https://file-examples.com/storage/fe86ad9c094c8217c95bc2c/2017/11/file_example_MP3_700KB.mp3",
                     duration: "4:12",
                     image: "",
                     jamendoUrl: "#"
                 },
                 {
-                    title: "Prize Time",
-                    artist: "抽奖音效",
-                    album: "系统音乐",
+                    title: "🏆 胜利庆典",
+                    artist: "庆祝音乐",
+                    album: "获奖音效",
                     url: "https://www.soundjay.com/misc/sounds-777.wav",
                     duration: "2:48",
                     image: "",
                     jamendoUrl: "#"
                 },
                 {
-                    title: "Celebration",
-                    artist: "庆祝音乐",
-                    album: "获奖音效",
+                    title: "🌸 温馨背景",
+                    artist: "环境音乐",
+                    album: "氛围音乐",
                     url: "https://www.soundjay.com/misc/sounds-776.wav",
                     duration: "3:56",
                     image: "",
                     jamendoUrl: "#"
                 },
                 {
-                    title: "Background Melody",
-                    artist: "环境音乐",
-                    album: "氛围音乐",
-                    url: "https://archive.org/download/testmp3testfile/mpthreetest.mp3",
+                    title: "🎠 欢乐时光",
+                    artist: "Labubu乐团",
+                    album: "快乐合集",
+                    url: "https://www.w3schools.com/html/horse.mp3",
+                    duration: "0:30",
+                    image: "",
+                    jamendoUrl: "#"
+                },
+                {
+                    title: "🚀 梦想起航",
+                    artist: "励志音乐",
+                    album: "正能量",
+                    url: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
                     duration: "5:30",
+                    image: "",
+                    jamendoUrl: "#"
+                },
+                {
+                    title: "☀️ 午后阳光",
+                    artist: "轻音乐",
+                    album: "放松时光",
+                    url: "https://samplelib.com/lib/preview/mp3/sample-6s.mp3",
+                    duration: "0:06",
+                    image: "",
+                    jamendoUrl: "#"
+                },
+                {
+                    title: "⭐ 星空下的梦",
+                    artist: "夜曲精选",
+                    album: "安静旋律",
+                    url: "https://samplelib.com/lib/preview/mp3/sample-9s.mp3",
+                    duration: "0:09",
+                    image: "",
+                    jamendoUrl: "#"
+                },
+                {
+                    title: "🎀 甜美旋律",
+                    artist: "可爱音乐",
+                    album: "Labubu专属",
+                    url: "https://www.soundjay.com/misc/sounds-778.wav",
+                    duration: "3:15",
+                    image: "",
+                    jamendoUrl: "#"
+                },
+                {
+                    title: "💫 奇幻之旅",
+                    artist: "魔法音乐",
+                    album: "幻想世界",
+                    url: "https://www.soundjay.com/misc/sounds-779.wav",
+                    duration: "4:20",
                     image: "",
                     jamendoUrl: "#"
                 }
@@ -1930,6 +1982,74 @@
 
         const uiSounds = new UISoundManager();
 
+        // 自动播放功能
+        function startAutoPlay() {
+            try {
+                console.log('🎵 尝试自动播放音乐...');
+
+                // 检查是否有音频对象
+                if (currentAudio) {
+                    // 先设置较低的音量，避免突然的大声音乐
+                    currentAudio.volume = 0.3;
+
+                    const playPromise = currentAudio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            isPlaying = true;
+                            updatePlayButtons();
+                            showMusicNotification('🎵 欢迎！背景音乐已自动开始', 'success');
+                            console.log('🎵 自动播放成功');
+                        }).catch(error => {
+                            console.log('🎵 自动播放被浏览器阻止，需要用户交互后才能播放');
+
+                            // 如果自动播放被阻止，显示提示并启用用户点击播放
+                            showMusicNotification('🎵 点击任意位置启用音乐播放', 'info');
+                            enableUserInteractionPlay();
+                        });
+                    }
+                } else {
+                    // 如果没有音频对象，启动模拟播放
+                    console.log('🎵 启动模拟播放模式');
+                    isPlaying = true;
+                    updatePlayButtons();
+                    simulatePlayback();
+                    showMusicNotification('🎵 音乐播放器已启动（模拟模式）', 'info');
+                }
+            } catch (error) {
+                console.error('🎵 自动播放失败:', error);
+                showMusicNotification('🎵 音乐播放器启动失败', 'error');
+            }
+        }
+
+        // 启用用户交互播放（当自动播放被阻止时）
+        function enableUserInteractionPlay() {
+            const enableMusic = () => {
+                if (!isPlaying && currentAudio) {
+                    currentAudio.volume = 0.3;
+                    const playPromise = currentAudio.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            isPlaying = true;
+                            updatePlayButtons();
+                            showMusicNotification('🎵 音乐播放已启用', 'success');
+
+                            // 移除事件监听器
+                            document.removeEventListener('click', enableMusic);
+                            document.removeEventListener('touchstart', enableMusic);
+                            document.removeEventListener('keydown', enableMusic);
+                        }).catch(error => {
+                            console.log('🎵 播放失败:', error);
+                        });
+                    }
+                }
+            };
+
+            // 添加多种用户交互事件监听器
+            document.addEventListener('click', enableMusic, { once: true });
+            document.addEventListener('touchstart', enableMusic, { once: true });
+            document.addEventListener('keydown', enableMusic, { once: true });
+        }
+
         async function initMusicPlayer() {
             try {
                 // 显示环境信息
@@ -1952,34 +2072,47 @@
                 renderPlaylist();
                 if (musicLibrary.length > 0) {
                     loadSong(0);
+
+                    // 自动播放功能 - 延迟1秒以确保页面完全加载
+                    setTimeout(() => {
+                        startAutoPlay();
+                    }, 1000);
                 }
 
                 // 确保DOM元素存在后再初始化
-                const content = $('#playerContent');
-                const minimized = $('#playerMinimized');
-                const icon = $('#playerToggleIcon');
+                const miniPlayer = $('#musicPlayerMini');
+                const fullPlayer = $('#musicPlayerFull');
+                const closeBtn = $('#closePlayer');
 
-                if (content && minimized && icon) {
-                    // 初始化为最小化状态
-                    content.classList.add('hidden');
-                    minimized.classList.remove('hidden');
-                    icon.textContent = '🔼';
+                if (miniPlayer && fullPlayer) {
+                    // 初始化为小按钮状态
+                    miniPlayer.classList.remove('hidden');
+                    fullPlayer.classList.add('hidden');
                 } else {
                     console.warn('🎵 音乐播放器DOM元素未找到');
                 }
 
-                // 安全地绑定播放器控制事件
-                const togglePlayer = $('#togglePlayer');
+                // 绑定播放器控制事件
                 const playPauseBtn = $('#playPauseBtn');
-                const miniPlayPause = $('#miniPlayPause');
                 const prevBtn = $('#prevBtn');
                 const nextBtn = $('#nextBtn');
+                const volumeSlider = $('#volumeSlider');
+                const progressContainer = $('#progressContainer');
 
-                if (togglePlayer) togglePlayer.addEventListener('click', togglePlayerSize);
+                // 小按钮和完整播放器切换
+                if (miniPlayer) miniPlayer.addEventListener('click', showFullPlayer);
+                if (closeBtn) closeBtn.addEventListener('click', showMiniPlayer);
+
+                // 播放控制
                 if (playPauseBtn) playPauseBtn.addEventListener('click', togglePlayPause);
-                if (miniPlayPause) miniPlayPause.addEventListener('click', togglePlayPause);
                 if (prevBtn) prevBtn.addEventListener('click', previousSong);
                 if (nextBtn) nextBtn.addEventListener('click', nextSong);
+
+                // 音量控制
+                if (volumeSlider) volumeSlider.addEventListener('input', adjustVolume);
+
+                // 进度条点击跳转
+                if (progressContainer) progressContainer.addEventListener('click', seekToPosition);
 
                 console.log('🎵 音乐播放器初始化完成');
             } catch (error) {
@@ -2100,21 +2233,51 @@
             updatePlayButtons();
         }
 
-        function togglePlayerSize() {
-            isPlayerMinimized = !isPlayerMinimized;
-            const content = $('#playerContent');
-            const minimized = $('#playerMinimized');
-            const icon = $('#playerToggleIcon');
+        // 显示完整播放器
+        function showFullPlayer() {
+            const miniPlayer = $('#musicPlayerMini');
+            const fullPlayer = $('#musicPlayerFull');
 
-            if (isPlayerMinimized) {
-                content.classList.add('hidden');
-                minimized.classList.remove('hidden');
-                icon.textContent = '🔼';
-            } else {
-                content.classList.remove('hidden');
-                minimized.classList.add('hidden');
-                icon.textContent = '🔽';
+            if (miniPlayer && fullPlayer) {
+                miniPlayer.classList.add('hidden');
+                fullPlayer.classList.remove('hidden');
+                console.log('🎵 显示完整播放器');
             }
+        }
+
+        // 显示小按钮播放器
+        function showMiniPlayer() {
+            const miniPlayer = $('#musicPlayerMini');
+            const fullPlayer = $('#musicPlayerFull');
+
+            if (miniPlayer && fullPlayer) {
+                fullPlayer.classList.add('hidden');
+                miniPlayer.classList.remove('hidden');
+                console.log('🎵 显示小按钮播放器');
+            }
+        }
+
+        // 音量控制
+        function adjustVolume(event) {
+            const volume = event.target.value / 100;
+            if (currentAudio) {
+                currentAudio.volume = volume;
+                console.log('🎵 音量调节至:', Math.round(volume * 100) + '%');
+            }
+        }
+
+        // 进度条点击跳转
+        function seekToPosition(event) {
+            if (!currentAudio || !currentAudio.duration) return;
+
+            const progressContainer = event.currentTarget;
+            const rect = progressContainer.getBoundingClientRect();
+            const clickX = event.clientX - rect.left;
+            const percentage = clickX / rect.width;
+            const newTime = percentage * currentAudio.duration;
+
+            currentAudio.currentTime = newTime;
+            console.log('🎵 跳转到:', formatDuration(newTime));
         }
 
         function togglePlayPause() {
@@ -2199,10 +2362,20 @@
 
         function updatePlayButtons() {
             const playBtn = $('#playPauseBtn');
-            const miniBtn = $('#miniPlayPause');
+            const miniMusicIcon = $('#miniMusicIcon');
 
             if (playBtn) playBtn.textContent = isPlaying ? '⏸️' : '▶️';
-            if (miniBtn) miniBtn.textContent = isPlaying ? '⏸️' : '▶️';
+
+            // 更新小按钮的状态
+            if (miniMusicIcon) {
+                if (isPlaying) {
+                    miniMusicIcon.textContent = '🎵';
+                    miniMusicIcon.classList.add('animate-pulse');
+                } else {
+                    miniMusicIcon.textContent = '⏸️';
+                    miniMusicIcon.classList.remove('animate-pulse');
+                }
+            }
         }
 
         function previousSong() {
@@ -2414,9 +2587,27 @@
         // 这个init函数已经合并到下面的主init函数中
 
         // —— 自定义鼠标和交互效果 ——
+        let cursorInitialized = false; // 防止重复初始化
+
         function initCustomCursor() {
+            // 如果已经初始化过，直接返回
+            if (cursorInitialized) {
+                console.log('🖱️ 自定义光标已初始化，跳过重复初始化');
+                return;
+            }
+
             const cursor = $('.custom-cursor');
+            if (!cursor) {
+                console.warn('🖱️ 自定义光标元素未找到');
+                return;
+            }
+
             let mouseX = 0, mouseY = 0;
+
+            // 初始化光标位置
+            cursor.style.left = '0px';
+            cursor.style.top = '0px';
+            cursor.style.display = 'block';
 
             // 鼠标移动跟踪
             document.addEventListener('mousemove', (e) => {
@@ -2445,6 +2636,14 @@
             document.addEventListener('mouseup', () => {
                 cursor.classList.remove('clicking');
             });
+
+            cursorInitialized = true;
+            console.log('🖱️ 自定义光标初始化完成');
+
+            // 显示光标状态通知
+            setTimeout(() => {
+                showMusicNotification('🖱️ 自定义光标已启用', 'success');
+            }, 500);
         }
 
         function createCursorTrail(x, y) {
@@ -2991,7 +3190,7 @@
             updateNavigation();
 
             setTimeout(() => {
-                initCustomCursor();
+                // initCustomCursor(); // 已在bind()函数中初始化，避免重复
                 initButtonEffects();
                 initScrollCharacters();
                 initPageAnimations();
