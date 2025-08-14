@@ -38,9 +38,14 @@
             }
         }
 
-        /* 自定义鼠标样式 */
-        * {
+        /* 自定义鼠标样式 - 增加备用方案 */
+        body.custom-cursor-enabled * {
             cursor: none !important;
+        }
+
+        /* 默认保留系统光标，直到自定义光标成功加载 */
+        body:not(.custom-cursor-enabled) * {
+            cursor: auto;
         }
 
         /* 恢复文本输入元素的光标 */
@@ -57,6 +62,24 @@
         [role="button"],
         .cursor-pointer,
         select {
+            cursor: pointer !important;
+        }
+
+        /* 光标回退选项 */
+        body.cursor-fallback * {
+            cursor: auto !important;
+        }
+
+        body.cursor-fallback input,
+        body.cursor-fallback textarea,
+        body.cursor-fallback [contenteditable="true"] {
+            cursor: text !important;
+        }
+
+        body.cursor-fallback button,
+        body.cursor-fallback a,
+        body.cursor-fallback [role="button"],
+        body.cursor-fallback select {
             cursor: pointer !important;
         }
 
@@ -231,6 +254,13 @@
 <body class="bg-slate-50 text-slate-900">
     <!-- 自定义鼠标光标 -->
     <div class="custom-cursor"></div>
+
+    <!-- 光标切换按钮 -->
+    <button id="cursorToggle"
+        class="fixed bottom-4 left-4 z-50 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full shadow-lg flex items-center justify-center text-white text-lg hover:scale-110 transition-transform duration-200"
+        title="切换光标模式" onclick="if(window.toggleCursorMode) window.toggleCursorMode()">
+        🖱️
+    </button>
 
     <!-- 顶部导航 -->
     <header class="sticky top-0 z-30 backdrop-blur bg-white/90 border-b border-slate-200 shadow-sm">

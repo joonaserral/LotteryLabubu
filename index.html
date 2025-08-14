@@ -283,9 +283,14 @@
             background: rgba(107, 91, 149, 0.05);
         }
 
-        /* 自定义鼠标样式 */
-        * {
+        /* 自定义鼠标样式 - 增加备用方案 */
+        body.custom-cursor-enabled * {
             cursor: none !important;
+        }
+
+        /* 默认保留系统光标，直到自定义光标成功加载 */
+        body:not(.custom-cursor-enabled) * {
+            cursor: auto;
         }
 
         /* 恢复文本输入元素的光标 */
@@ -302,6 +307,24 @@
         [role="button"],
         .cursor-pointer,
         select {
+            cursor: pointer !important;
+        }
+
+        /* 光标回退选项 */
+        body.cursor-fallback * {
+            cursor: auto !important;
+        }
+
+        body.cursor-fallback input,
+        body.cursor-fallback textarea,
+        body.cursor-fallback [contenteditable="true"] {
+            cursor: text !important;
+        }
+
+        body.cursor-fallback button,
+        body.cursor-fallback a,
+        body.cursor-fallback [role="button"],
+        body.cursor-fallback select {
             cursor: pointer !important;
         }
 
@@ -750,6 +773,45 @@
 
     <!-- 自定义鼠标光标 -->
     <div class="custom-cursor"></div>
+
+    <!-- 光标切换按钮 -->
+    <button id="cursorToggle"
+        class="fixed bottom-4 left-4 z-50 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full shadow-lg flex items-center justify-center text-white text-lg hover:scale-110 transition-transform duration-200"
+        title="切换光标模式" onclick="toggleCursorMode()">
+        🖱️
+    </button>
+
+    <!-- 音乐播放器调试按钮 -->
+    <button id="musicDebugBtn"
+        class="fixed bottom-20 left-4 z-50 w-12 h-12 bg-gradient-to-br from-green-500 to-blue-500 rounded-full shadow-lg flex items-center justify-center text-white text-lg hover:scale-110 transition-transform duration-200"
+        title="音乐播放器调试"
+        onclick="if(window.testMusicPlayer) window.testMusicPlayer(); if(window.showFullPlayer) window.showFullPlayer(); document.getElementById('emergencyMusicPanel').classList.remove('hidden');">
+        🎵
+    </button>
+
+    <!-- 紧急音乐控制面板 -->
+    <div id="emergencyMusicPanel"
+        class="fixed top-4 right-4 z-50 bg-white/90 backdrop-blur rounded-lg shadow-lg p-3 hidden">
+        <div class="text-sm font-medium mb-2">🎵 紧急音乐控制</div>
+        <div class="flex gap-2">
+            <button onclick="if(window.showFullPlayer) window.showFullPlayer()"
+                class="px-3 py-1 bg-blue-500 text-white rounded text-xs hover:bg-blue-600">
+                展开
+            </button>
+            <button onclick="if(window.showMiniPlayer) window.showMiniPlayer()"
+                class="px-3 py-1 bg-green-500 text-white rounded text-xs hover:bg-green-600">
+                收起
+            </button>
+            <button onclick="if(window.togglePlayPause) window.togglePlayPause()"
+                class="px-3 py-1 bg-purple-500 text-white rounded text-xs hover:bg-purple-600">
+                播放
+            </button>
+            <button onclick="document.getElementById('emergencyMusicPanel').classList.add('hidden')"
+                class="px-3 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600">
+                关闭
+            </button>
+        </div>
+    </div>
 
     <!-- 侧边互动区域 -->
     <div class="side-interactive left"></div>
@@ -1535,6 +1597,29 @@
                 saveUserDrawCount(userCount + 1);
                 updateDrawLimitDisplay();
                 renderHistory();
+
+                // 🎯 触发成就检查系统（延迟执行避免阻塞UI）
+                setTimeout(() => {
+                    if (typeof checkAchievements === 'function') {
+                        checkAchievements(record, picked, rarity);
+                    }
+                }, 1500);
+
+                // 🏆 根据稀有度给予积分奖励
+                const pointsReward = {
+                    'common': 10,
+                    'rare': 25,
+                    'epic': 50,
+                    'legendary': 100,
+                    'mythic': 200
+                };
+
+                if (pointsReward[rarity]) {
+                    updateUserPoints(pointsReward[rarity]);
+                    setTimeout(() => {
+                        showMusicNotification(`🎉 获得 ${pointsReward[rarity]} 积分奖励！`, 'success');
+                    }, 2000);
+                }
             }
 
             // 播放中奖音效
@@ -1833,8 +1918,8 @@
                     title: "🎵 Labubu幸运之歌",
                     artist: "基金会音乐团",
                     album: "背景音乐合集",
-                    url: "https://archive.org/download/testmp3testfile/mpthreetest.mp3",
-                    duration: "3:24",
+                    url: "https://www.w3schools.com/html/horse.mp3",
+                    duration: "0:30",
                     image: "",
                     jamendoUrl: "#"
                 },
@@ -1842,8 +1927,8 @@
                     title: "🎶 抽奖进行曲",
                     artist: "系统音乐",
                     album: "专享音乐",
-                    url: "https://file-examples.com/storage/fe86ad9c094c8217c95bc2c/2017/11/file_example_MP3_700KB.mp3",
-                    duration: "4:12",
+                    url: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
+                    duration: "5:30",
                     image: "",
                     jamendoUrl: "#"
                 },
@@ -1851,8 +1936,8 @@
                     title: "🏆 胜利庆典",
                     artist: "庆祝音乐",
                     album: "获奖音效",
-                    url: "https://www.soundjay.com/misc/sounds-777.wav",
-                    duration: "2:48",
+                    url: "https://archive.org/download/testmp3testfile/mpthreetest.mp3",
+                    duration: "0:30",
                     image: "",
                     jamendoUrl: "#"
                 },
@@ -1860,8 +1945,8 @@
                     title: "🌸 温馨背景",
                     artist: "环境音乐",
                     album: "氛围音乐",
-                    url: "https://www.soundjay.com/misc/sounds-776.wav",
-                    duration: "3:56",
+                    url: "https://www.w3schools.com/html/horse.mp3",
+                    duration: "0:30",
                     image: "",
                     jamendoUrl: "#"
                 },
@@ -1869,8 +1954,8 @@
                     title: "🎠 欢乐时光",
                     artist: "Labubu乐团",
                     album: "快乐合集",
-                    url: "https://www.w3schools.com/html/horse.mp3",
-                    duration: "0:30",
+                    url: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
+                    duration: "5:30",
                     image: "",
                     jamendoUrl: "#"
                 },
@@ -1878,8 +1963,8 @@
                     title: "🚀 梦想起航",
                     artist: "励志音乐",
                     album: "正能量",
-                    url: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
-                    duration: "5:30",
+                    url: "https://www.w3schools.com/html/horse.mp3",
+                    duration: "0:30",
                     image: "",
                     jamendoUrl: "#"
                 },
@@ -1887,8 +1972,8 @@
                     title: "☀️ 午后阳光",
                     artist: "轻音乐",
                     album: "放松时光",
-                    url: "https://samplelib.com/lib/preview/mp3/sample-6s.mp3",
-                    duration: "0:06",
+                    url: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
+                    duration: "5:30",
                     image: "",
                     jamendoUrl: "#"
                 },
@@ -1896,8 +1981,8 @@
                     title: "⭐ 星空下的梦",
                     artist: "夜曲精选",
                     album: "安静旋律",
-                    url: "https://samplelib.com/lib/preview/mp3/sample-9s.mp3",
-                    duration: "0:09",
+                    url: "https://www.w3schools.com/html/horse.mp3",
+                    duration: "0:30",
                     image: "",
                     jamendoUrl: "#"
                 },
@@ -1905,8 +1990,8 @@
                     title: "🎀 甜美旋律",
                     artist: "可爱音乐",
                     album: "Labubu专属",
-                    url: "https://www.soundjay.com/misc/sounds-778.wav",
-                    duration: "3:15",
+                    url: "https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3",
+                    duration: "5:30",
                     image: "",
                     jamendoUrl: "#"
                 },
@@ -1914,8 +1999,8 @@
                     title: "💫 奇幻之旅",
                     artist: "魔法音乐",
                     album: "幻想世界",
-                    url: "https://www.soundjay.com/misc/sounds-779.wav",
-                    duration: "4:20",
+                    url: "https://www.w3schools.com/html/horse.mp3",
+                    duration: "0:30",
                     image: "",
                     jamendoUrl: "#"
                 }
@@ -2025,12 +2110,44 @@
                         });
                     }
                 } else {
-                    // 如果没有音频对象，启动模拟播放
-                    console.log('🎵 启动模拟播放模式');
-                    isPlaying = true;
-                    updatePlayButtons();
-                    simulatePlayback();
-                    showMusicNotification('🎵 音乐播放器已启动（模拟模式）', 'info');
+                    // 如果没有音频对象，尝试重新加载第一首歌
+                    console.log('🎵 currentAudio为空，尝试重新加载音乐...');
+                    if (musicLibrary && musicLibrary.length > 0) {
+                        loadSong(0);
+                        // 等待音频加载完成后再次尝试播放
+                        setTimeout(() => {
+                            if (currentAudio) {
+                                console.log('🎵 重新加载后尝试自动播放...');
+                                currentAudio.volume = 0.3;
+                                const playPromise = currentAudio.play();
+                                if (playPromise !== undefined) {
+                                    playPromise.then(() => {
+                                        isPlaying = true;
+                                        updatePlayButtons();
+                                        showMusicNotification('🎵 音乐已重新加载并开始播放', 'success');
+                                        console.log('🎵 重新加载后自动播放成功');
+                                    }).catch(error => {
+                                        console.log('🎵 重新加载后自动播放仍被阻止');
+                                        showMusicNotification('🎵 点击任意位置启用音乐播放', 'info');
+                                        enableUserInteractionPlay();
+                                    });
+                                }
+                            } else {
+                                // 如果仍然没有音频对象，启动模拟播放
+                                console.log('🎵 重新加载失败，启动模拟播放模式');
+                                isPlaying = true;
+                                updatePlayButtons();
+                                simulatePlayback();
+                                showMusicNotification('🎵 音乐播放器已启动（模拟模式）', 'info');
+                            }
+                        }, 1500); // 给音频加载更多时间
+                    } else {
+                        console.log('🎵 音乐库为空，启动模拟播放模式');
+                        isPlaying = true;
+                        updatePlayButtons();
+                        simulatePlayback();
+                        showMusicNotification('🎵 音乐播放器已启动（模拟模式）', 'info');
+                    }
                 }
             } catch (error) {
                 console.error('🎵 自动播放失败:', error);
@@ -2090,10 +2207,19 @@
                 if (musicLibrary.length > 0) {
                     loadSong(0);
 
-                    // 自动播放功能 - 延迟1秒以确保页面完全加载
+                    // 自动播放功能 - 增加回调确保音频加载完成
                     setTimeout(() => {
                         startAutoPlay();
                     }, 1000);
+
+                    // 备用启动机制 - 如果第一次失败，3秒后再次尝试
+                    setTimeout(() => {
+                        if (!isPlaying && !currentAudio) {
+                            console.log('🎵 备用启动：重新尝试加载和播放音乐');
+                            loadSong(0);
+                            setTimeout(() => startAutoPlay(), 500);
+                        }
+                    }, 3000);
                 }
 
                 // 确保DOM元素存在后再初始化
@@ -2101,12 +2227,21 @@
                 const fullPlayer = $('#musicPlayerFull');
                 const closeBtn = $('#closePlayer');
 
+                console.log('🎵 DOM元素检查:', {
+                    miniPlayer: !!miniPlayer,
+                    fullPlayer: !!fullPlayer,
+                    closeBtn: !!closeBtn
+                });
+
                 if (miniPlayer && fullPlayer) {
                     // 初始化为小按钮状态
                     miniPlayer.classList.remove('hidden');
                     fullPlayer.classList.add('hidden');
+                    console.log('🎵 播放器初始状态设置完成');
                 } else {
                     console.warn('🎵 音乐播放器DOM元素未找到');
+                    console.warn('miniPlayer:', miniPlayer);
+                    console.warn('fullPlayer:', fullPlayer);
                 }
 
                 // 绑定播放器控制事件
@@ -2116,12 +2251,42 @@
                 const volumeSlider = $('#volumeSlider');
                 const progressContainer = $('#progressContainer');
 
+                console.log('🎵 控制元素检查:', {
+                    playPauseBtn: !!playPauseBtn,
+                    prevBtn: !!prevBtn,
+                    nextBtn: !!nextBtn,
+                    volumeSlider: !!volumeSlider,
+                    progressContainer: !!progressContainer
+                });
+
                 // 小按钮和完整播放器切换
-                if (miniPlayer) miniPlayer.addEventListener('click', showFullPlayer);
-                if (closeBtn) closeBtn.addEventListener('click', showMiniPlayer);
+                if (miniPlayer) {
+                    miniPlayer.addEventListener('click', () => {
+                        console.log('🎵 小按钮被点击');
+                        showFullPlayer();
+                    });
+                    console.log('🎵 小按钮点击事件已绑定');
+                } else {
+                    console.error('🎵 小按钮元素未找到，无法绑定点击事件');
+                }
+
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        console.log('🎵 关闭按钮被点击');
+                        showMiniPlayer();
+                    });
+                    console.log('🎵 关闭按钮点击事件已绑定');
+                } else {
+                    console.error('🎵 关闭按钮元素未找到');
+                }
 
                 // 播放控制
-                if (playPauseBtn) playPauseBtn.addEventListener('click', togglePlayPause);
+                if (playPauseBtn) {
+                    playPauseBtn.addEventListener('click', () => {
+                        console.log('🎵 播放/暂停按钮被点击');
+                        togglePlayPause();
+                    });
+                }
                 if (prevBtn) prevBtn.addEventListener('click', previousSong);
                 if (nextBtn) nextBtn.addEventListener('click', nextSong);
 
@@ -2252,25 +2417,59 @@
 
         // 显示完整播放器
         function showFullPlayer() {
+            console.log('🎵 showFullPlayer 函数被调用');
             const miniPlayer = $('#musicPlayerMini');
             const fullPlayer = $('#musicPlayerFull');
+
+            console.log('🎵 元素检查 - showFullPlayer:', {
+                miniPlayer: !!miniPlayer,
+                fullPlayer: !!fullPlayer,
+                miniPlayerClasses: miniPlayer ? miniPlayer.className : 'null',
+                fullPlayerClasses: fullPlayer ? fullPlayer.className : 'null'
+            });
 
             if (miniPlayer && fullPlayer) {
                 miniPlayer.classList.add('hidden');
                 fullPlayer.classList.remove('hidden');
-                console.log('🎵 显示完整播放器');
+                console.log('🎵 完整播放器已显示');
+
+                // 显示用户通知
+                if (typeof showMusicNotification === 'function') {
+                    showMusicNotification('🎵 音乐播放器已展开', 'success');
+                }
+            } else {
+                console.error('🎵 showFullPlayer: DOM元素未找到');
+                if (!miniPlayer) console.error('miniPlayer 元素未找到');
+                if (!fullPlayer) console.error('fullPlayer 元素未找到');
             }
         }
 
         // 显示小按钮播放器
         function showMiniPlayer() {
+            console.log('🎵 showMiniPlayer 函数被调用');
             const miniPlayer = $('#musicPlayerMini');
             const fullPlayer = $('#musicPlayerFull');
+
+            console.log('🎵 元素检查 - showMiniPlayer:', {
+                miniPlayer: !!miniPlayer,
+                fullPlayer: !!fullPlayer,
+                miniPlayerClasses: miniPlayer ? miniPlayer.className : 'null',
+                fullPlayerClasses: fullPlayer ? fullPlayer.className : 'null'
+            });
 
             if (miniPlayer && fullPlayer) {
                 fullPlayer.classList.add('hidden');
                 miniPlayer.classList.remove('hidden');
-                console.log('🎵 显示小按钮播放器');
+                console.log('🎵 小按钮播放器已显示');
+
+                // 显示用户通知
+                if (typeof showMusicNotification === 'function') {
+                    showMusicNotification('🎵 音乐播放器已收起', 'info');
+                }
+            } else {
+                console.error('🎵 showMiniPlayer: DOM元素未找到');
+                if (!miniPlayer) console.error('miniPlayer 元素未找到');
+                if (!fullPlayer) console.error('fullPlayer 元素未找到');
             }
         }
 
@@ -2605,6 +2804,8 @@
 
         // —— 自定义鼠标和交互效果 ——
         let cursorInitialized = false; // 防止重复初始化
+        let customCursorEnabled = false;
+        let cursorFallbackTimer = null;
 
         function initCustomCursor() {
             // 如果已经初始化过，直接返回
@@ -2613,55 +2814,197 @@
                 return;
             }
 
+            try {
+                const cursor = $('.custom-cursor');
+                if (!cursor) {
+                    console.warn('🖱️ 自定义光标元素未找到，使用系统光标');
+                    enableCursorFallback();
+                    return;
+                }
+
+                let mouseX = 0, mouseY = 0;
+
+                // 初始化光标位置
+                cursor.style.left = '0px';
+                cursor.style.top = '0px';
+                cursor.style.display = 'block';
+                cursor.style.opacity = '1';
+
+                // 设置一个定时器，如果3秒后用户没有移动鼠标，则启用备用光标
+                cursorFallbackTimer = setTimeout(() => {
+                    if (!customCursorEnabled) {
+                        console.log('🖱️ 自定义光标可能有问题，启用备用方案');
+                        enableCursorFallback();
+                    }
+                }, 3000);
+
+                // 鼠标移动跟踪
+                document.addEventListener('mousemove', (e) => {
+                    mouseX = e.clientX;
+                    mouseY = e.clientY;
+                    cursor.style.left = mouseX + 'px';
+                    cursor.style.top = mouseY + 'px';
+
+                    // 第一次移动时标记为已启用
+                    if (!customCursorEnabled) {
+                        customCursorEnabled = true;
+                        document.body.classList.add('custom-cursor-enabled');
+                        if (cursorFallbackTimer) {
+                            clearTimeout(cursorFallbackTimer);
+                            cursorFallbackTimer = null;
+                        }
+                        console.log('🖱️ 自定义光标成功启用');
+                    }
+
+                    // 创建尾随光效
+                    createCursorTrail(mouseX, mouseY);
+
+                    // 侧边互动检测
+                    if (mouseX < 100) {
+                        createSideParticle('left', mouseY);
+                    } else if (mouseX > window.innerWidth - 100) {
+                        createSideParticle('right', mouseY);
+                    }
+                });
+
+                // 点击效果
+                document.addEventListener('mousedown', () => {
+                    cursor.classList.add('clicking');
+                    createMagicParticles(mouseX, mouseY);
+                });
+
+                document.addEventListener('mouseup', () => {
+                    cursor.classList.remove('clicking');
+                });
+
+                cursorInitialized = true;
+                console.log('🖱️ 自定义光标初始化完成');
+
+                // 显示光标状态通知
+                setTimeout(() => {
+                    if (customCursorEnabled) {
+                        showMusicNotification('🖱️ 自定义光标已启用', 'success');
+                    }
+                }, 1000);
+
+            } catch (error) {
+                console.error('🖱️ 自定义光标初始化失败:', error);
+                enableCursorFallback();
+            }
+        }
+
+        // 启用备用光标方案
+        function enableCursorFallback() {
+            document.body.classList.remove('custom-cursor-enabled');
+            document.body.classList.add('cursor-fallback');
+            console.log('🖱️ 已启用系统光标备用方案');
+
+            // 隐藏自定义光标元素
             const cursor = $('.custom-cursor');
-            if (!cursor) {
-                console.warn('🖱️ 自定义光标元素未找到');
-                return;
+            if (cursor) {
+                cursor.style.display = 'none';
             }
 
-            let mouseX = 0, mouseY = 0;
-
-            // 初始化光标位置
-            cursor.style.left = '0px';
-            cursor.style.top = '0px';
-            cursor.style.display = 'block';
-
-            // 鼠标移动跟踪
-            document.addEventListener('mousemove', (e) => {
-                mouseX = e.clientX;
-                mouseY = e.clientY;
-                cursor.style.left = mouseX + 'px';
-                cursor.style.top = mouseY + 'px';
-
-                // 创建尾随光效
-                createCursorTrail(mouseX, mouseY);
-
-                // 侧边互动检测
-                if (mouseX < 100) {
-                    createSideParticle('left', mouseY);
-                } else if (mouseX > window.innerWidth - 100) {
-                    createSideParticle('right', mouseY);
-                }
-            });
-
-            // 点击效果
-            document.addEventListener('mousedown', () => {
-                cursor.classList.add('clicking');
-                createMagicParticles(mouseX, mouseY);
-            });
-
-            document.addEventListener('mouseup', () => {
-                cursor.classList.remove('clicking');
-            });
-
-            cursorInitialized = true;
-            console.log('🖱️ 自定义光标初始化完成');
-
-            // 显示光标状态通知
-            setTimeout(() => {
-                showMusicNotification('🖱️ 自定义光标已启用', 'success');
-            }, 500);
+            showMusicNotification('🖱️ 使用系统光标', 'info');
         }
+
+        // 切换光标模式的函数（可以在控制台调用）
+        function toggleCursorMode() {
+            if (document.body.classList.contains('cursor-fallback')) {
+                // 尝试重新启用自定义光标
+                document.body.classList.remove('cursor-fallback');
+                customCursorEnabled = false;
+                cursorInitialized = false;
+                const cursor = $('.custom-cursor');
+                if (cursor) {
+                    cursor.style.display = 'block';
+                }
+                initCustomCursor();
+                showMusicNotification('🖱️ 尝试重新启用自定义光标', 'info');
+            } else {
+                // 切换到系统光标
+                enableCursorFallback();
+            }
+        }
+
+        // 将切换函数暴露到全局，方便调试
+        window.toggleCursorMode = toggleCursorMode;
+
+        // 暴露音乐播放器函数到全局，方便调试
+        window.showFullPlayer = showFullPlayer;
+        window.showMiniPlayer = showMiniPlayer;
+        window.togglePlayPause = togglePlayPause;
+
+        // 音乐播放器测试函数
+        window.testMusicPlayer = function () {
+            console.log('🎵 开始测试音乐播放器...');
+
+            // 检查DOM元素
+            const miniPlayer = $('#musicPlayerMini');
+            const fullPlayer = $('#musicPlayerFull');
+            const musicPlayer = $('#musicPlayer');
+
+            console.log('🎵 DOM元素状态:', {
+                musicPlayer: !!musicPlayer,
+                miniPlayer: !!miniPlayer,
+                fullPlayer: !!fullPlayer,
+                musicPlayerClasses: musicPlayer ? musicPlayer.className : 'null',
+                miniPlayerClasses: miniPlayer ? miniPlayer.className : 'null',
+                fullPlayerClasses: fullPlayer ? fullPlayer.className : 'null'
+            });
+
+            if (musicPlayer) {
+                console.log('🎵 音乐播放器容器位置:', {
+                    offsetTop: musicPlayer.offsetTop,
+                    offsetLeft: musicPlayer.offsetLeft,
+                    offsetWidth: musicPlayer.offsetWidth,
+                    offsetHeight: musicPlayer.offsetHeight,
+                    display: window.getComputedStyle(musicPlayer).display,
+                    visibility: window.getComputedStyle(musicPlayer).visibility
+                });
+            }
+
+            // 测试显示完整播放器
+            console.log('🎵 测试显示完整播放器...');
+            showFullPlayer();
+
+            setTimeout(() => {
+                console.log('🎵 测试显示小播放器...');
+                showMiniPlayer();
+            }, 2000);
+
+            return '测试完成，请查看控制台输出';
+        };
+
+        // 页面加载完成后的自动检查
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                console.log('🎵 页面加载完成，进行音乐播放器自动检查...');
+                const miniPlayer = $('#musicPlayerMini');
+                const fullPlayer = $('#musicPlayerFull');
+
+                if (miniPlayer) {
+                    console.log('🎵 小播放器元素找到，尝试触发点击事件...');
+
+                    // 添加一个临时的点击监听器来测试
+                    const testClick = () => {
+                        console.log('🎵 测试点击事件被触发！');
+                        showMusicNotification('🎵 点击测试成功！', 'success');
+                    };
+
+                    miniPlayer.addEventListener('click', testClick);
+
+                    // 5秒后移除测试监听器
+                    setTimeout(() => {
+                        miniPlayer.removeEventListener('click', testClick);
+                        console.log('🎵 测试点击监听器已移除');
+                    }, 5000);
+
+                } else {
+                    console.error('🎵 页面加载完成但小播放器元素仍未找到');
+                }
+            }, 2000);
+        });
 
         function createCursorTrail(x, y) {
             const trail = document.createElement('div');
@@ -3061,17 +3404,115 @@
             return emojiMap[name] || '🧸';
         }
 
+        // 🏆 积分管理系统
+        function getUserPoints() {
+            return parseInt(localStorage.getItem('labubu_user_points') || '100');
+        }
+
+        function updateUserPoints(change) {
+            const currentPoints = getUserPoints();
+            const newPoints = Math.max(0, currentPoints + change);
+            localStorage.setItem('labubu_user_points', newPoints.toString());
+
+            // 更新所有积分显示元素
+            const pointsElements = document.querySelectorAll('.user-points, #userPoints');
+            pointsElements.forEach(el => {
+                if (el) el.textContent = newPoints;
+            });
+
+            console.log(`🏆 积分${change >= 0 ? '增加' : '减少'}：${Math.abs(change)}，当前积分：${newPoints}`);
+            return newPoints;
+        }
+
+        function initializeUserPoints() {
+            const currentPoints = getUserPoints();
+            const pointsElements = document.querySelectorAll('.user-points, #userPoints');
+            pointsElements.forEach(el => {
+                if (el) el.textContent = currentPoints;
+            });
+            console.log(`🏆 积分系统初始化，当前积分：${currentPoints}`);
+        }
+
+        // 🎯 成就检查系统（简化版本）
+        function checkAchievements(record, picked, rarity) {
+            console.log('🎯 检查成就触发...', {
+                prize: record.prize,
+                type: record.type,
+                rarity: rarity
+            });
+
+            // 获取用户统计数据
+            const history = loadHistory();
+            const totalDraws = history.filter(r => r.type !== '试抽').length;
+            const legendaryCount = history.filter(r =>
+                (r.prize && r.prize.includes('限定')) ||
+                (picked && picked.rarity === 'legendary')
+            ).length;
+
+            // 检查各种成就
+            const achievements = [];
+
+            // 抽奖次数成就
+            if (totalDraws === 1) {
+                achievements.push('🎉 新手幸运儿 - 完成第一次抽奖！');
+            } else if (totalDraws === 10) {
+                achievements.push('🎯 抽奖达人 - 完成10次抽奖！');
+            } else if (totalDraws === 50) {
+                achievements.push('🏆 抽奖大师 - 完成50次抽奖！');
+            }
+
+            // 稀有度成就
+            if (rarity === 'legendary') {
+                achievements.push('⭐ 传说收集者 - 获得传说级奖品！');
+            } else if (rarity === 'mythic') {
+                achievements.push('👑 神话猎手 - 获得神话级奖品！');
+            }
+
+            // 特殊奖品成就
+            if (record.prize && record.prize.includes('限定')) {
+                achievements.push('💎 限定收藏家 - 获得限定版奖品！');
+            }
+
+            // 显示成就通知
+            achievements.forEach((achievement, index) => {
+                setTimeout(() => {
+                    showMusicNotification(achievement, 'success');
+                    if (uiSounds) uiSounds.playSuccess();
+
+                    // 给予成就积分奖励
+                    updateUserPoints(50);
+                    setTimeout(() => {
+                        showMusicNotification('🎁 成就奖励：+50 积分！', 'info');
+                    }, 1000);
+                }, index * 2000);
+            });
+
+            return achievements.length > 0;
+        }
+
         // 兑换物品
         function exchangeItem(itemId) {
             const item = EXCHANGE_ITEMS.find(i => i.id === itemId);
-            if (!item || userPoints < item.cost || item.available <= 0) {
-                alert('兑换失败：积分不足或库存不足');
+            const currentPoints = getUserPoints();
+
+            if (!item) {
+                showMusicNotification('商品不存在', 'error');
+                return;
+            }
+
+            if (currentPoints < item.cost) {
+                showMusicNotification(`积分不足！需要 ${item.cost} 积分，当前只有 ${currentPoints} 积分`, 'error');
+                return;
+            }
+
+            if (item.available <= 0) {
+                showMusicNotification('商品库存不足', 'error');
                 return;
             }
 
             if (confirm(`确认兑换 ${item.name}？\n消耗 ${item.cost} 积分`)) {
                 // 扣除积分
-                userPoints -= item.cost;
+                updateUserPoints(-item.cost);
                 item.available--;
 
                 // 添加到历史记录
@@ -3090,13 +3531,18 @@
                 renderExchangeItems();
                 renderMyCollection();
                 renderHistory();
-                $('#userPoints').textContent = userPoints;
 
                 // 显示兑换成功
                 showExchangeSuccess(item.name, exchangeRecord.code);
+                showMusicNotification(`🎉 成功兑换 ${item.name}！`, 'success');
 
                 // 创建庆祝效果
                 createCelebrationEffect();
+
+                // 播放成功音效
+                if (uiSounds) {
+                    uiSounds.playSuccess();
+                }
             }
         }
 
@@ -3205,6 +3651,9 @@
             initMusicPlayer();
             initCommentSystem();
             updateNavigation();
+
+            // 初始化积分系统
+            initializeUserPoints();
 
             setTimeout(() => {
                 // initCustomCursor(); // 已在bind()函数中初始化，避免重复

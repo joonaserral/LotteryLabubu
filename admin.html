@@ -34,9 +34,13 @@
             background-image: linear-gradient(135deg, rgba(107, 91, 149, .12), rgba(255, 204, 0, .12));
         }
 
-        /* 自定义鼠标样式和交互效果 */
-        * {
+        /* 自定义鼠标样式和交互效果 - 增加备用方案 */
+        body.custom-cursor-enabled * {
             cursor: none !important;
+        }
+
+        body:not(.custom-cursor-enabled) * {
+            cursor: auto;
         }
 
         /* 恢复文本输入元素的光标 */
@@ -53,6 +57,24 @@
         [role="button"],
         .cursor-pointer,
         select {
+            cursor: pointer !important;
+        }
+
+        /* 光标回退选项 */
+        body.cursor-fallback * {
+            cursor: auto !important;
+        }
+
+        body.cursor-fallback input,
+        body.cursor-fallback textarea,
+        body.cursor-fallback [contenteditable="true"] {
+            cursor: text !important;
+        }
+
+        body.cursor-fallback button,
+        body.cursor-fallback a,
+        body.cursor-fallback [role="button"],
+        body.cursor-fallback select {
             cursor: pointer !important;
         }
 
@@ -146,6 +168,16 @@
 <body class="bg-slate-50 text-slate-900">
     <!-- 自定义鼠标光标 -->
     <div class="custom-cursor"></div>
+
+    <!-- 光标切换按钮 -->
+    <button id="cursorToggle"
+        class="fixed bottom-4 left-4 z-50 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full shadow-lg flex items-center justify-center text-white text-lg hover:scale-110 transition-transform duration-200"
+        title="切换光标模式" onclick="if(window.toggleCursorMode) window.toggleCursorMode()">
+        🖱️
+    </button>
+
+    <!-- 光标修复脚本 -->
+    <script src="修复光标脚本.js"></script>
 
     <!-- 登录界面 -->
     <div id="loginOverlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center">

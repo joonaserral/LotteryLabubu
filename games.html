@@ -300,6 +300,16 @@
     <!-- 自定义鼠标光标 -->
     <div class="custom-cursor"></div>
 
+    <!-- 光标切换按钮 -->
+    <button id="cursorToggle"
+        class="fixed bottom-4 left-4 z-50 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full shadow-lg flex items-center justify-center text-white text-lg hover:scale-110 transition-transform duration-200"
+        title="切换光标模式" onclick="if(window.toggleCursorMode) window.toggleCursorMode()">
+        🖱️
+    </button>
+
+    <!-- 光标修复脚本 -->
+    <script src="修复光标脚本.js"></script>
+
     <!-- 顶部导航 -->
     <header class="sticky top-0 z-30 backdrop-blur bg-white/90 border-b border-slate-200 shadow-sm">
         <div class="max-w-6xl mx-auto px-4 py-3">
